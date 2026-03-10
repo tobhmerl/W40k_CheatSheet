@@ -1,0 +1,404 @@
+@page "/"
+@rendermode InteractiveWebAssembly
+@using W40k_CheatSheet.Client.Models
+@using W40k_CheatSheet.Client.Services
+
+<PageTitle>W40k Roster</PageTitle>
+
+<div class="roster-app">
+    @if (army is null)
+    {
+        <div class="import-section">
+            <h1>⚔️ W40k CheatSheet</h1>
+            <p>Import your army roster JSON to view unit stats.</p>
+            <label class="import-btn">
+                📁 Import Roster JSON
+                <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
+            </label>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="error-msg">@errorMessage</div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="roster-header">
+            <h1>@army.Name</h1>
+            <div class="roster-meta">
+                @if (!string.IsNullOrEmpty(army.Faction))
+                {
+                    <span class="meta-badge faction">@army.Faction</span>
+                }
+                @if (!string.IsNullOrEmpty(army.Detachment))
+                {
+                    <span class="meta-badge detachment">@army.Detachment</span>
+                }
+                <span class="meta-badge points">@army.TotalPoints / @army.PointLimit pts</span>
+            </div>
+            <div class="phase-buttons">
+                <button class="phase-btn @(activePhase == GamePhase.Command ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Command)">Command</button>
+                <button class="phase-btn @(activePhase == GamePhase.Move ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Move)">Move</button>
+                <button class="phase-btn @(activePhase == GamePhase.Shoot ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Shoot)">Shoot</button>
+                <button class="phase-btn @(activePhase == GamePhase.Charge ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Charge)">Charge</button>
+                <button class="phase-btn @(activePhase == GamePhase.Fight ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Fight)">Fight</button>
+            </div>
+        </div>
+
+        @if (selectedLeader is not null)
+        {
+            <div class="attach-hint">
+                Tap a unit to attach <strong>@selectedLeader.Name</strong> ·
+                <span class="cancel-link" @onclick="CancelSelection">Cancel</span>
+            </div>
+        }
+
+        <div class="unit-grid">
+            @foreach (var unit in DisplayUnits)
+            {
+                var stats = GetAllStatLines(unit);
+                var ranged = GetAllRangedWeapons(unit);
+                var melee = GetAllMeleeWeapons(unit);
+                var abilities = GetAllAbilities(unit);
+                var filteredAbilities = activePhase is not null
+                    ? abilities.Where(a => a.Phases.HasFlag(activePhase.Value)).ToList()
+                    : abilities;
+                var enhancements = GetAllEnhancements(unit);
+                var keywords = GetAllKeywords(unit);
+                var totalPts = GetTotalPoints(unit);
+                var hasInvuln = stats.Any(s => !string.IsNullOrEmpty(s.InvulnSave));
+                var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
+                var collapsed = IsCollapsed(unit);
+
+                <div class="unit-card @CardClass(unit)"
+                     draggable="true"
+                     @ondragstart="() => DragStart(unit)"
+                     @ondragend="DragEnd"
+                     @ondragenter="() => DragEnter(unit)"
+                     @ondragover:preventDefault
+                     @ondrop="() => Drop(unit)">
+
+                    <div class="unit-header" @onclick="() => HandleHeaderClick(unit)">
+                        <div class="unit-name">
+                            @unit.Name
+                            @if (isWarlord)
+                            {
+                                <span class="warlord-badge">⭐</span>
+                            }
+                        </div>
+                        <div class="header-right">
+                            <span class="unit-points">@totalPts pts</span>
+                            <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
+                        </div>
+                    </div>
+
+                    @foreach (var leader in unit.AttachedLeaders)
+                    {
+                        <div class="attached-leader">
+                            <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "") (@leader.Points pts)</span>
+                            <button class="detach-btn" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
+                        </div>
+                    }
+
+                    @if (!collapsed)
+                    {
+                        <div class="unit-body">
+                            @if (keywords.Count > 0)
+                            {
+                                <div class="unit-keywords">
+                                    @foreach (var kw in keywords)
+                                    {
+                                        <span class="keyword">@kw</span>
+                                    }
+                                </div>
+                            }
+
+                            @if (enhancements.Count > 0)
+                            {
+                                <div class="unit-enhancements">
+                                    @foreach (var enh in enhancements)
+                                    {
+                                        <span class="enhancement">🔮 @enh</span>
+                                    }
+                                </div>
+                            }
+
+                            @if (stats.Count > 0)
+                            {
+                                <div class="table-wrapper">
+                                    <table class="stats-table">
+                                        <thead>
+                                            <tr>
+                                                <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
+                                                @if (hasInvuln) { <th>Inv</th> }
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var s in stats)
+                                            {
+                                                <tr>
+                                                    <td class="name-cell">@s.Stat.Name</td>
+                                                    <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
+                                                    <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
+                                                    @if (hasInvuln)
+                                                    {
+                                                        <td class="invuln">@(string.IsNullOrEmpty(s.InvulnSave) ? "-" : s.InvulnSave)</td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+
+                            @if (ranged.Count > 0)
+                            {
+                                <h4 class="section-title">🎯 Ranged Weapons</h4>
+                                <div class="table-wrapper">
+                                    <table class="weapons-table">
+                                        <thead>
+                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>BS</th><th>S</th><th>AP</th><th>D</th><th>Keywords</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var w in ranged)
+                                            {
+                                                <tr>
+                                                    <td class="name-cell">@w.Name</td>
+                                                    <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
+                                                    <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
+                                                    <td class="kw-cell">@w.Keywords</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+
+                            @if (melee.Count > 0)
+                            {
+                                <h4 class="section-title">⚔️ Melee Weapons</h4>
+                                <div class="table-wrapper">
+                                    <table class="weapons-table">
+                                        <thead>
+                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>WS</th><th>S</th><th>AP</th><th>D</th><th>Keywords</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var w in melee)
+                                            {
+                                                <tr>
+                                                    <td class="name-cell">@w.Name</td>
+                                                    <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
+                                                    <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
+                                                    <td class="kw-cell">@w.Keywords</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+
+                            @if (filteredAbilities.Count > 0)
+                            {
+                                <h4 class="section-title">📜 Abilities</h4>
+                                <div class="abilities-list">
+                                    @foreach (var ability in filteredAbilities)
+                                    {
+                                        <div class="ability-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                            <strong>@ability.Name:</strong> @ability.Description
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            @if (unit.IsLeader && unit.AttachedLeaders.Count == 0)
+                            {
+                                <button class="attach-link" @onclick="() => StartAttach(unit)" @onclick:stopPropagation="true">
+                                    🔗 Attach to unit
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private ArmyRoster? army;
+    private string? errorMessage;
+    private readonly RosterParserService parser = new();
+    private UnitEntry? draggedUnit;
+    private UnitEntry? dragOverUnit;
+    private UnitEntry? selectedLeader;
+    private AbilityEntry? focusedAbility;
+    private GamePhase? activePhase;
+    private readonly HashSet<UnitEntry> collapsedUnits = [];
+
+    private IEnumerable<UnitEntry> DisplayUnits
+    {
+        get
+        {
+            if (army is null) return [];
+            var attached = army.Units
+                .SelectMany(u => u.AttachedLeaders)
+                .ToHashSet();
+            return army.Units.Where(u => !attached.Contains(u));
+        }
+    }
+
+    private bool IsCollapsed(UnitEntry unit) => collapsedUnits.Contains(unit);
+
+    private void ToggleCollapse(UnitEntry unit)
+    {
+        if (!collapsedUnits.Remove(unit))
+            collapsedUnits.Add(unit);
+    }
+
+    private string CardClass(UnitEntry unit)
+    {
+        var css = "";
+        if (unit.IsLeader && unit.AttachedLeaders.Count == 0)
+            css += " leader-card";
+        if (unit.AttachedLeaders.Count > 0)
+            css += " combined-card";
+        if (IsCollapsed(unit))
+            css += " collapsed";
+        if (draggedUnit == unit)
+            css += " dragging";
+        if (dragOverUnit == unit && draggedUnit is not null && draggedUnit != unit)
+            css += " drag-over";
+        if (selectedLeader == unit)
+            css += " selected";
+        if (selectedLeader is not null && !unit.IsLeader && unit != selectedLeader)
+            css += " attach-target";
+        return css.TrimStart();
+    }
+
+    private void DragStart(UnitEntry unit) => draggedUnit = unit;
+
+    private void DragEnter(UnitEntry unit)
+    {
+        if (draggedUnit is not null && draggedUnit != unit)
+            dragOverUnit = unit;
+    }
+
+    private void DragEnd()
+    {
+        draggedUnit = null;
+        dragOverUnit = null;
+    }
+
+    private void Drop(UnitEntry target)
+    {
+        if (draggedUnit is null || draggedUnit == target || army is null)
+            return;
+
+        var units = army.Units;
+        var fromIndex = units.IndexOf(draggedUnit);
+        var toIndex = units.IndexOf(target);
+        if (fromIndex >= 0 && toIndex >= 0)
+        {
+            units.RemoveAt(fromIndex);
+            units.Insert(toIndex, draggedUnit);
+        }
+
+        draggedUnit = null;
+        dragOverUnit = null;
+    }
+
+    private void HandleHeaderClick(UnitEntry unit)
+    {
+        if (selectedLeader is not null)
+        {
+            if (!unit.IsLeader)
+            {
+                foreach (var u in army!.Units)
+                    u.AttachedLeaders.Remove(selectedLeader);
+                unit.AttachedLeaders.Add(selectedLeader);
+            }
+            selectedLeader = null;
+            return;
+        }
+
+        ToggleCollapse(unit);
+    }
+
+    private void StartAttach(UnitEntry leader)
+    {
+        selectedLeader = selectedLeader == leader ? null : leader;
+    }
+
+    private void CancelSelection() => selectedLeader = null;
+
+    private void TogglePhase(GamePhase phase)
+    {
+        activePhase = activePhase == phase ? null : phase;
+    }
+
+    private void ToggleFocusAbility(AbilityEntry ability)
+    {
+        focusedAbility = focusedAbility == ability ? null : ability;
+    }
+
+    private void DetachLeader(UnitEntry unit, UnitEntry leader)
+        => unit.AttachedLeaders.Remove(leader);
+
+    private List<(StatLine Stat, string InvulnSave)> GetAllStatLines(UnitEntry unit)
+    {
+        var result = unit.StatLines.Select(s => (s, unit.InvulnerableSave)).ToList();
+        foreach (var leader in unit.AttachedLeaders)
+            result.AddRange(leader.StatLines.Select(s => (s, leader.InvulnerableSave)));
+        return result;
+    }
+
+    private static List<WeaponProfile> GetAllRangedWeapons(UnitEntry unit) =>
+        unit.RangedWeapons
+            .Concat(unit.AttachedLeaders.SelectMany(l => l.RangedWeapons))
+            .DistinctBy(w => w.Name).ToList();
+
+    private static List<WeaponProfile> GetAllMeleeWeapons(UnitEntry unit) =>
+        unit.MeleeWeapons
+            .Concat(unit.AttachedLeaders.SelectMany(l => l.MeleeWeapons))
+            .DistinctBy(w => w.Name).ToList();
+
+    private static List<AbilityEntry> GetAllAbilities(UnitEntry unit) =>
+        unit.Abilities
+            .Concat(unit.AttachedLeaders.SelectMany(l => l.Abilities))
+            .DistinctBy(a => a.Name).ToList();
+
+    private static List<string> GetAllEnhancements(UnitEntry unit) =>
+        unit.Enhancements
+            .Concat(unit.AttachedLeaders.SelectMany(l => l.Enhancements))
+            .Distinct().ToList();
+
+    private static List<string> GetAllKeywords(UnitEntry unit) =>
+        unit.Keywords
+            .Concat(unit.AttachedLeaders.SelectMany(l => l.Keywords))
+            .Distinct().ToList();
+
+    private static int GetTotalPoints(UnitEntry unit) =>
+        unit.Points + unit.AttachedLeaders.Sum(l => l.Points);
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        errorMessage = null;
+        selectedLeader = null;
+        draggedUnit = null;
+        dragOverUnit = null;
+        collapsedUnits.Clear();
+        try
+        {
+            var file = e.File;
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+            var json = await reader.ReadToEndAsync();
+            army = parser.Parse(json);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error importing file: {ex.Message}";
+            army = null;
+        }
+    }
+}

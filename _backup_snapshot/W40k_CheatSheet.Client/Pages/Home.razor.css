@@ -1,0 +1,422 @@
+.roster-app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0.5rem;
+}
+
+/* Import screen */
+.import-section {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.import-section h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.import-section p {
+    color: #888;
+    margin-bottom: 1.5rem;
+}
+
+.import-btn {
+    display: inline-block;
+    background: #00b4d8;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.import-btn:hover {
+    background: #0096c7;
+}
+
+.import-btn.small {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Phase filter buttons */
+.phase-buttons {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.phase-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #333;
+    color: #888;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.phase-btn:hover {
+    background: rgba(0, 180, 216, 0.1);
+    border-color: #00b4d8;
+    color: #ccc;
+}
+
+.phase-btn.active {
+    background: rgba(0, 180, 216, 0.2);
+    border-color: #00b4d8;
+    color: #00b4d8;
+}
+
+.error-msg {
+    color: #e94560;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background: rgba(233, 69, 96, 0.1);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* Roster header */
+.roster-header {
+    text-align: center;
+    padding: 0.75rem 0 1rem;
+    border-bottom: 1px solid #222;
+    margin-bottom: 0.75rem;
+}
+
+.roster-header h1 {
+    font-size: 1.3rem;
+    margin: 0 0 0.5rem;
+}
+
+.roster-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.meta-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.meta-badge.faction {
+    background: rgba(0, 180, 216, 0.15);
+    color: #00b4d8;
+    border: 1px solid #00b4d8;
+}
+
+.meta-badge.detachment {
+    background: rgba(233, 69, 96, 0.15);
+    color: #e94560;
+    border: 1px solid #e94560;
+}
+
+.meta-badge.points {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ccc;
+    border: 1px solid #333;
+}
+
+/* Attach hint */
+.attach-hint {
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(0, 180, 216, 0.1);
+    border: 1px solid #00b4d8;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+    color: #00b4d8;
+}
+
+.cancel-link {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #e94560;
+}
+
+/* Grid — masonry-style columns so mixed-size cards pack tightly */
+.unit-grid {
+    columns: 2;
+    column-gap: 0.6rem;
+}
+
+@media (max-width: 700px) {
+    .unit-grid {
+        columns: 1;
+    }
+}
+
+/* Unit cards */
+.unit-card {
+    background: #111;
+    border-radius: 8px;
+    padding: 0.5rem;
+    border: 1px solid #2a2a2a;
+    cursor: grab;
+    transition: border-color 0.15s, opacity 0.15s, box-shadow 0.15s;
+    font-size: 0.75rem;
+    break-inside: avoid;
+    margin-bottom: 0.6rem;
+}
+
+.unit-card:active {
+    cursor: grabbing;
+}
+
+.unit-card.leader-card {
+    border-left: 3px solid #bb86fc;
+}
+
+.unit-card.combined-card {
+    border-left: 3px solid #00b4d8;
+}
+
+.unit-card.dragging {
+    opacity: 0.3;
+}
+
+.unit-card.drag-over {
+    border-top: 2px solid #00b4d8;
+    margin-top: -1px;
+}
+
+.unit-card.selected {
+    border-color: #bb86fc;
+    box-shadow: 0 0 8px rgba(187, 134, 252, 0.4);
+}
+
+.unit-card.attach-target {
+    border-color: #00b4d8;
+    border-style: dashed;
+}
+
+/* Unit header — clickable for collapse/expand */
+.unit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding: 0.15rem 0;
+}
+
+.unit-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.warlord-badge {
+    font-size: 0.65rem;
+    margin-left: 0.25rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.unit-points {
+    font-weight: 700;
+    color: #00b4d8;
+    white-space: nowrap;
+    font-size: 0.8rem;
+}
+
+.collapse-icon {
+    color: #555;
+    font-size: 0.7rem;
+    width: 0.8rem;
+    text-align: center;
+}
+
+/* Attached leader row */
+.attached-leader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.15rem 0;
+    color: #bb86fc;
+    font-size: 0.7rem;
+}
+
+.detach-btn {
+    background: none;
+    border: 1px solid #555;
+    color: #e94560;
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    cursor: pointer;
+    font-size: 0.65rem;
+    line-height: 1.4;
+}
+
+.detach-btn:hover {
+    background: rgba(233, 69, 96, 0.2);
+}
+
+/* Unit body — collapsible content */
+.unit-body {
+    margin-top: 0.3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 0.3rem;
+}
+
+/* Keywords */
+.unit-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+    margin: 0.3rem 0;
+}
+
+.keyword {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.55rem;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.unit-enhancements {
+    margin: 0.3rem 0;
+}
+
+.enhancement {
+    display: inline-block;
+    background: rgba(138, 43, 226, 0.15);
+    color: #bb86fc;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+/* Attach link button on leader cards */
+.attach-link {
+    display: block;
+    width: 100%;
+    margin-top: 0.4rem;
+    padding: 0.3rem;
+    background: rgba(187, 134, 252, 0.1);
+    border: 1px dashed #bb86fc;
+    border-radius: 4px;
+    color: #bb86fc;
+    font-size: 0.65rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.attach-link:hover {
+    background: rgba(187, 134, 252, 0.2);
+}
+
+/* Tables */
+.table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 0.4rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.stats-table,
+.weapons-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.65rem;
+    white-space: nowrap;
+}
+
+.stats-table th,
+.weapons-table th {
+    background: #1a1a1a;
+    padding: 0.25rem 0.3rem;
+    text-align: center;
+    font-weight: 600;
+    color: #00b4d8;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+}
+
+.stats-table td,
+.weapons-table td {
+    padding: 0.25rem 0.3rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.name-cell {
+    text-align: left !important;
+    font-weight: 600;
+}
+
+.kw-cell {
+    text-align: left !important;
+    font-size: 0.55rem;
+    color: #777;
+    white-space: normal;
+    min-width: 60px;
+}
+
+.invuln {
+    color: gold;
+    font-weight: 700;
+}
+
+/* Section titles */
+.section-title {
+    font-size: 0.7rem;
+    color: #777;
+    margin: 0.4rem 0 0.2rem;
+    font-weight: 600;
+}
+
+/* Abilities */
+.abilities-list {
+    font-size: 0.65rem;
+    line-height: 1.4;
+}
+
+.ability-item {
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ability-item.zoomed {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    background: rgba(0, 180, 216, 0.08);
+    border-left: 3px solid #00b4d8;
+    padding: 0.4rem 0.4rem 0.4rem 0.5rem;
+    color: #ccc;
+    border-radius: 4px;
+}
+
+.ability-item.zoomed strong {
+    color: #00b4d8;
+    font-size: 0.95rem;
+}
+
+.ability-item strong {
+    color: #ccc;
+}
