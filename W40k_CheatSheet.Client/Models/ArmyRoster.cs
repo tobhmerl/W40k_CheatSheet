@@ -20,6 +20,8 @@ public class UnitEntry
     public List<WeaponProfile> MeleeWeapons { get; set; } = [];
     public List<AbilityEntry> Abilities { get; set; } = [];
     public string InvulnerableSave { get; set; } = "";
+    public string FeelNoPain { get; set; } = "";
+    public string FeelNoPainAura { get; set; } = "";
     public bool IsWarlord { get; set; }
     public bool IsLeader { get; set; }
     public List<string> Enhancements { get; set; } = [];

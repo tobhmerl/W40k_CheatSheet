@@ -110,6 +110,15 @@ public partial class RosterParserService
                 }
                 else
                 {
+                    var fnpMatch = MatchFnp(desc);
+                    if (fnpMatch.Success)
+                    {
+                        var fnpValue = fnpMatch.Groups[1].Value;
+                        if (desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase))
+                            unit.FeelNoPainAura = BetterValue(unit.FeelNoPainAura, fnpValue);
+                        else
+                            unit.FeelNoPain = BetterValue(unit.FeelNoPain, fnpValue);
+                    }
                     unit.Abilities.Add(new AbilityEntry { Name = profile.Name, Description = desc, Phases = ClassifyPhase(desc) });
                 }
                 break;
@@ -254,4 +263,23 @@ public partial class RosterParserService
 
     [GeneratedRegex(@"(\d+\+)\s*invulnerable", RegexOptions.IgnoreCase)]
     private static partial Regex InvulnRegex();
+
+    [GeneratedRegex(@"would lose a wound.*?(\d\+).*?wound is not lost", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
+    private static partial Regex FnpWoundRegex();
+
+    [GeneratedRegex(@"feel no pain (\d\+)", RegexOptions.IgnoreCase)]
+    private static partial Regex FnpExplicitRegex();
+
+    private static Match MatchFnp(string desc)
+    {
+        var m = FnpExplicitRegex().Match(desc);
+        return m.Success ? m : FnpWoundRegex().Match(desc);
+    }
+
+    private static string BetterValue(string current, string candidate)
+    {
+        if (string.IsNullOrEmpty(current)) return candidate;
+        if (string.IsNullOrEmpty(candidate)) return current;
+        return string.Compare(current, candidate, StringComparison.Ordinal) <= 0 ? current : candidate;
+    }
 }

@@ -33,24 +33,6 @@
     {
         <div class="roster-header">
             <h1>@army.Name</h1>
-            <div class="roster-actions">
-                <label class="import-btn small">
-                    📁 Re-import
-                    <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
-                </label>
-                <button class="clear-btn" @onclick="ClearRoster">🗑️ Clear</button>
-            </div>
-            <div class="roster-meta">
-                @if (!string.IsNullOrEmpty(army.Faction))
-                {
-                    <span class="meta-badge faction">@army.Faction</span>
-                }
-                @if (!string.IsNullOrEmpty(army.Detachment))
-                {
-                    <span class="meta-badge detachment">@army.Detachment</span>
-                }
-                <span class="meta-badge points">@army.TotalPoints / @army.PointLimit pts</span>
-            </div>
             <div class="phase-buttons">
                 <button class="phase-btn @(activePhase == GamePhase.Command ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Command)">Command</button>
                 <button class="phase-btn @(activePhase == GamePhase.Move ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Move)">Move</button>
@@ -81,7 +63,7 @@
                 var enhancements = GetAllEnhancements(unit);
                 var keywords = GetAllKeywords(unit);
                 var totalPts = GetTotalPoints(unit);
-                var hasInvuln = stats.Any(s => !string.IsNullOrEmpty(s.InvulnSave));
+                var hasSpecialSave = stats.Any(s => !string.IsNullOrEmpty(s.InvulnSave) || !string.IsNullOrEmpty(s.FeelNoPain));
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var collapsed = IsCollapsed(unit);
 
@@ -145,19 +127,23 @@
                                         <thead>
                                             <tr>
                                                 <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
-                                                @if (hasInvuln) { <th>Inv</th> }
+                                                @if (hasSpecialSave) { <th>🛡️</th> }
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var s in stats)
                                             {
-                                                <tr>
+                                                <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@s.Stat.Name</td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
-                                                    @if (hasInvuln)
+                                                    @if (hasSpecialSave)
                                                     {
-                                                        <td class="invuln">@(string.IsNullOrEmpty(s.InvulnSave) ? "-" : s.InvulnSave)</td>
+                                                        <td>
+                                                            @if (!string.IsNullOrEmpty(s.InvulnSave)) { <span class="invuln">@s.InvulnSave</span> }
+                                                            @if (!string.IsNullOrEmpty(s.FeelNoPain)) { <span class="fnp">@(s.FeelNoPain.Replace("+", "++"))</span> }
+                                                            @if (string.IsNullOrEmpty(s.InvulnSave) && string.IsNullOrEmpty(s.FeelNoPain)) { <span>-</span> }
+                                                        </td>
                                                     }
                                                 </tr>
                                             }
@@ -177,7 +163,7 @@
                                         <tbody>
                                             @foreach (var w in ranged)
                                             {
-                                                <tr>
+                                                <tr class="weapon-row @(focusedWeapon == w || IsWeaponOwnedByFocused(w) ? "zoomed" : "") @(focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
@@ -200,7 +186,7 @@
                                         <tbody>
                                             @foreach (var w in melee)
                                             {
-                                                <tr>
+                                                <tr class="weapon-row @(focusedWeapon == w || IsWeaponOwnedByFocused(w) ? "zoomed" : "") @(focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
@@ -218,7 +204,7 @@
                                 <div class="abilities-list">
                                     @foreach (var ability in filteredAbilities)
                                     {
-                                        <div class="ability-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                        <div class="ability-item @(focusedAbility == ability || IsAbilityOwnedByFocused(ability) ? "zoomed" : "") @(focusedStatOwner is not null && !IsAbilityOwnedByFocused(ability) ? "dimmed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
                                             <strong>@ability.Name:</strong> @ability.Description
                                         </div>
                                     }
@@ -236,6 +222,28 @@
                 </div>
             }
         </div>
+
+        <div class="roster-footer">
+            <hr class="footer-divider" />
+            <div class="roster-actions">
+                <label class="import-btn small">
+                    📁 Re-import
+                    <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
+                </label>
+                <button class="clear-btn" @onclick="ClearRoster">🗑️ Clear</button>
+            </div>
+            <div class="roster-meta">
+                @if (!string.IsNullOrEmpty(army.Faction))
+                {
+                    <span class="meta-badge faction">@army.Faction</span>
+                }
+                @if (!string.IsNullOrEmpty(army.Detachment))
+                {
+                    <span class="meta-badge detachment">@army.Detachment</span>
+                }
+                <span class="meta-badge points">@army.TotalPoints / @army.PointLimit pts</span>
+            </div>
+        </div>
     }
 </div>
 
@@ -249,6 +257,8 @@
     private UnitEntry? dragOverUnit;
     private UnitEntry? selectedLeader;
     private AbilityEntry? focusedAbility;
+    private WeaponProfile? focusedWeapon;
+    private UnitEntry? focusedStatOwner;
     private GamePhase? activePhase;
     private readonly HashSet<UnitEntry> collapsedUnits = [];
 
@@ -370,18 +380,54 @@
         focusedAbility = focusedAbility == ability ? null : ability;
     }
 
+    private void ToggleFocusWeapon(WeaponProfile weapon)
+    {
+        focusedWeapon = focusedWeapon == weapon ? null : weapon;
+    }
+
+    private void ToggleFocusStatOwner(UnitEntry owner)
+    {
+        focusedStatOwner = focusedStatOwner == owner ? null : owner;
+    }
+
+    private bool IsWeaponOwnedByFocused(WeaponProfile weapon) =>
+        focusedStatOwner is not null &&
+        (focusedStatOwner.RangedWeapons.Any(w => w.Name == weapon.Name) ||
+         focusedStatOwner.MeleeWeapons.Any(w => w.Name == weapon.Name));
+
+    private bool IsAbilityOwnedByFocused(AbilityEntry ability) =>
+        focusedStatOwner is not null &&
+        focusedStatOwner.Abilities.Any(a => a.Name == ability.Name);
+
     private async Task DetachLeader(UnitEntry unit, UnitEntry leader)
     {
         unit.AttachedLeaders.Remove(leader);
         await SaveToStorage();
     }
 
-    private List<(StatLine Stat, string InvulnSave)> GetAllStatLines(UnitEntry unit)
+    private List<(StatLine Stat, string InvulnSave, string FeelNoPain, UnitEntry Owner)> GetAllStatLines(UnitEntry unit)
     {
-        var result = unit.StatLines.Select(s => (s, unit.InvulnerableSave)).ToList();
+        var unitWideFnp = unit.FeelNoPain;
         foreach (var leader in unit.AttachedLeaders)
-            result.AddRange(leader.StatLines.Select(s => (s, leader.InvulnerableSave)));
+        {
+            if (!string.IsNullOrEmpty(leader.FeelNoPainAura))
+                unitWideFnp = BetterFnp(unitWideFnp, leader.FeelNoPainAura);
+        }
+
+        var result = unit.StatLines.Select(s => (s, unit.InvulnerableSave, unitWideFnp, unit)).ToList();
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            var leaderFnp = BetterFnp(unitWideFnp, leader.FeelNoPain);
+            result.AddRange(leader.StatLines.Select(s => (s, leader.InvulnerableSave, leaderFnp, leader)));
+        }
         return result;
+    }
+
+    private static string BetterFnp(string a, string b)
+    {
+        if (string.IsNullOrEmpty(a)) return b ?? "";
+        if (string.IsNullOrEmpty(b)) return a;
+        return string.Compare(a, b, StringComparison.Ordinal) <= 0 ? a : b;
     }
 
     private static List<WeaponProfile> GetAllRangedWeapons(UnitEntry unit) =>
