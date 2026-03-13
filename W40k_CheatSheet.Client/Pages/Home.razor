@@ -48,6 +48,109 @@
             }
         </div>
 
+        <div class="abilities-panel">
+            <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
+                <span>📜 Abilities Overview</span>
+                <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
+            </div>
+            @if (abilitiesPanelOpen)
+            {
+                <div class="abilities-panel-body">
+                    @* ── Phase-specific abilities ── *@
+                    @foreach (var entry in PanelUnits)
+                    {
+                        var phaseAbilities = entry.Abilities.Where(a => a.Phases != GamePhase.All).ToList();
+                        var phaseFiltered = activePhase is not null
+                            ? phaseAbilities.Where(a => a.Phases.HasFlag(activePhase.Value)).ToList()
+                            : phaseAbilities;
+                        if (phaseFiltered.Count == 0) { continue; }
+
+                        var isOtherFocused = focusedStatOwner is not null && focusedCard != entry.Unit;
+
+                        <div class="abilities-panel-unit @(isOtherFocused ? "dimmed" : "")">
+                            <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
+                            @foreach (var ability in phaseFiltered)
+                            {
+                                <div class="abilities-panel-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                    <strong>@ability.Name:</strong> @ability.Description
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @* ── General abilities (no specific phase) ── *@
+                    @if (PanelUnits.Any(e => e.Abilities.Any(a => a.Phases == GamePhase.All)))
+                    {
+                        <div class="abilities-panel-divider-row">
+                            <span class="abilities-panel-divider-text">General Abilities</span>
+                        </div>
+                        @foreach (var entry in PanelUnits)
+                        {
+                            var generalAbilities = entry.Abilities.Where(a => a.Phases == GamePhase.All).ToList();
+                            if (generalAbilities.Count == 0) { continue; }
+
+                            var isOtherFocused = focusedStatOwner is not null && focusedCard != entry.Unit;
+
+                            <div class="abilities-panel-unit @(isOtherFocused ? "dimmed" : "")">
+                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
+                                @foreach (var ability in generalAbilities)
+                                {
+                                    <div class="abilities-panel-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                        <strong>@ability.Name:</strong> @ability.Description
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="stratagems-panel">
+            <div class="stratagems-panel-header" @onclick="() => stratagemsPanelOpen = !stratagemsPanelOpen">
+                <span>🎯 Stratagems</span>
+                <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
+            </div>
+            @if (stratagemsPanelOpen)
+            {
+                <div class="stratagems-panel-body">
+                    @foreach (var strat in FilteredStratagems)
+                    {
+                        var canUse = CanFocusedUnitUse(strat);
+                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "") @(focusedStatOwner is not null && !canUse ? "dimmed" : "")"
+                             @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
+                            <div class="strat-header">
+                                <span class="strat-name">@strat.Name</span>
+                                <span class="strat-cost">@strat.Cost</span>
+                            </div>
+                            <div class="strat-category">@strat.Category</div>
+                            @if (focusedStratagem == strat)
+                            {
+                                <div class="strat-details">
+                                    <div class="strat-field"><span class="strat-label">When:</span> @strat.When</div>
+                                    <div class="strat-field"><span class="strat-label">Target:</span> @strat.Target</div>
+                                    <div class="strat-field"><span class="strat-label">Effect:</span> @strat.Effect</div>
+                                    @if (!string.IsNullOrEmpty(strat.Restriction))
+                                    {
+                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @strat.Restriction</div>
+                                    }
+                                </div>
+                            }
+                            @if (strat.RequiredKeywords.Count > 0 && focusedStratagem != strat)
+                            {
+                                <div class="strat-keywords">
+                                    @foreach (var kw in strat.RequiredKeywords)
+                                    {
+                                        <span class="strat-kw-badge">@kw.ToUpperInvariant()</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
         @if (selectedLeader is not null)
         {
             <div class="attach-hint">
@@ -251,6 +354,7 @@
             </div>
         </div>
     }
+    <div class="version-tag">v1.1</div>
 </div>
 
 @code {
@@ -267,6 +371,9 @@
     private UnitEntry? focusedStatOwner;
     private UnitEntry? focusedCard;
     private GamePhase? activePhase;
+    private bool abilitiesPanelOpen = true;
+    private bool stratagemsPanelOpen = true;
+    private Stratagem? focusedStratagem;
     private readonly HashSet<UnitEntry> collapsedUnits = [];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -292,6 +399,11 @@
     }
 
     private bool IsCollapsed(UnitEntry unit) => collapsedUnits.Contains(unit);
+
+    private record struct PanelUnitEntry(UnitEntry Unit, List<AbilityEntry> Abilities);
+
+    private List<PanelUnitEntry> PanelUnits =>
+        DisplayUnits.Select(u => new PanelUnitEntry(u, GetAllAbilities(u))).ToList();
 
     private void ToggleCollapse(UnitEntry unit)
     {
@@ -385,6 +497,29 @@
     private void ToggleFocusAbility(AbilityEntry ability)
     {
         focusedAbility = focusedAbility == ability ? null : ability;
+    }
+
+    private void ToggleFocusStratagem(Stratagem strat)
+    {
+        focusedStratagem = focusedStratagem == strat ? null : strat;
+    }
+
+    private List<Stratagem> FilteredStratagems =>
+        activePhase is not null
+            ? CoreStratagems.All.Where(s => s.Phases.HasFlag(activePhase.Value)).ToList()
+            : CoreStratagems.All;
+
+    private bool CanFocusedUnitUse(Stratagem strat)
+    {
+        if (strat.RequiredKeywords.Count == 0) return true;
+        if (focusedStatOwner is null) return true;
+
+        var unitKeywords = focusedCard is not null
+            ? GetAllKeywords(focusedCard)
+            : focusedStatOwner.Keywords;
+
+        return strat.RequiredKeywords.Any(rk =>
+            unitKeywords.Any(uk => string.Equals(uk, rk, StringComparison.OrdinalIgnoreCase)));
     }
 
     private void ToggleFocusWeapon(WeaponProfile weapon)

@@ -110,6 +110,238 @@
     color: #e94560;
 }
 
+/* Abilities overview panel */
+.abilities-panel {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.abilities-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ccc;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.abilities-panel-header:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.abilities-panel-body {
+    padding: 0.3rem 0.5rem 0.5rem;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.abilities-panel-unit {
+    margin-bottom: 0.4rem;
+    transition: opacity 0.15s;
+}
+
+.abilities-panel-unit.dimmed {
+    opacity: 0.3;
+}
+
+.abilities-panel-unit-name {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #00b4d8;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(0, 180, 216, 0.15);
+    margin-bottom: 0.2rem;
+}
+
+.abilities-panel-item {
+    font-size: 0.65rem;
+    line-height: 1.4;
+    padding: 0.15rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.abilities-panel-item:hover {
+    color: #bbb;
+}
+
+.abilities-panel-item strong {
+    color: #ccc;
+}
+
+.abilities-panel-item.zoomed {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    background: rgba(0, 180, 216, 0.08);
+    border-left: 3px solid #00b4d8;
+    padding: 0.4rem 0.4rem 0.4rem 0.5rem;
+    color: #ccc;
+    border-radius: 4px;
+}
+
+.abilities-panel-item.zoomed strong {
+    color: #00b4d8;
+    font-size: 0.95rem;
+}
+
+.abilities-panel-divider-row {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0;
+    gap: 0.5rem;
+}
+
+.abilities-panel-divider-row::before,
+.abilities-panel-divider-row::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid #333;
+}
+
+.abilities-panel-divider-text {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Stratagems panel */
+.stratagems-panel {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.stratagems-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ccc;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.stratagems-panel-header:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.stratagems-panel-body {
+    padding: 0.3rem 0.5rem 0.5rem;
+    max-height: 50vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.strat-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.strat-item:hover {
+    border-color: #444;
+}
+
+.strat-item.zoomed {
+    background: rgba(0, 180, 216, 0.06);
+    border-color: #00b4d8;
+}
+
+.strat-item.dimmed {
+    opacity: 0.3;
+}
+
+.strat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.strat-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #ccc;
+}
+
+.strat-item.zoomed .strat-name {
+    color: #00b4d8;
+    font-size: 0.85rem;
+}
+
+.strat-cost {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #e94560;
+    white-space: nowrap;
+}
+
+.strat-category {
+    font-size: 0.6rem;
+    color: #666;
+    margin-top: 0.1rem;
+}
+
+.strat-details {
+    margin-top: 0.3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 0.3rem;
+}
+
+.strat-field {
+    font-size: 0.65rem;
+    line-height: 1.5;
+    color: #999;
+    margin-bottom: 0.15rem;
+}
+
+.strat-label {
+    font-weight: 700;
+    color: #00b4d8;
+}
+
+.strat-label.restriction {
+    color: #e94560;
+}
+
+.strat-keywords {
+    display: flex;
+    gap: 0.2rem;
+    margin-top: 0.2rem;
+}
+
+.strat-kw-badge {
+    font-size: 0.5rem;
+    font-weight: 700;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    background: rgba(233, 69, 96, 0.1);
+    color: #e94560;
+    border: 1px solid rgba(233, 69, 96, 0.3);
+    letter-spacing: 0.3px;
+}
+
 .roster-actions {
     display: flex;
     gap: 0.4rem;
@@ -525,4 +757,12 @@
 
 .ability-item strong {
     color: #ccc;
+}
+
+.version-tag {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+    font-size: 0.55rem;
+    color: #333;
+    letter-spacing: 0.5px;
 }

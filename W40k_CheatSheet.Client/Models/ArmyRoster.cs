@@ -71,6 +71,19 @@ public class AbilityEntry
     public GamePhase Phases { get; set; } = GamePhase.All;
 }
 
+public class Stratagem
+{
+    public string Name { get; set; } = "";
+    public string Cost { get; set; } = "";
+    public string Category { get; set; } = "";
+    public string When { get; set; } = "";
+    public string Target { get; set; } = "";
+    public string Effect { get; set; } = "";
+    public string Restriction { get; set; } = "";
+    public GamePhase Phases { get; set; } = GamePhase.All;
+    public List<string> RequiredKeywords { get; set; } = [];
+}
+
 public class RuleEntry
 {
     public string Name { get; set; } = "";
