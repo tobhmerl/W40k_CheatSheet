@@ -40,6 +40,12 @@
                 <button class="phase-btn @(activePhase == GamePhase.Charge ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Charge)">Charge</button>
                 <button class="phase-btn @(activePhase == GamePhase.Fight ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Fight)">Fight</button>
             </div>
+            @if (!string.IsNullOrEmpty(army.DetachmentRule))
+            {
+                <div class="detachment-rule">
+                    <strong>@army.Detachment:</strong> @army.DetachmentRule
+                </div>
+            }
         </div>
 
         @if (selectedLeader is not null)
@@ -133,7 +139,7 @@
                                         <tbody>
                                             @foreach (var s in stats)
                                             {
-                                                <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner)" @onclick:stopPropagation="true">
+                                                <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner, unit)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@s.Stat.Name</td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
@@ -163,7 +169,7 @@
                                         <tbody>
                                             @foreach (var w in ranged)
                                             {
-                                                <tr class="weapon-row @(focusedWeapon == w || IsWeaponOwnedByFocused(w) ? "zoomed" : "") @(focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
+                                                <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
@@ -186,7 +192,7 @@
                                         <tbody>
                                             @foreach (var w in melee)
                                             {
-                                                <tr class="weapon-row @(focusedWeapon == w || IsWeaponOwnedByFocused(w) ? "zoomed" : "") @(focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
+                                                <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
@@ -204,7 +210,7 @@
                                 <div class="abilities-list">
                                     @foreach (var ability in filteredAbilities)
                                     {
-                                        <div class="ability-item @(focusedAbility == ability || IsAbilityOwnedByFocused(ability) ? "zoomed" : "") @(focusedStatOwner is not null && !IsAbilityOwnedByFocused(ability) ? "dimmed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                        <div class="ability-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
                                             <strong>@ability.Name:</strong> @ability.Description
                                         </div>
                                     }
@@ -259,6 +265,7 @@
     private AbilityEntry? focusedAbility;
     private WeaponProfile? focusedWeapon;
     private UnitEntry? focusedStatOwner;
+    private UnitEntry? focusedCard;
     private GamePhase? activePhase;
     private readonly HashSet<UnitEntry> collapsedUnits = [];
 
@@ -385,19 +392,24 @@
         focusedWeapon = focusedWeapon == weapon ? null : weapon;
     }
 
-    private void ToggleFocusStatOwner(UnitEntry owner)
+    private void ToggleFocusStatOwner(UnitEntry owner, UnitEntry card)
     {
-        focusedStatOwner = focusedStatOwner == owner ? null : owner;
+        if (focusedStatOwner == owner)
+        {
+            focusedStatOwner = null;
+            focusedCard = null;
+        }
+        else
+        {
+            focusedStatOwner = owner;
+            focusedCard = card;
+        }
     }
 
     private bool IsWeaponOwnedByFocused(WeaponProfile weapon) =>
         focusedStatOwner is not null &&
         (focusedStatOwner.RangedWeapons.Any(w => w.Name == weapon.Name) ||
          focusedStatOwner.MeleeWeapons.Any(w => w.Name == weapon.Name));
-
-    private bool IsAbilityOwnedByFocused(AbilityEntry ability) =>
-        focusedStatOwner is not null &&
-        focusedStatOwner.Abilities.Any(a => a.Name == ability.Name);
 
     private async Task DetachLeader(UnitEntry unit, UnitEntry leader)
     {

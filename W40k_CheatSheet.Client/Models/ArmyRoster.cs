@@ -5,6 +5,7 @@ public class ArmyRoster
     public string Name { get; set; } = "";
     public string Faction { get; set; } = "";
     public string Detachment { get; set; } = "";
+    public string DetachmentRule { get; set; } = "";
     public int TotalPoints { get; set; }
     public int PointLimit { get; set; }
     public List<UnitEntry> Units { get; set; } = [];

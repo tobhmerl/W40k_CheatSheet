@@ -31,7 +31,12 @@ public partial class RosterParserService
                     {
                         var det = selection.Selections.FirstOrDefault();
                         if (det != null)
+                        {
                             army.Detachment = det.Name;
+                            var rule = det.Rules.FirstOrDefault(r => !r.Hidden);
+                            if (rule != null)
+                                army.DetachmentRule = rule.Description;
+                        }
                     }
                     continue;
                 }

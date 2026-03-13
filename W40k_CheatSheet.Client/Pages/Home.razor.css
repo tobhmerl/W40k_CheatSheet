@@ -94,6 +94,22 @@
     margin: 0 0 0.5rem;
 }
 
+.detachment-rule {
+    background: rgba(233, 69, 96, 0.08);
+    border: 1px solid rgba(233, 69, 96, 0.3);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: #bbb;
+    text-align: center;
+}
+
+.detachment-rule strong {
+    color: #e94560;
+}
+
 .roster-actions {
     display: flex;
     gap: 0.4rem;
