@@ -241,13 +241,16 @@
                             }
                         </div>
                         <div class="header-right">
+                            <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
+                            <span class="unit-points">@totalPts pts</span>
+                            @if (!playMode)
+                            {
+                                <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
+                            }
                             @if (playMode && !IsKilled(unit))
                             {
                                 <button class="kill-btn" @onclick="() => KillUnit(unit)" @onclick:stopPropagation="true">☠</button>
                             }
-                            <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
-                            <span class="unit-points">@totalPts pts</span>
-                            <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
                         </div>
                     </div>
 
@@ -257,7 +260,7 @@
                             <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "") (@leader.Points pts)</span>
                             @if (playMode && !IsKilled(leader))
                             {
-                                <button class="kill-btn small" @onclick="() => KillAttachedUnit(unit, leader)" @onclick:stopPropagation="true">☠</button>
+                                <button class="kill-btn" @onclick="() => KillAttachedUnit(unit, leader)" @onclick:stopPropagation="true">☠</button>
                             }
                             else if (!playMode)
                             {

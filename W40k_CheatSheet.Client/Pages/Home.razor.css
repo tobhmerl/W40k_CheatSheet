@@ -678,21 +678,21 @@
     border: 1px solid #555;
     color: #e94560;
     border-radius: 4px;
-    padding: 0 0.3rem;
+    width: 1.6rem;
+    height: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 0.7rem;
-    line-height: 1.4;
+    line-height: 1;
+    flex-shrink: 0;
     transition: all 0.15s;
 }
 
 .kill-btn:hover {
     background: rgba(233, 69, 96, 0.2);
     border-color: #e94560;
-}
-
-.kill-btn.small {
-    font-size: 0.6rem;
-    padding: 0 0.2rem;
 }
 
 /* Killed unit card */
@@ -980,10 +980,15 @@
     border: 1px solid #555;
     color: #e94560;
     border-radius: 4px;
-    padding: 0 0.3rem;
+    width: 1.6rem;
+    height: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 0.65rem;
-    line-height: 1.4;
+    line-height: 1;
+    flex-shrink: 0;
 }
 
 .detach-btn:hover {
