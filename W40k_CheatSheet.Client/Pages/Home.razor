@@ -139,14 +139,13 @@
                             <div class="strat-category">@strat.Category</div>
                             @if (focusedStratagem == strat)
                             {
-                                var fw = "when"; var ft = "target"; var fe = "effect"; var fr = "restriction";
-                                <div class="strat-details">
-                                    <div class="strat-field @(focusedStratField == fw ? "zoomed" : "")" @onclick="() => ToggleStratField(fw)" @onclick:stopPropagation="true"><span class="strat-label">When:</span> @strat.When</div>
-                                    <div class="strat-field @(focusedStratField == ft ? "zoomed" : "")" @onclick="() => ToggleStratField(ft)" @onclick:stopPropagation="true"><span class="strat-label">Target:</span> @strat.Target</div>
-                                    <div class="strat-field @(focusedStratField == fe ? "zoomed" : "")" @onclick="() => ToggleStratField(fe)" @onclick:stopPropagation="true"><span class="strat-label">Effect:</span> @strat.Effect</div>
+                                <div class="strat-details @(stratDetailsZoomed ? "zoomed" : "")" @onclick="() => stratDetailsZoomed = !stratDetailsZoomed" @onclick:stopPropagation="true">
+                                    <div class="strat-field"><span class="strat-label">When:</span> @strat.When</div>
+                                    <div class="strat-field"><span class="strat-label">Target:</span> @strat.Target</div>
+                                    <div class="strat-field"><span class="strat-label">Effect:</span> @strat.Effect</div>
                                     @if (!string.IsNullOrEmpty(strat.Restriction))
                                     {
-                                        <div class="strat-field @(focusedStratField == fr ? "zoomed" : "")" @onclick="() => ToggleStratField(fr)" @onclick:stopPropagation="true"><span class="strat-label restriction">Restriction:</span> @strat.Restriction</div>
+                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @strat.Restriction</div>
                                     }
                                 </div>
                             }
@@ -510,7 +509,7 @@
     private bool abilitiesPanelOpen = true;
     private bool stratagemsPanelOpen = true;
     private Stratagem? focusedStratagem;
-    private string? focusedStratField;
+    private bool stratDetailsZoomed;
     private bool showChangelog;
     private int defenderPrimary;
     private int aggressorPrimary;
@@ -719,12 +718,7 @@
     private void ToggleFocusStratagem(Stratagem strat)
     {
         focusedStratagem = focusedStratagem == strat ? null : strat;
-        focusedStratField = null;
-    }
-
-    private void ToggleStratField(string field)
-    {
-        focusedStratField = focusedStratField == field ? null : field;
+        stratDetailsZoomed = false;
     }
 
     private List<Stratagem> FilteredStratagems

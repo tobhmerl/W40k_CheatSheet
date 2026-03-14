@@ -416,6 +416,29 @@
     margin-top: 0.3rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding-top: 0.3rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.strat-details:hover .strat-field {
+    color: #bbb;
+}
+
+.strat-details.zoomed {
+    background: rgba(0, 180, 216, 0.08);
+    border-left: 3px solid #00b4d8;
+    padding: 0.4rem 0.4rem 0.4rem 0.5rem;
+    border-radius: 4px;
+}
+
+.strat-details.zoomed .strat-field {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #ccc;
+}
+
+.strat-details.zoomed .strat-label {
+    font-size: 0.95rem;
 }
 
 .strat-field {
@@ -423,26 +446,7 @@
     line-height: 1.5;
     color: #999;
     margin-bottom: 0.15rem;
-    cursor: pointer;
     transition: all 0.2s ease;
-}
-
-.strat-field:hover {
-    color: #bbb;
-}
-
-.strat-field.zoomed {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    background: rgba(0, 180, 216, 0.08);
-    border-left: 3px solid #00b4d8;
-    padding: 0.4rem 0.4rem 0.4rem 0.5rem;
-    color: #ccc;
-    border-radius: 4px;
-}
-
-.strat-field.zoomed .strat-label {
-    font-size: 0.95rem;
 }
 
 .strat-label {
