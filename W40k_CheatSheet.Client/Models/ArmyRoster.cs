@@ -71,6 +71,15 @@ public class AbilityEntry
     public GamePhase Phases { get; set; } = GamePhase.All;
 }
 
+public enum StratagemTurn
+{
+    Green,
+    Blue,
+    Red,
+    BlueRed,
+    RedBlue
+}
+
 public class Stratagem
 {
     public string Name { get; set; } = "";
@@ -81,8 +90,11 @@ public class Stratagem
     public string Effect { get; set; } = "";
     public string Restriction { get; set; } = "";
     public GamePhase Phases { get; set; } = GamePhase.All;
+    public GamePhase? MyTurnPhases { get; set; }
+    public GamePhase? EnemyTurnPhases { get; set; }
     public List<string> RequiredKeywords { get; set; } = [];
     public string Detachment { get; set; } = "";
+    public StratagemTurn TurnColor { get; set; } = StratagemTurn.Green;
 }
 
 public class RuleEntry

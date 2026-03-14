@@ -317,7 +317,9 @@
 
 .strat-header.turn-myturn,
 .strat-header.turn-enemyturn,
-.strat-header.turn-both {
+.strat-header.turn-both,
+.strat-header.turn-bluered,
+.strat-header.turn-redblue {
     margin: -0.35rem -0.5rem 0.3rem;
     padding: 0.35rem 0.5rem;
     border-radius: 6px 6px 0 0;
@@ -335,16 +337,36 @@
     background: #2a5040;
 }
 
+.strat-header.turn-bluered {
+    background: linear-gradient(to right, #1e4d6b, #6b2839);
+}
+
+.strat-header.turn-redblue {
+    background: linear-gradient(to right, #6b2839, #1e4d6b);
+}
+
 .strat-header.turn-myturn .strat-name,
 .strat-header.turn-enemyturn .strat-name,
-.strat-header.turn-both .strat-name {
+.strat-header.turn-both .strat-name,
+.strat-header.turn-bluered .strat-name,
+.strat-header.turn-redblue .strat-name {
     color: #fff;
 }
 
 .strat-header.turn-myturn .strat-cost,
 .strat-header.turn-enemyturn .strat-cost,
-.strat-header.turn-both .strat-cost {
+.strat-header.turn-both .strat-cost,
+.strat-header.turn-bluered .strat-cost,
+.strat-header.turn-redblue .strat-cost {
     color: rgba(255, 255, 255, 0.85);
+}
+
+.strat-phases {
+    font-size: 0.5rem;
+    font-weight: 400;
+    opacity: 0.55;
+    margin-left: 0.3rem;
+    letter-spacing: 0.3px;
 }
 
 .strat-name {
@@ -363,6 +385,14 @@
 
 .strat-item.zoomed .strat-header.turn-both {
     background: #366b54;
+}
+
+.strat-item.zoomed .strat-header.turn-bluered {
+    background: linear-gradient(to right, #256a8f, #8a3548);
+}
+
+.strat-item.zoomed .strat-header.turn-redblue {
+    background: linear-gradient(to right, #8a3548, #256a8f);
 }
 
 .strat-item.zoomed .strat-name {
@@ -393,6 +423,26 @@
     line-height: 1.5;
     color: #999;
     margin-bottom: 0.15rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.strat-field:hover {
+    color: #bbb;
+}
+
+.strat-field.zoomed {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    background: rgba(0, 180, 216, 0.08);
+    border-left: 3px solid #00b4d8;
+    padding: 0.4rem 0.4rem 0.4rem 0.5rem;
+    color: #ccc;
+    border-radius: 4px;
+}
+
+.strat-field.zoomed .strat-label {
+    font-size: 0.95rem;
 }
 
 .strat-label {
@@ -626,10 +676,58 @@
     color: #e94560;
 }
 
-/* Grid — masonry-style columns so mixed-size cards pack tightly */
+/* Move hint */
+.move-hint {
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(187, 134, 252, 0.1);
+    border: 1px solid #bb86fc;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+    color: #bb86fc;
+}
+
+/* Move handle */
+.move-handle {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 0.75rem;
+    cursor: grab;
+    padding: 0 0.2rem;
+    line-height: 1;
+    touch-action: none;
+    transition: color 0.15s;
+}
+
+.move-handle:hover {
+    color: #bb86fc;
+}
+
+.unit-card.moving {
+    border-color: #bb86fc;
+    box-shadow: 0 0 8px rgba(187, 134, 252, 0.4);
+    opacity: 0.6;
+}
+
+.unit-card.move-target {
+    border-color: #bb86fc;
+    border-style: dashed;
+}
+
+/* Grid — left column: grouped units, right column: standalone */
 .unit-grid {
     columns: 2;
     column-gap: 0.6rem;
+}
+
+.column-break {
+    break-before: column;
+    margin: 0;
+    padding: 0;
+    height: 0;
+    line-height: 0;
 }
 
 @media (max-width: 700px) {

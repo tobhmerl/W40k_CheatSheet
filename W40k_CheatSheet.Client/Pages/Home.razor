@@ -133,19 +133,20 @@
                         <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "")"
                              @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
                             <div class="strat-header @GetStratTurnClass(strat)">
-                                <span class="strat-name">@strat.Name</span>
+                                <span class="strat-name">@strat.Name <span class="strat-phases">@GetPhaseLabels(strat.Phases)</span></span>
                                 <span class="strat-cost">@strat.Cost</span>
                             </div>
                             <div class="strat-category">@strat.Category</div>
                             @if (focusedStratagem == strat)
                             {
+                                var fw = "when"; var ft = "target"; var fe = "effect"; var fr = "restriction";
                                 <div class="strat-details">
-                                    <div class="strat-field"><span class="strat-label">When:</span> @strat.When</div>
-                                    <div class="strat-field"><span class="strat-label">Target:</span> @strat.Target</div>
-                                    <div class="strat-field"><span class="strat-label">Effect:</span> @strat.Effect</div>
+                                    <div class="strat-field @(focusedStratField == fw ? "zoomed" : "")" @onclick="() => ToggleStratField(fw)" @onclick:stopPropagation="true"><span class="strat-label">When:</span> @strat.When</div>
+                                    <div class="strat-field @(focusedStratField == ft ? "zoomed" : "")" @onclick="() => ToggleStratField(ft)" @onclick:stopPropagation="true"><span class="strat-label">Target:</span> @strat.Target</div>
+                                    <div class="strat-field @(focusedStratField == fe ? "zoomed" : "")" @onclick="() => ToggleStratField(fe)" @onclick:stopPropagation="true"><span class="strat-label">Effect:</span> @strat.Effect</div>
                                     @if (!string.IsNullOrEmpty(strat.Restriction))
                                     {
-                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @strat.Restriction</div>
+                                        <div class="strat-field @(focusedStratField == fr ? "zoomed" : "")" @onclick="() => ToggleStratField(fr)" @onclick:stopPropagation="true"><span class="strat-label restriction">Restriction:</span> @strat.Restriction</div>
                                     }
                                 </div>
                             }
@@ -172,7 +173,19 @@
             </div>
         }
 
+        @if (movingUnit is not null)
+        {
+            <div class="move-hint">
+                Tap a unit to move <strong>@movingUnit.Name</strong> there ·
+                <span class="cancel-link" @onclick="() => movingUnit = null">Cancel</span>
+            </div>
+        }
+
         <div class="unit-grid">
+            @{
+                bool hasGrouped = DisplayUnits.Any(u => u.AttachedLeaders.Count > 0);
+                bool breakInserted = false;
+            }
             @foreach (var unit in DisplayUnits)
             {
                 var stats = GetAllStatLines(unit);
@@ -184,6 +197,12 @@
                 var hasSpecialSave = stats.Any(s => !string.IsNullOrEmpty(s.InvulnSave) || !string.IsNullOrEmpty(s.FeelNoPain));
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var collapsed = IsCollapsed(unit);
+
+                @if (hasGrouped && !breakInserted && unit.AttachedLeaders.Count == 0)
+                {
+                    breakInserted = true;
+                    <div class="column-break"></div>
+                }
 
                 <div class="unit-card @CardClass(unit)"
                      draggable="true"
@@ -207,6 +226,7 @@
                             }
                         </div>
                         <div class="header-right">
+                            <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
                             <span class="unit-points">@totalPts pts</span>
                             <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
                         </div>
@@ -408,7 +428,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.2</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.3</div>
 
     @if (showChangelog)
     {
@@ -419,6 +439,19 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+                    <div class="changelog-version">v1.3 — 2026-03-14</div>
+                    <ul class="changelog-list">
+                        <li>Hardcoded stratagem turn colors (blue/red/green/gradients) for accurate display</li>
+                        <li>Stratagem headers now show applicable phases (Cmd, Mov, Sht, Chg, Fgt)</li>
+                        <li>Stratagem text fields (When, Target, Effect, Restriction) are now click-to-zoom</li>
+                        <li>Added red→blue gradient for enemy-first mixed stratagems (e.g. Undying Legions)</li>
+                        <li>Fixed Protocol of the Undying Legions: no longer shows in My turn + Shoot</li>
+                        <li>Per-turn phase filtering for stratagems with mixed turn/phase availability</li>
+                        <li>Colored stratagems now sort before green (any phase) stratagems</li>
+                        <li>Unit grid: grouped units (with leaders) in left column, standalone in right column</li>
+                        <li>Added tap-to-move reorder for mobile (☰ handle on each unit card)</li>
+                        <li>Clickable changelog popup on version tag</li>
+                    </ul>
                     <div class="changelog-version">v1.2 — 2026-03-14</div>
                     <ul class="changelog-list">
                         <li>Added "My turn" / "Enemy turn" filter buttons</li>
@@ -464,6 +497,7 @@
     private UnitEntry? draggedUnit;
     private UnitEntry? dragOverUnit;
     private UnitEntry? selectedLeader;
+    private UnitEntry? movingUnit;
     private AbilityEntry? focusedAbility;
     private WeaponProfile? focusedWeapon;
     private UnitEntry? focusedStatOwner;
@@ -476,6 +510,7 @@
     private bool abilitiesPanelOpen = true;
     private bool stratagemsPanelOpen = true;
     private Stratagem? focusedStratagem;
+    private string? focusedStratField;
     private bool showChangelog;
     private int defenderPrimary;
     private int aggressorPrimary;
@@ -501,7 +536,10 @@
             var attached = army.Units
                 .SelectMany(u => u.AttachedLeaders)
                 .ToHashSet();
-            return army.Units.Where(u => !attached.Contains(u));
+            var visible = army.Units.Where(u => !attached.Contains(u)).ToList();
+            var grouped = visible.Where(u => u.AttachedLeaders.Count > 0);
+            var standalone = visible.Where(u => u.AttachedLeaders.Count == 0);
+            return grouped.Concat(standalone);
         }
     }
 
@@ -537,7 +575,17 @@
             css += " attach-target";
         if (focusedUnit == unit)
             css += " focused-unit";
+        if (movingUnit == unit)
+            css += " moving";
+        if (movingUnit is not null && movingUnit != unit)
+            css += " move-target";
         return css.TrimStart();
+    }
+
+    private void StartMove(UnitEntry unit)
+    {
+        movingUnit = movingUnit == unit ? null : unit;
+        selectedLeader = null;
     }
 
     private void DragStart(UnitEntry unit) => draggedUnit = unit;
@@ -578,6 +626,24 @@
         if (longPressTriggered)
         {
             longPressTriggered = false;
+            return;
+        }
+
+        if (movingUnit is not null)
+        {
+            if (movingUnit != unit && army is not null)
+            {
+                var units = army.Units;
+                var fromIndex = units.IndexOf(movingUnit);
+                var toIndex = units.IndexOf(unit);
+                if (fromIndex >= 0 && toIndex >= 0)
+                {
+                    units.RemoveAt(fromIndex);
+                    units.Insert(toIndex, movingUnit);
+                }
+                await SaveToStorage();
+            }
+            movingUnit = null;
             return;
         }
 
@@ -653,6 +719,12 @@
     private void ToggleFocusStratagem(Stratagem strat)
     {
         focusedStratagem = focusedStratagem == strat ? null : strat;
+        focusedStratField = null;
+    }
+
+    private void ToggleStratField(string field)
+    {
+        focusedStratField = focusedStratField == field ? null : field;
     }
 
     private List<Stratagem> FilteredStratagems
@@ -664,86 +736,56 @@
                 .Where(s => string.IsNullOrEmpty(s.Detachment) ||
                             s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase));
 
-            if (activePhase is not null)
-                available = available.Where(s => s.Phases.HasFlag(activePhase.Value));
-
             if (activeTurn is not null)
-                available = available.Where(s => IsAvailableOnTurn(s.When, activeTurn.Value));
+                available = available.Where(s => IsAvailableForTurn(s.TurnColor, activeTurn.Value));
 
-            return available.ToList();
-        }
-    }
-
-    private static bool IsAvailableOnTurn(string when, TurnFilter turn)
-    {
-        if (when.Contains("Any phase", StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return turn switch
-        {
-            TurnFilter.MyTurn => IsMyTurnStratagem(when),
-            TurnFilter.EnemyTurn => IsEnemyTurnStratagem(when),
-            _ => true
-        };
-    }
-
-    private static bool IsMyTurnStratagem(string when)
-    {
-        var stripped = when.Replace("Your opponent's", "\0", StringComparison.OrdinalIgnoreCase)
-                          .Replace("your opponent", "\0", StringComparison.OrdinalIgnoreCase);
-        if (stripped.Contains("Your", StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return HasUnqualifiedPhaseReference(when);
-    }
-
-    private static bool IsEnemyTurnStratagem(string when)
-    {
-        if (when.Contains("opponent", StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return HasUnqualifiedPhaseReference(when);
-    }
-
-    private static bool HasUnqualifiedPhaseReference(string when)
-    {
-        ReadOnlySpan<char> span = when;
-        string[] phases = ["Command phase", "Movement phase", "Shooting phase", "Charge phase", "Fight phase"];
-        foreach (var phase in phases)
-        {
-            int idx = when.IndexOf(phase, StringComparison.OrdinalIgnoreCase);
-            while (idx >= 0)
+            if (activePhase is not null)
             {
-                bool qualified = false;
-                if (idx >= 5)
+                available = available.Where(s =>
                 {
-                    var before = when[..idx].TrimEnd();
-                    if (before.EndsWith("Your", StringComparison.OrdinalIgnoreCase) ||
-                        before.EndsWith("opponent's", StringComparison.OrdinalIgnoreCase))
-                        qualified = true;
-                }
-                if (!qualified)
-                    return true;
-
-                int next = idx + phase.Length;
-                idx = next < when.Length
-                    ? when.IndexOf(phase, next, StringComparison.OrdinalIgnoreCase)
-                    : -1;
+                    var phases = s.Phases;
+                    if (activeTurn is not null)
+                    {
+                        phases = activeTurn.Value == TurnFilter.MyTurn
+                            ? (s.MyTurnPhases ?? s.Phases)
+                            : (s.EnemyTurnPhases ?? s.Phases);
+                    }
+                    return phases.HasFlag(activePhase.Value);
+                });
             }
+
+            return available
+                .OrderBy(s => s.TurnColor == StratagemTurn.Green ? 1 : 0)
+                .ToList();
         }
-        return false;
     }
 
-    private static string GetStratTurnClass(Stratagem strat)
+    private static bool IsAvailableForTurn(StratagemTurn color, TurnFilter turn) => turn switch
     {
-        var when = strat.When;
-        bool anyPhase = when.Contains("Any phase", StringComparison.OrdinalIgnoreCase);
-        bool myTurn = anyPhase || IsMyTurnStratagem(when);
-        bool enemyTurn = anyPhase || IsEnemyTurnStratagem(when);
+        TurnFilter.MyTurn => color is StratagemTurn.Green or StratagemTurn.Blue or StratagemTurn.BlueRed or StratagemTurn.RedBlue,
+        TurnFilter.EnemyTurn => color is StratagemTurn.Green or StratagemTurn.Red or StratagemTurn.BlueRed or StratagemTurn.RedBlue,
+        _ => true
+    };
 
-        if (myTurn && enemyTurn) return "turn-both";
-        if (enemyTurn) return "turn-enemyturn";
-        return "turn-myturn";
+    private static string GetStratTurnClass(Stratagem strat) => strat.TurnColor switch
+    {
+        StratagemTurn.Blue => "turn-myturn",
+        StratagemTurn.Red => "turn-enemyturn",
+        StratagemTurn.BlueRed => "turn-bluered",
+        StratagemTurn.RedBlue => "turn-redblue",
+        _ => "turn-both"
+    };
+
+    private static string GetPhaseLabels(GamePhase phases)
+    {
+        if (phases == GamePhase.All) return "Any";
+        var labels = new List<string>();
+        if (phases.HasFlag(GamePhase.Command)) labels.Add("Cmd");
+        if (phases.HasFlag(GamePhase.Move)) labels.Add("Mov");
+        if (phases.HasFlag(GamePhase.Shoot)) labels.Add("Sht");
+        if (phases.HasFlag(GamePhase.Charge)) labels.Add("Chg");
+        if (phases.HasFlag(GamePhase.Fight)) labels.Add("Fgt");
+        return string.Join(" · ", labels);
     }
 
     private static bool IsAbilityAvailableOnTurn(string description, TurnFilter turn)
