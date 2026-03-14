@@ -82,6 +82,7 @@ public class Stratagem
     public string Restriction { get; set; } = "";
     public GamePhase Phases { get; set; } = GamePhase.All;
     public List<string> RequiredKeywords { get; set; } = [];
+    public string Detachment { get; set; } = "";
 }
 
 public class RuleEntry

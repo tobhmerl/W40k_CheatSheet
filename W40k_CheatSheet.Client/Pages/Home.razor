@@ -33,6 +33,10 @@
     {
         <div class="roster-header">
             <h1>@army.Name</h1>
+            <div class="turn-buttons">
+                <button class="turn-btn my-turn @(activeTurn == TurnFilter.MyTurn ? "active" : "")" @onclick="() => ToggleTurn(TurnFilter.MyTurn)">My turn</button>
+                <button class="turn-btn enemy-turn @(activeTurn == TurnFilter.EnemyTurn ? "active" : "")" @onclick="() => ToggleTurn(TurnFilter.EnemyTurn)">Enemy turn</button>
+            </div>
             <div class="phase-buttons">
                 <button class="phase-btn @(activePhase == GamePhase.Command ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Command)">Command</button>
                 <button class="phase-btn @(activePhase == GamePhase.Move ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Move)">Move</button>
@@ -63,11 +67,15 @@
                         var phaseFiltered = activePhase is not null
                             ? phaseAbilities.Where(a => a.Phases.HasFlag(activePhase.Value)).ToList()
                             : phaseAbilities;
+                        if (activeTurn is not null)
+                            phaseFiltered = phaseFiltered.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)).ToList();
                         if (phaseFiltered.Count == 0) { continue; }
 
-                        var isOtherFocused = focusedStatOwner is not null && focusedCard != entry.Unit;
+                        var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
+                                             (focusedUnit is not null && focusedUnit != entry.Unit);
+                        if (isOtherFocused) { continue; }
 
-                        <div class="abilities-panel-unit @(isOtherFocused ? "dimmed" : "")">
+                        <div class="abilities-panel-unit">
                             <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
                             @foreach (var ability in phaseFiltered)
                             {
@@ -79,7 +87,7 @@
                     }
 
                     @* ── General abilities (no specific phase) ── *@
-                    @if (PanelUnits.Any(e => e.Abilities.Any(a => a.Phases == GamePhase.All)))
+                    @if (PanelUnits.Any(e => e.Abilities.Any(a => a.Phases == GamePhase.All && (activeTurn is null || IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)))))
                     {
                         <div class="abilities-panel-divider-row">
                             <span class="abilities-panel-divider-text">General Abilities</span>
@@ -87,11 +95,15 @@
                         @foreach (var entry in PanelUnits)
                         {
                             var generalAbilities = entry.Abilities.Where(a => a.Phases == GamePhase.All).ToList();
+                            if (activeTurn is not null)
+                                generalAbilities = generalAbilities.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)).ToList();
                             if (generalAbilities.Count == 0) { continue; }
 
-                            var isOtherFocused = focusedStatOwner is not null && focusedCard != entry.Unit;
+                            var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
+                                                 (focusedUnit is not null && focusedUnit != entry.Unit);
+                            if (isOtherFocused) { continue; }
 
-                            <div class="abilities-panel-unit @(isOtherFocused ? "dimmed" : "")">
+                            <div class="abilities-panel-unit">
                                 <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
                                 @foreach (var ability in generalAbilities)
                                 {
@@ -117,9 +129,10 @@
                     @foreach (var strat in FilteredStratagems)
                     {
                         var canUse = CanFocusedUnitUse(strat);
-                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "") @(focusedStatOwner is not null && !canUse ? "dimmed" : "")"
+                        if (HasUnitFocus && !canUse) { continue; }
+                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "")"
                              @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
-                            <div class="strat-header">
+                            <div class="strat-header @GetStratTurnClass(strat)">
                                 <span class="strat-name">@strat.Name</span>
                                 <span class="strat-cost">@strat.Cost</span>
                             </div>
@@ -165,10 +178,6 @@
                 var stats = GetAllStatLines(unit);
                 var ranged = GetAllRangedWeapons(unit);
                 var melee = GetAllMeleeWeapons(unit);
-                var abilities = GetAllAbilities(unit);
-                var filteredAbilities = activePhase is not null
-                    ? abilities.Where(a => a.Phases.HasFlag(activePhase.Value)).ToList()
-                    : abilities;
                 var enhancements = GetAllEnhancements(unit);
                 var keywords = GetAllKeywords(unit);
                 var totalPts = GetTotalPoints(unit);
@@ -184,7 +193,12 @@
                      @ondragover:preventDefault
                      @ondrop="() => Drop(unit)">
 
-                    <div class="unit-header" @onclick="() => HandleHeaderClick(unit)">
+                    <div class="unit-header"
+                         @onclick="e => HandleHeaderClick(unit, e)"
+                         @onpointerdown="() => HeaderPointerDown(unit)"
+                         @onpointerup="HeaderPointerUp"
+                         @onpointerleave="HeaderPointerUp"
+                         @oncontextmenu:preventDefault>
                         <div class="unit-name">
                             @unit.Name
                             @if (isWarlord)
@@ -250,6 +264,7 @@
                                                     {
                                                         <td>
                                                             @if (!string.IsNullOrEmpty(s.InvulnSave)) { <span class="invuln">@s.InvulnSave</span> }
+                                                            @if (!string.IsNullOrEmpty(s.InvulnSave) && !string.IsNullOrEmpty(s.FeelNoPain)) { <span class="save-sep">|</span> }
                                                             @if (!string.IsNullOrEmpty(s.FeelNoPain)) { <span class="fnp">@(s.FeelNoPain.Replace("+", "++"))</span> }
                                                             @if (string.IsNullOrEmpty(s.InvulnSave) && string.IsNullOrEmpty(s.FeelNoPain)) { <span>-</span> }
                                                         </td>
@@ -307,19 +322,6 @@
                                 </div>
                             }
 
-                            @if (filteredAbilities.Count > 0)
-                            {
-                                <h4 class="section-title">📜 Abilities</h4>
-                                <div class="abilities-list">
-                                    @foreach (var ability in filteredAbilities)
-                                    {
-                                        <div class="ability-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
-                                            <strong>@ability.Name:</strong> @ability.Description
-                                        </div>
-                                    }
-                                </div>
-                            }
-
                             @if (unit.IsLeader && unit.AttachedLeaders.Count == 0)
                             {
                                 <button class="attach-link" @onclick="() => StartAttach(unit)" @onclick:stopPropagation="true">
@@ -330,6 +332,58 @@
                     }
                 </div>
             }
+        </div>
+
+        <hr class="footer-divider" />
+
+        <div class="score-tracker">
+            <div class="score-total-row">
+                <span class="score-total">@(defenderPrimary + defenderSecondary)</span>
+                <span class="score-total-label">Total</span>
+                <span class="score-total">@(aggressorPrimary + aggressorSecondary)</span>
+            </div>
+            <div class="score-section">
+                <div class="score-section-label">Primary</div>
+                <div class="score-row">
+                    <div class="score-player">
+                        <div class="score-label">🛡️ Defender</div>
+                        <div class="score-controls">
+                            <button class="score-btn" @onclick="() => defenderPrimary = Math.Max(0, defenderPrimary - 1)">−</button>
+                            <span class="score-value">@defenderPrimary</span>
+                            <button class="score-btn" @onclick="() => defenderPrimary++">+</button>
+                        </div>
+                    </div>
+                    <div class="score-divider"></div>
+                    <div class="score-player">
+                        <div class="score-label">⚔️ Aggressor</div>
+                        <div class="score-controls">
+                            <button class="score-btn" @onclick="() => aggressorPrimary = Math.Max(0, aggressorPrimary - 1)">−</button>
+                            <span class="score-value">@aggressorPrimary</span>
+                            <button class="score-btn" @onclick="() => aggressorPrimary++">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="score-section">
+                <div class="score-section-label">Secondary</div>
+                <div class="score-row">
+                    <div class="score-player">
+                        <div class="score-controls">
+                            <button class="score-btn" @onclick="() => defenderSecondary = Math.Max(0, defenderSecondary - 1)">−</button>
+                            <span class="score-value">@defenderSecondary</span>
+                            <button class="score-btn" @onclick="() => defenderSecondary++">+</button>
+                        </div>
+                    </div>
+                    <div class="score-divider"></div>
+                    <div class="score-player">
+                        <div class="score-controls">
+                            <button class="score-btn" @onclick="() => aggressorSecondary = Math.Max(0, aggressorSecondary - 1)">−</button>
+                            <span class="score-value">@aggressorSecondary</span>
+                            <button class="score-btn" @onclick="() => aggressorSecondary++">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="roster-footer">
@@ -354,7 +408,51 @@
             </div>
         </div>
     }
-    <div class="version-tag">v1.1</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.2</div>
+
+    @if (showChangelog)
+    {
+        <div class="changelog-overlay" @onclick="() => showChangelog = false">
+            <div class="changelog-modal" @onclick:stopPropagation="true">
+                <div class="changelog-header">
+                    <span>📋 Changelog</span>
+                    <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
+                </div>
+                <div class="changelog-body">
+                    <div class="changelog-version">v1.2 — 2026-03-14</div>
+                    <ul class="changelog-list">
+                        <li>Added "My turn" / "Enemy turn" filter buttons</li>
+                        <li>Stratagem headers color-coded by turn (blue = yours, red = enemy, green = both)</li>
+                        <li>Abilities panel now filters by turn</li>
+                        <li>Removed duplicate abilities section from unit cards</li>
+                        <li>Added pipe separator between invuln save and feel-no-pain in shield column</li>
+                    </ul>
+                    <div class="changelog-version">v1.1 — 2026-03-13</div>
+                    <ul class="changelog-list">
+                        <li>Added stratagems panel with Core and Detachment stratagems</li>
+                        <li>Added abilities overview panel with phase filtering</li>
+                        <li>Added detachment rule display</li>
+                        <li>Added scoped weapon highlight when focusing a stat row</li>
+                        <li>Added feel-no-pain parsing and display</li>
+                        <li>Added weapon zoom on click</li>
+                        <li>Added stat-row focus to filter weapons by owner</li>
+                        <li>Added score tracker for primary and secondary objectives</li>
+                        <li>Added version tag</li>
+                    </ul>
+                    <div class="changelog-version">v1.0 — 2026-03-10</div>
+                    <ul class="changelog-list">
+                        <li>Initial release — import BattleScribe roster JSON</li>
+                        <li>Unit cards with stats, weapons, keywords, and enhancements</li>
+                        <li>Leader attachment via drag-and-drop or tap</li>
+                        <li>Collapsible unit cards</li>
+                        <li>Phase filter buttons</li>
+                        <li>Local storage persistence</li>
+                        <li>Deployed as standalone Blazor WASM on GitHub Pages</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -370,10 +468,19 @@
     private WeaponProfile? focusedWeapon;
     private UnitEntry? focusedStatOwner;
     private UnitEntry? focusedCard;
+    private UnitEntry? focusedUnit;
+    private CancellationTokenSource? longPressCts;
+    private bool longPressTriggered;
     private GamePhase? activePhase;
+    private TurnFilter? activeTurn;
     private bool abilitiesPanelOpen = true;
     private bool stratagemsPanelOpen = true;
     private Stratagem? focusedStratagem;
+    private bool showChangelog;
+    private int defenderPrimary;
+    private int aggressorPrimary;
+    private int defenderSecondary;
+    private int aggressorSecondary;
     private readonly HashSet<UnitEntry> collapsedUnits = [];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -428,6 +535,8 @@
             css += " selected";
         if (selectedLeader is not null && !unit.IsLeader && unit != selectedLeader)
             css += " attach-target";
+        if (focusedUnit == unit)
+            css += " focused-unit";
         return css.TrimStart();
     }
 
@@ -464,8 +573,14 @@
         await SaveToStorage();
     }
 
-    private async Task HandleHeaderClick(UnitEntry unit)
+    private async Task HandleHeaderClick(UnitEntry unit, MouseEventArgs e)
     {
+        if (longPressTriggered)
+        {
+            longPressTriggered = false;
+            return;
+        }
+
         if (selectedLeader is not null)
         {
             if (!unit.IsLeader)
@@ -479,7 +594,36 @@
             return;
         }
 
+        if (e.ShiftKey)
+        {
+            focusedUnit = focusedUnit == unit ? null : unit;
+            focusedStatOwner = null;
+            focusedCard = null;
+            return;
+        }
+
         ToggleCollapse(unit);
+    }
+
+    private async Task HeaderPointerDown(UnitEntry unit)
+    {
+        longPressTriggered = false;
+        longPressCts?.Cancel();
+        longPressCts = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(500, longPressCts.Token);
+            longPressTriggered = true;
+            focusedUnit = focusedUnit == unit ? null : unit;
+            focusedStatOwner = null;
+            focusedCard = null;
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private void HeaderPointerUp()
+    {
+        longPressCts?.Cancel();
     }
 
     private void StartAttach(UnitEntry leader)
@@ -494,6 +638,13 @@
         activePhase = activePhase == phase ? null : phase;
     }
 
+    private enum TurnFilter { MyTurn, EnemyTurn }
+
+    private void ToggleTurn(TurnFilter turn)
+    {
+        activeTurn = activeTurn == turn ? null : turn;
+    }
+
     private void ToggleFocusAbility(AbilityEntry ability)
     {
         focusedAbility = focusedAbility == ability ? null : ability;
@@ -504,19 +655,127 @@
         focusedStratagem = focusedStratagem == strat ? null : strat;
     }
 
-    private List<Stratagem> FilteredStratagems =>
-        activePhase is not null
-            ? CoreStratagems.All.Where(s => s.Phases.HasFlag(activePhase.Value)).ToList()
-            : CoreStratagems.All;
+    private List<Stratagem> FilteredStratagems
+    {
+        get
+        {
+            var detachment = army?.Detachment ?? "";
+            var available = CoreStratagems.All
+                .Where(s => string.IsNullOrEmpty(s.Detachment) ||
+                            s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase));
+
+            if (activePhase is not null)
+                available = available.Where(s => s.Phases.HasFlag(activePhase.Value));
+
+            if (activeTurn is not null)
+                available = available.Where(s => IsAvailableOnTurn(s.When, activeTurn.Value));
+
+            return available.ToList();
+        }
+    }
+
+    private static bool IsAvailableOnTurn(string when, TurnFilter turn)
+    {
+        if (when.Contains("Any phase", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return turn switch
+        {
+            TurnFilter.MyTurn => IsMyTurnStratagem(when),
+            TurnFilter.EnemyTurn => IsEnemyTurnStratagem(when),
+            _ => true
+        };
+    }
+
+    private static bool IsMyTurnStratagem(string when)
+    {
+        var stripped = when.Replace("Your opponent's", "\0", StringComparison.OrdinalIgnoreCase)
+                          .Replace("your opponent", "\0", StringComparison.OrdinalIgnoreCase);
+        if (stripped.Contains("Your", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return HasUnqualifiedPhaseReference(when);
+    }
+
+    private static bool IsEnemyTurnStratagem(string when)
+    {
+        if (when.Contains("opponent", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return HasUnqualifiedPhaseReference(when);
+    }
+
+    private static bool HasUnqualifiedPhaseReference(string when)
+    {
+        ReadOnlySpan<char> span = when;
+        string[] phases = ["Command phase", "Movement phase", "Shooting phase", "Charge phase", "Fight phase"];
+        foreach (var phase in phases)
+        {
+            int idx = when.IndexOf(phase, StringComparison.OrdinalIgnoreCase);
+            while (idx >= 0)
+            {
+                bool qualified = false;
+                if (idx >= 5)
+                {
+                    var before = when[..idx].TrimEnd();
+                    if (before.EndsWith("Your", StringComparison.OrdinalIgnoreCase) ||
+                        before.EndsWith("opponent's", StringComparison.OrdinalIgnoreCase))
+                        qualified = true;
+                }
+                if (!qualified)
+                    return true;
+
+                int next = idx + phase.Length;
+                idx = next < when.Length
+                    ? when.IndexOf(phase, next, StringComparison.OrdinalIgnoreCase)
+                    : -1;
+            }
+        }
+        return false;
+    }
+
+    private static string GetStratTurnClass(Stratagem strat)
+    {
+        var when = strat.When;
+        bool anyPhase = when.Contains("Any phase", StringComparison.OrdinalIgnoreCase);
+        bool myTurn = anyPhase || IsMyTurnStratagem(when);
+        bool enemyTurn = anyPhase || IsEnemyTurnStratagem(when);
+
+        if (myTurn && enemyTurn) return "turn-both";
+        if (enemyTurn) return "turn-enemyturn";
+        return "turn-myturn";
+    }
+
+    private static bool IsAbilityAvailableOnTurn(string description, TurnFilter turn)
+    {
+        bool mentionsEnemy = description.Contains("opponent", StringComparison.OrdinalIgnoreCase) ||
+                             description.Contains("enemy", StringComparison.OrdinalIgnoreCase);
+
+        var stripped = description.Replace("your opponent", "", StringComparison.OrdinalIgnoreCase);
+        bool mentionsYour = stripped.Contains("your", StringComparison.OrdinalIgnoreCase);
+
+        if (!mentionsYour && !mentionsEnemy) return true;
+
+        return turn switch
+        {
+            TurnFilter.MyTurn => mentionsYour,
+            TurnFilter.EnemyTurn => mentionsEnemy,
+            _ => true
+        };
+    }
+
+    private bool HasUnitFocus => focusedUnit is not null || focusedStatOwner is not null;
 
     private bool CanFocusedUnitUse(Stratagem strat)
     {
         if (strat.RequiredKeywords.Count == 0) return true;
-        if (focusedStatOwner is null) return true;
+        if (!HasUnitFocus) return true;
 
-        var unitKeywords = focusedCard is not null
-            ? GetAllKeywords(focusedCard)
-            : focusedStatOwner.Keywords;
+        var unitKeywords = focusedUnit is not null
+            ? GetAllKeywords(focusedUnit)
+            : focusedCard is not null
+                ? GetAllKeywords(focusedCard)
+                : focusedStatOwner!.Keywords;
 
         return strat.RequiredKeywords.Any(rk =>
             unitKeywords.Any(uk => string.Equals(uk, rk, StringComparison.OrdinalIgnoreCase)));
@@ -529,6 +788,7 @@
 
     private void ToggleFocusStatOwner(UnitEntry owner, UnitEntry card)
     {
+        focusedUnit = null;
         if (focusedStatOwner == owner)
         {
             focusedStatOwner = null;
