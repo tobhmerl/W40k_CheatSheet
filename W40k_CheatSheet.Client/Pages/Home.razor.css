@@ -176,6 +176,37 @@
     background: rgba(255, 255, 255, 0.03);
 }
 
+.abilities-panel-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.show-all-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #333;
+    color: #666;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.show-all-btn:hover {
+    border-color: #555;
+    color: #999;
+}
+
+.show-all-btn.active {
+    background: rgba(0, 180, 216, 0.15);
+    border-color: #00b4d8;
+    color: #00b4d8;
+}
+    background: rgba(255, 255, 255, 0.03);
+}
+
 .abilities-panel-header:hover {
     background: rgba(255, 255, 255, 0.06);
 }
@@ -615,6 +646,103 @@
 
 .clear-btn:hover {
     background: rgba(233, 69, 96, 0.25);
+}
+
+/* Play mode */
+.play-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #333;
+    color: #888;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.play-btn:hover {
+    border-color: #e94560;
+    color: #e94560;
+    background: rgba(233, 69, 96, 0.1);
+}
+
+.play-btn.active {
+    background: rgba(233, 69, 96, 0.2);
+    border-color: #e94560;
+    color: #e94560;
+}
+
+.kill-btn {
+    background: none;
+    border: 1px solid #555;
+    color: #e94560;
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    cursor: pointer;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    transition: all 0.15s;
+}
+
+.kill-btn:hover {
+    background: rgba(233, 69, 96, 0.2);
+    border-color: #e94560;
+}
+
+.kill-btn.small {
+    font-size: 0.6rem;
+    padding: 0 0.2rem;
+}
+
+/* Killed unit card */
+.unit-card.killed {
+    opacity: 0.35;
+    border-color: #333;
+    border-style: dashed;
+}
+
+.unit-card.killed .unit-name {
+    text-decoration: line-through;
+    color: #555;
+}
+
+.unit-card.killed .unit-points {
+    color: #555;
+}
+
+/* Killed leader row */
+.attached-leader.killed {
+    opacity: 0.35;
+    text-decoration: line-through;
+}
+
+/* Killed divider */
+.killed-divider {
+    display: flex;
+    align-items: center;
+    margin: 0.4rem 0;
+    gap: 0.5rem;
+    break-inside: avoid;
+    column-span: all;
+}
+
+.killed-divider::before,
+.killed-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid #e94560;
+    opacity: 0.3;
+}
+
+.killed-divider-text {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #e94560;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .roster-meta {

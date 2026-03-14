@@ -55,7 +55,10 @@
         <div class="abilities-panel">
             <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
                 <span>📜 Abilities Overview</span>
-                <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
+                <span class="abilities-panel-controls">
+                    <button class="show-all-btn @(showAllAbilities ? "active" : "")" @onclick="() => showAllAbilities = !showAllAbilities" @onclick:stopPropagation="true">@(showAllAbilities ? "Hide stats" : "Show all")</button>
+                    <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
+                </span>
             </div>
             @if (abilitiesPanelOpen)
             {
@@ -69,6 +72,8 @@
                             : phaseAbilities;
                         if (activeTurn is not null)
                             phaseFiltered = phaseFiltered.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)).ToList();
+                        if (!showAllAbilities)
+                            phaseFiltered = phaseFiltered.Where(a => !IsStatReflectedAbility(a, entry.Unit)).ToList();
                         if (phaseFiltered.Count == 0) { continue; }
 
                         var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
@@ -87,7 +92,7 @@
                     }
 
                     @* ── General abilities (no specific phase) ── *@
-                    @if (PanelUnits.Any(e => e.Abilities.Any(a => a.Phases == GamePhase.All && (activeTurn is null || IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)))))
+                    @if (PanelUnits.Any(e => e.Abilities.Any(a => a.Phases == GamePhase.All && (activeTurn is null || IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)) && (showAllAbilities || !IsStatReflectedAbility(a, e.Unit)))))
                     {
                         <div class="abilities-panel-divider-row">
                             <span class="abilities-panel-divider-text">General Abilities</span>
@@ -97,6 +102,8 @@
                             var generalAbilities = entry.Abilities.Where(a => a.Phases == GamePhase.All).ToList();
                             if (activeTurn is not null)
                                 generalAbilities = generalAbilities.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)).ToList();
+                            if (!showAllAbilities)
+                                generalAbilities = generalAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit)).ToList();
                             if (generalAbilities.Count == 0) { continue; }
 
                             var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
@@ -182,8 +189,9 @@
 
         <div class="unit-grid">
             @{
-                bool hasGrouped = DisplayUnits.Any(u => u.AttachedLeaders.Count > 0);
+                bool hasGrouped = DisplayUnits.Any(u => !IsKilled(u) && u.AttachedLeaders.Count > 0);
                 bool breakInserted = false;
+                bool killedDividerInserted = false;
             }
             @foreach (var unit in DisplayUnits)
             {
@@ -197,10 +205,18 @@
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var collapsed = IsCollapsed(unit);
 
-                @if (hasGrouped && !breakInserted && unit.AttachedLeaders.Count == 0)
+                @if (hasGrouped && !breakInserted && !IsKilled(unit) && unit.AttachedLeaders.Count == 0)
                 {
                     breakInserted = true;
                     <div class="column-break"></div>
+                }
+
+                @if (playMode && !killedDividerInserted && IsKilled(unit))
+                {
+                    killedDividerInserted = true;
+                    <div class="killed-divider">
+                        <span class="killed-divider-text">☠ Destroyed</span>
+                    </div>
                 }
 
                 <div class="unit-card @CardClass(unit)"
@@ -225,6 +241,10 @@
                             }
                         </div>
                         <div class="header-right">
+                            @if (playMode && !IsKilled(unit))
+                            {
+                                <button class="kill-btn" @onclick="() => KillUnit(unit)" @onclick:stopPropagation="true">☠</button>
+                            }
                             <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
                             <span class="unit-points">@totalPts pts</span>
                             <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
@@ -233,9 +253,16 @@
 
                     @foreach (var leader in unit.AttachedLeaders)
                     {
-                        <div class="attached-leader">
+                        <div class="attached-leader @(IsKilled(leader) ? "killed" : "")">
                             <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "") (@leader.Points pts)</span>
-                            <button class="detach-btn" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
+                            @if (playMode && !IsKilled(leader))
+                            {
+                                <button class="kill-btn small" @onclick="() => KillAttachedUnit(unit, leader)" @onclick:stopPropagation="true">☠</button>
+                            }
+                            else if (!playMode)
+                            {
+                                <button class="detach-btn" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
+                            }
                         </div>
                     }
 
@@ -408,6 +435,7 @@
         <div class="roster-footer">
             <hr class="footer-divider" />
             <div class="roster-actions">
+                <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Live" : "⚔️ Play mode")</button>
                 <label class="import-btn small">
                     📁 Re-import
                     <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
@@ -427,7 +455,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.3</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.4</div>
 
     @if (showChangelog)
     {
@@ -438,6 +466,20 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+                    <div class="changelog-version">v1.4 — 2026-03-14</div>
+                    <ul class="changelog-list">
+                        <li>Added Play mode (⚔️) — toggle in footer to enter live game tracking</li>
+                        <li>Kill units with ☠ button on each card and attached leader row</li>
+                        <li>Killed units move below a “☠ Destroyed” divider, greyed out with strike-through</li>
+                        <li>Killing a bodyguard splits the group — surviving leaders become standalone</li>
+                        <li>Abilities of killed units hidden from the Abilities panel</li>
+                        <li>“While leading” abilities auto-hidden when bodyguard is destroyed</li>
+                        <li>Exiting Play mode resets all kills</li>
+                        <li>Simplified all stratagem text to concise shorthand (ER, MW, ≤6″, etc.)</li>
+                        <li>Abilities panel: stat-reflected abilities (FNP, invuln) hidden by default</li>
+                        <li>Added “Show all” / “Hide stats” toggle in Abilities panel header</li>
+                        <li>Stratagem details now zoom as a whole block instead of per-field</li>
+                    </ul>
                     <div class="changelog-version">v1.3 — 2026-03-14</div>
                     <ul class="changelog-list">
                         <li>Hardcoded stratagem turn colors (blue/red/green/gradients) for accurate display</li>
@@ -507,10 +549,13 @@
     private GamePhase? activePhase;
     private TurnFilter? activeTurn;
     private bool abilitiesPanelOpen = true;
+    private bool showAllAbilities;
     private bool stratagemsPanelOpen = true;
     private Stratagem? focusedStratagem;
     private bool stratDetailsZoomed;
     private bool showChangelog;
+    private bool playMode;
+    private readonly HashSet<UnitEntry> killedUnits = [];
     private int defenderPrimary;
     private int aggressorPrimary;
     private int defenderSecondary;
@@ -536,18 +581,73 @@
                 .SelectMany(u => u.AttachedLeaders)
                 .ToHashSet();
             var visible = army.Units.Where(u => !attached.Contains(u)).ToList();
-            var grouped = visible.Where(u => u.AttachedLeaders.Count > 0);
-            var standalone = visible.Where(u => u.AttachedLeaders.Count == 0);
-            return grouped.Concat(standalone);
+            var alive = visible.Where(u => !IsKilled(u));
+            var dead = visible.Where(u => IsKilled(u));
+            var grouped = alive.Where(u => u.AttachedLeaders.Count > 0);
+            var standalone = alive.Where(u => u.AttachedLeaders.Count == 0);
+            return grouped.Concat(standalone).Concat(dead);
         }
     }
+
+    private bool IsKilled(UnitEntry unit) => killedUnits.Contains(unit);
 
     private bool IsCollapsed(UnitEntry unit) => collapsedUnits.Contains(unit);
 
     private record struct PanelUnitEntry(UnitEntry Unit, List<AbilityEntry> Abilities);
 
     private List<PanelUnitEntry> PanelUnits =>
-        DisplayUnits.Select(u => new PanelUnitEntry(u, GetAllAbilities(u))).ToList();
+        DisplayUnits
+            .Where(u => !IsKilled(u))
+            .Select(u => new PanelUnitEntry(u, GetFilteredAbilities(u)))
+            .ToList();
+
+    private List<AbilityEntry> GetFilteredAbilities(UnitEntry unit)
+    {
+        var abilities = GetAllAbilities(unit);
+        if (!playMode) return abilities;
+        return abilities.Where(a =>
+        {
+            if (a.Description.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase) ||
+                a.Description.Contains("while leading", StringComparison.OrdinalIgnoreCase))
+            {
+                var leaderOwner = unit.AttachedLeaders.FirstOrDefault(l =>
+                    l.Abilities.Any(la => la.Name == a.Name));
+                if (leaderOwner is not null)
+                {
+                    bool bodyguardDead = IsKilled(unit);
+                    if (bodyguardDead) return false;
+                }
+            }
+            return true;
+        }).ToList();
+    }
+
+    private void TogglePlayMode()
+    {
+        playMode = !playMode;
+        if (!playMode)
+            killedUnits.Clear();
+    }
+
+    private void KillUnit(UnitEntry unit)
+    {
+        killedUnits.Add(unit);
+        if (unit.AttachedLeaders.Count > 0)
+        {
+            foreach (var leader in unit.AttachedLeaders.ToList())
+            {
+                if (!IsKilled(leader))
+                    unit.AttachedLeaders.Remove(leader);
+            }
+        }
+        collapsedUnits.Add(unit);
+    }
+
+    private void KillAttachedUnit(UnitEntry host, UnitEntry leader)
+    {
+        killedUnits.Add(leader);
+        host.AttachedLeaders.Remove(leader);
+    }
 
     private void ToggleCollapse(UnitEntry unit)
     {
@@ -578,6 +678,8 @@
             css += " moving";
         if (movingUnit is not null && movingUnit != unit)
             css += " move-target";
+        if (IsKilled(unit))
+            css += " killed";
         return css.TrimStart();
     }
 
@@ -798,6 +900,37 @@
             TurnFilter.EnemyTurn => mentionsEnemy,
             _ => true
         };
+    }
+
+    private static bool IsStatReflectedAbility(AbilityEntry ability, UnitEntry unit)
+    {
+        var name = ability.Name;
+        var desc = ability.Description;
+
+        bool isFnp = name.Contains("Feel No Pain", StringComparison.OrdinalIgnoreCase) ||
+                     desc.Contains("Feel No Pain", StringComparison.OrdinalIgnoreCase);
+        if (isFnp && HasFnpInStats(unit))
+            return true;
+
+        bool isInvuln = name.Contains("Invulnerable", StringComparison.OrdinalIgnoreCase) ||
+                        desc.Contains("invulnerable save", StringComparison.OrdinalIgnoreCase);
+        if (isInvuln && HasInvulnInStats(unit))
+            return true;
+
+        return false;
+    }
+
+    private static bool HasFnpInStats(UnitEntry unit)
+    {
+        if (!string.IsNullOrEmpty(unit.FeelNoPain)) return true;
+        return unit.AttachedLeaders.Any(l =>
+            !string.IsNullOrEmpty(l.FeelNoPain) || !string.IsNullOrEmpty(l.FeelNoPainAura));
+    }
+
+    private static bool HasInvulnInStats(UnitEntry unit)
+    {
+        if (!string.IsNullOrEmpty(unit.InvulnerableSave)) return true;
+        return unit.AttachedLeaders.Any(l => !string.IsNullOrEmpty(l.InvulnerableSave));
     }
 
     private bool HasUnitFocus => focusedUnit is not null || focusedStatOwner is not null;
