@@ -7,11 +7,6 @@ html, body {
     -webkit-text-size-adjust: 100%;
 }
 
-body.light-mode {
-    background: #eef0f4;
-    color: #1a1a2e;
-}
-
 h1:focus {
     outline: none;
 }

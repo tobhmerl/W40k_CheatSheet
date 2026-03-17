@@ -6,7 +6,7 @@
 
 <PageTitle>W40k Roster</PageTitle>
 
-<div class="roster-app">
+<div class="roster-app @(lightMode ? "light" : "")">
     @if (!loaded)
     {
         <div class="import-section">
@@ -458,7 +458,10 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.4</div>
+    <div class="version-row">
+        <span class="version-tag" @onclick="() => showChangelog = true">v1.4</span>
+        <button class="theme-btn" @onclick="ToggleTheme" title="Toggle light/dark mode">@(lightMode ? "🌙" : "☀️")</button>
+    </div>
 
     @if (showChangelog)
     {
@@ -558,6 +561,7 @@
     private bool stratDetailsZoomed;
     private bool showChangelog;
     private bool playMode;
+    private bool lightMode;
     private readonly HashSet<UnitEntry> killedUnits = [];
     private int defenderPrimary;
     private int aggressorPrimary;
@@ -573,6 +577,12 @@
             loaded = true;
             StateHasChanged();
         }
+    }
+
+    private async Task ToggleTheme()
+    {
+        lightMode = !lightMode;
+        await JS.InvokeVoidAsync("setTheme", lightMode);
     }
 
     private IEnumerable<UnitEntry> DisplayUnits
