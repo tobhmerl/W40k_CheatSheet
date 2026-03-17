@@ -5,9 +5,155 @@
     font-size: 1.05rem;
 }
 
-/* Import screen */
-.import-section {
+/* ============================================================
+   Rules Search panel
+   ============================================================ */
+.rules-panel {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.rules-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ccc;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.rules-panel-header:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.rules-panel-body {
+    padding: 0.4rem 0.5rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.rules-search-row {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.rules-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #ccc;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.rules-input::placeholder {
+    color: #555;
+}
+
+.rules-input:focus {
+    border-color: #00b4d8;
+}
+
+.rules-search-btn {
+    background: rgba(0, 180, 216, 0.15);
+    border: 1px solid #00b4d8;
+    color: #00b4d8;
+    border-radius: 6px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.rules-search-btn:hover:not(:disabled) {
+    background: rgba(0, 180, 216, 0.28);
+}
+
+.rules-search-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.rules-result {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.65rem;
+    line-height: 1.6;
+    color: #aaa;
+}
+
+.rules-result:hover {
+    border-color: #444;
+    color: #ccc;
+}
+
+.rules-empty {
+    font-size: 0.65rem;
+    color: #555;
     text-align: center;
+    padding: 0.4rem;
+}
+
+.rules-empty code {
+    color: #777;
+    font-family: monospace;
+}
+
+/* Light mode */
+.roster-app.light .rules-panel {
+    background: #fff;
+    border-color: #d1d5db;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+.roster-app.light .rules-panel-header {
+    background: #e9ecef;
+    color: #111827;
+    border-bottom: 1px solid #d1d5db;
+}
+
+.roster-app.light .rules-panel-header:hover {
+    background: #dee2e6;
+}
+
+.roster-app.light .rules-input {
+    background: #fff;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+.roster-app.light .rules-input::placeholder {
+    color: #9ca3af;
+}
+
+.roster-app.light .rules-result {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    color: #374151;
+}
+
+.roster-app.light .rules-empty {
+    color: #9ca3af;
+}
+
+.roster-app.light .rules-empty code {
+    color: #6b7280;
+}
+
     padding: 3rem 1rem;
 }
 

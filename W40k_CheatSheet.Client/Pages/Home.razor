@@ -3,6 +3,7 @@
 @using W40k_CheatSheet.Client.Services
 @using System.Text.Json
 @inject IJSRuntime JS
+@inject RulesSearchService RulesSearch
 
 <PageTitle>W40k Roster</PageTitle>
 
@@ -458,6 +459,48 @@
             </div>
         </div>
     }
+    <div class="rules-panel">
+        <div class="rules-panel-header" @onclick="ToggleRulesPanel">
+            <span>📖 Rules Search</span>
+            <span class="collapse-icon">@(rulesPanelOpen ? "▾" : "▸")</span>
+        </div>
+        @if (rulesPanelOpen)
+        {
+            <div class="rules-panel-body">
+                @if (!rulesLoaded)
+                {
+                    <div class="rules-empty">No rules data loaded. Run <code>scripts/extract_rules.py</code> first.</div>
+                }
+                else
+                {
+                    <div class="rules-search-row">
+                        <input class="rules-input"
+                               placeholder="e.g. How does cover work?"
+                               @bind="rulesQuery"
+                               @bind:event="oninput"
+                               @onkeydown="OnRulesKey" />
+                        <button class="rules-search-btn"
+                                @onclick="SearchRules"
+                                disabled="@rulesSearching">
+                            @(rulesSearching ? "…" : "🔍")
+                        </button>
+                    </div>
+                    @if (rulesResults.Count > 0)
+                    {
+                        @foreach (var r in rulesResults)
+                        {
+                            <div class="rules-result">@r.Text</div>
+                        }
+                    }
+                    else if (rulesSearched)
+                    {
+                        <div class="rules-empty">No matching rules found.</div>
+                    }
+                }
+            </div>
+        }
+    </div>
+
     <div class="version-row">
         <span class="version-tag" @onclick="() => showChangelog = true">v1.4</span>
         <button class="theme-btn" @onclick="ToggleTheme" title="Toggle light/dark mode">@(lightMode ? "🌙" : "☀️")</button>
@@ -562,6 +605,12 @@
     private bool showChangelog;
     private bool playMode;
     private bool lightMode;
+    private bool rulesPanelOpen;
+    private bool rulesLoaded;
+    private bool rulesSearching;
+    private bool rulesSearched;
+    private string rulesQuery = "";
+    private List<RulesSearchResult> rulesResults = [];
     private readonly HashSet<UnitEntry> killedUnits = [];
     private int defenderPrimary;
     private int aggressorPrimary;
@@ -583,6 +632,33 @@
     {
         lightMode = !lightMode;
         await JS.InvokeVoidAsync("setTheme", lightMode);
+    }
+
+    private async Task ToggleRulesPanel()
+    {
+        rulesPanelOpen = !rulesPanelOpen;
+        if (rulesPanelOpen && !RulesSearch.IsLoaded)
+        {
+            rulesLoaded = await RulesSearch.EnsureLoadedAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task SearchRules()
+    {
+        if (string.IsNullOrWhiteSpace(rulesQuery)) return;
+        rulesSearching = true;
+        rulesSearched  = false;
+        rulesResults   = [];
+        await Task.Yield();
+        rulesResults   = RulesSearch.Search(rulesQuery);
+        rulesSearched  = true;
+        rulesSearching = false;
+    }
+
+    private async Task OnRulesKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SearchRules();
     }
 
     private IEnumerable<UnitEntry> DisplayUnits
