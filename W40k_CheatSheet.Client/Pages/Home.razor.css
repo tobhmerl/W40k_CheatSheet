@@ -5,155 +5,9 @@
     font-size: 1.05rem;
 }
 
-/* ============================================================
-   Rules Search panel
-   ============================================================ */
-.rules-panel {
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    margin-bottom: 0.75rem;
-    overflow: hidden;
-}
-
-.rules-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.4rem 0.6rem;
-    cursor: pointer;
-    user-select: none;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #ccc;
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.rules-panel-header:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.rules-panel-body {
-    padding: 0.4rem 0.5rem 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
-.rules-search-row {
-    display: flex;
-    gap: 0.3rem;
-}
-
-.rules-input {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid #333;
-    border-radius: 6px;
-    color: #ccc;
-    font-size: 0.75rem;
-    padding: 0.35rem 0.6rem;
-    outline: none;
-    transition: border-color 0.15s;
-}
-
-.rules-input::placeholder {
-    color: #555;
-}
-
-.rules-input:focus {
-    border-color: #00b4d8;
-}
-
-.rules-search-btn {
-    background: rgba(0, 180, 216, 0.15);
-    border: 1px solid #00b4d8;
-    color: #00b4d8;
-    border-radius: 6px;
-    padding: 0.35rem 0.7rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-}
-
-.rules-search-btn:hover:not(:disabled) {
-    background: rgba(0, 180, 216, 0.28);
-}
-
-.rules-search-btn:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
-
-.rules-result {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid #2a2a2a;
-    border-radius: 6px;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.65rem;
-    line-height: 1.6;
-    color: #aaa;
-}
-
-.rules-result:hover {
-    border-color: #444;
-    color: #ccc;
-}
-
-.rules-empty {
-    font-size: 0.65rem;
-    color: #555;
+/* Import screen */
+.import-section {
     text-align: center;
-    padding: 0.4rem;
-}
-
-.rules-empty code {
-    color: #777;
-    font-family: monospace;
-}
-
-/* Light mode */
-.roster-app.light .rules-panel {
-    background: #fff;
-    border-color: #d1d5db;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-}
-
-.roster-app.light .rules-panel-header {
-    background: #e9ecef;
-    color: #111827;
-    border-bottom: 1px solid #d1d5db;
-}
-
-.roster-app.light .rules-panel-header:hover {
-    background: #dee2e6;
-}
-
-.roster-app.light .rules-input {
-    background: #fff;
-    border-color: #d1d5db;
-    color: #111827;
-}
-
-.roster-app.light .rules-input::placeholder {
-    color: #9ca3af;
-}
-
-.roster-app.light .rules-result {
-    background: #f9fafb;
-    border-color: #e5e7eb;
-    color: #374151;
-}
-
-.roster-app.light .rules-empty {
-    color: #9ca3af;
-}
-
-.roster-app.light .rules-empty code {
-    color: #6b7280;
-}
-
     padding: 3rem 1rem;
 }
 
@@ -362,41 +216,30 @@
     padding: 0.3rem 0.5rem 0.5rem;
     max-height: 40vh;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
 }
 
 .abilities-panel-unit {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid #2a2a2a;
-    border-radius: 6px;
-    overflow: hidden;
+    margin-bottom: 0.4rem;
     transition: opacity 0.15s;
 }
 
 .abilities-panel-unit-name {
     font-size: 0.7rem;
     font-weight: 700;
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    background: #0c3347;
-    border-bottom: 1px solid #1a4d66;
-    margin-bottom: 0;
+    color: #00b4d8;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(0, 180, 216, 0.15);
+    margin-bottom: 0.2rem;
 }
 
 .abilities-panel-item {
     font-size: 0.65rem;
     line-height: 1.4;
-    padding: 0.2rem 0.5rem;
+    padding: 0.15rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     color: #888;
     cursor: pointer;
     transition: all 0.2s ease;
-}
-
-.abilities-panel-item:last-child {
-    border-bottom: none;
 }
 
 .abilities-panel-item:hover {
@@ -1378,6 +1221,7 @@
 
 .version-tag {
     text-align: center;
+    padding: 1.5rem 0 0.5rem;
     font-size: 0.55rem;
     color: #333;
     letter-spacing: 0.5px;
@@ -1466,294 +1310,4 @@
     font-size: 0.65rem;
     color: #999;
     line-height: 1.6;
-}
-
-/* ============================================================
-   Version row (tag + theme toggle)
-   ============================================================ */
-.version-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 1.5rem 0 0.5rem;
-}
-
-.version-tag {
-    padding: 0;
-}
-
-.theme-btn {
-    background: none;
-    border: 1px solid #333;
-    border-radius: 4px;
-    color: #555;
-    font-size: 0.65rem;
-    padding: 0.1rem 0.3rem;
-    cursor: pointer;
-    line-height: 1.4;
-    transition: all 0.15s;
-}
-
-.theme-btn:hover {
-    border-color: #666;
-    color: #999;
-}
-
-/* ============================================================
-   LIGHT MODE
-   ============================================================ */
-.roster-app.light {
-    color: #1a1a2e;
-}
-
-.roster-app.light .roster-header {
-    border-bottom-color: #d1d5db;
-}
-
-.roster-app.light .roster-header h1 {
-    color: #111827;
-}
-
-.roster-app.light .detachment-rule {
-    background: rgba(233, 69, 96, 0.07);
-    border-color: rgba(233, 69, 96, 0.25);
-    color: #374151;
-}
-
-.roster-app.light .turn-btn {
-    background: #fff;
-    border-color: #d1d5db;
-    color: #4b5563;
-}
-
-.roster-app.light .phase-btn {
-    background: #fff;
-    border-color: #d1d5db;
-    color: #4b5563;
-}
-
-.roster-app.light .abilities-panel,
-.roster-app.light .stratagems-panel {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-}
-
-.roster-app.light .abilities-panel-header,
-.roster-app.light .stratagems-panel-header {
-    background: #e9ecef;
-    color: #111827;
-    border-bottom: 1px solid #d1d5db;
-}
-
-.roster-app.light .abilities-panel-header:hover,
-.roster-app.light .stratagems-panel-header:hover {
-    background: #dee2e6;
-}
-
-.roster-app.light .show-all-btn {
-    background: #fff;
-    border-color: #d1d5db;
-    color: #6b7280;
-}
-
-.roster-app.light .abilities-panel-unit-name {
-    background: #0c3347;
-    border-bottom-color: #1a4d66;
-    color: #fff;
-}
-
-.roster-app.light .abilities-panel-item {
-    color: #4b5563;
-    border-bottom-color: #f3f4f6;
-}
-
-.roster-app.light .abilities-panel-item strong {
-    color: #111827;
-}
-
-.roster-app.light .abilities-panel-item:hover {
-    color: #1a1a2e;
-    background: #f3f4f6;
-}
-
-.roster-app.light .abilities-panel-divider-row::before,
-.roster-app.light .abilities-panel-divider-row::after {
-    border-top-color: #d1d5db;
-}
-
-.roster-app.light .abilities-panel-divider-text {
-    color: #9ca3af;
-}
-
-.roster-app.light .strat-item {
-    background: #fff;
-    border-color: #e5e7eb;
-}
-
-.roster-app.light .abilities-panel-unit {
-    background: #fff;
-    border-color: #e5e7eb;
-}
-
-.roster-app.light .strat-item:hover {
-    border-color: #9ca3af;
-    background: #f9fafb;
-}
-
-.roster-app.light .strat-name {
-    color: #111827;
-}
-
-.roster-app.light .strat-header.turn-myturn .strat-name,
-.roster-app.light .strat-header.turn-enemyturn .strat-name,
-.roster-app.light .strat-header.turn-both .strat-name,
-.roster-app.light .strat-header.turn-bluered .strat-name,
-.roster-app.light .strat-header.turn-redblue .strat-name {
-    color: #fff;
-}
-
-.roster-app.light .strat-category {
-    color: #6b7280;
-}
-
-.roster-app.light .strat-field {
-    color: #374151;
-}
-
-.roster-app.light .strat-details {
-    border-top-color: #e5e7eb;
-}
-
-.roster-app.light .unit-card {
-    background: #fff;
-    border-color: #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-}
-
-.roster-app.light .unit-name {
-    color: #111827;
-}
-
-.roster-app.light .unit-body {
-    border-top-color: #f3f4f6;
-}
-
-.roster-app.light .keyword {
-    background: #f3f4f6;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
-}
-
-.roster-app.light .collapse-icon {
-    color: #9ca3af;
-}
-
-.roster-app.light .section-title {
-    color: #9ca3af;
-}
-
-.roster-app.light .ability-item {
-    color: #4b5563;
-    border-bottom-color: #f3f4f6;
-}
-
-.roster-app.light .ability-item strong {
-    color: #111827;
-}
-
-.roster-app.light .stats-table th,
-.roster-app.light .weapons-table th {
-    background: #f3f4f6;
-    color: #0096b0;
-}
-
-.roster-app.light .stats-table td,
-.roster-app.light .weapons-table td {
-    border-bottom-color: #f3f4f6;
-    color: #1a1a2e;
-}
-
-.roster-app.light .kw-cell {
-    color: #6b7280;
-}
-
-.roster-app.light .stat-row:hover td {
-    background: #f9fafb;
-}
-
-.roster-app.light .move-handle {
-    color: #9ca3af;
-}
-
-.roster-app.light .score-divider {
-    background: #d1d5db;
-}
-
-.roster-app.light .score-total-row {
-    border-bottom-color: #d1d5db;
-}
-
-.roster-app.light .score-total {
-    color: #111827;
-}
-
-.roster-app.light .score-btn {
-    background: #fff;
-    border-color: #d1d5db;
-    color: #374151;
-}
-
-.roster-app.light .score-btn:hover {
-    background: rgba(0, 180, 216, 0.1);
-}
-
-.roster-app.light .footer-divider {
-    border-top-color: #d1d5db;
-}
-
-.roster-app.light .play-btn {
-    background: #fff;
-    border-color: #d1d5db;
-    color: #4b5563;
-}
-
-.roster-app.light .meta-badge.points {
-    background: #f3f4f6;
-    color: #374151;
-    border-color: #d1d5db;
-}
-
-.roster-app.light .version-tag {
-    color: #9ca3af;
-}
-
-.roster-app.light .version-tag:hover {
-    color: #6b7280;
-}
-
-.roster-app.light .theme-btn {
-    border-color: #d1d5db;
-    color: #9ca3af;
-}
-
-.roster-app.light .changelog-modal {
-    background: #fff;
-    border-color: #d1d5db;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-}
-
-.roster-app.light .changelog-header {
-    border-bottom-color: #e5e7eb;
-    color: #111827;
-}
-
-.roster-app.light .changelog-close {
-    border-color: #d1d5db;
-    color: #6b7280;
-}
-
-.roster-app.light .changelog-list li {
-    color: #4b5563;
 }

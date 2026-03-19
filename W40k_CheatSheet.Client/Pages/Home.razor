@@ -3,11 +3,10 @@
 @using W40k_CheatSheet.Client.Services
 @using System.Text.Json
 @inject IJSRuntime JS
-@inject RulesSearchService RulesSearch
 
 <PageTitle>W40k Roster</PageTitle>
 
-<div class="roster-app @(lightMode ? "light" : "")">
+<div class="roster-app">
     @if (!loaded)
     {
         <div class="import-section">
@@ -57,71 +56,105 @@
             <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
                 <span>📜 Abilities Overview</span>
                 <span class="abilities-panel-controls">
-                    <button class="show-all-btn @(showAllAbilities ? "active" : "")" @onclick="() => showAllAbilities = !showAllAbilities" @onclick:stopPropagation="true">@(showAllAbilities ? "Hide stats" : "Show all")</button>
+                    <button class="show-all-btn @(showAllAbilities ? "active" : "")" @onclick="() => showAllAbilities = !showAllAbilities" @onclick:stopPropagation="true">@(showAllAbilities ? "Filter" : "Show all")</button>
                     <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
                 </span>
             </div>
             @if (abilitiesPanelOpen)
             {
                 <div class="abilities-panel-body">
+
                     @* ── Phase-specific abilities ── *@
                     @foreach (var entry in PanelUnits)
                     {
-                        var phaseAbilities = entry.Abilities.Where(a => a.Phases != GamePhase.All).ToList();
-                        var phaseFiltered = activePhase is not null
-                            ? phaseAbilities.Where(a => a.Phases.HasFlag(activePhase.Value)).ToList()
-                            : phaseAbilities;
-                        if (activeTurn is not null)
-                            phaseFiltered = phaseFiltered.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)).ToList();
-                        if (!showAllAbilities)
-                            phaseFiltered = phaseFiltered.Where(a => !IsStatReflectedAbility(a, entry.Unit)).ToList();
-                        if (phaseFiltered.Count == 0) { continue; }
-
                         var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
                                              (focusedUnit is not null && focusedUnit != entry.Unit);
                         if (isOtherFocused) { continue; }
 
+                        var phaseAbilities = entry.Abilities.Where(a => a.Phases != GamePhase.All);
+                        if (!showAllAbilities)
+                        {
+                            if (activePhase is not null)
+                                phaseAbilities = phaseAbilities.Where(a => a.Phases.HasFlag(activePhase.Value));
+                            if (activeTurn is not null)
+                                phaseAbilities = phaseAbilities.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value));
+                            phaseAbilities = phaseAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit));
+                        }
+
+                        var phaseList = phaseAbilities.ToList();
+                        if (phaseList.Count == 0) { continue; }
+
                         <div class="abilities-panel-unit">
                             <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                            @foreach (var ability in phaseFiltered)
+                            @foreach (var ability in phaseList)
                             {
-                                <div class="abilities-panel-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
-                                    <strong>@ability.Name:</strong> @ability.Description
+                                <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                     @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                    <span class="ability-name">@ability.Name</span>
+                                    @if (focusedAbility == ability)
+                                    {
+                                        <div class="ability-desc">@ability.Description</div>
+                                    }
                                 </div>
                             }
                         </div>
                     }
 
-                    @* ── General abilities (no specific phase) ── *@
-                    @if (PanelUnits.Any(e => e.Abilities.Any(a => a.Phases == GamePhase.All && (activeTurn is null || IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)) && (showAllAbilities || !IsStatReflectedAbility(a, e.Unit)))))
+                    @* ── General abilities (GamePhase.All) — phase filter never applies here ── *@
+                    @{
+                        bool hasGeneral = PanelUnits.Any(e =>
+                        {
+                            if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
+                                (focusedUnit is not null && focusedUnit != e.Unit)) return false;
+                            var g = e.Abilities.Where(a => a.Phases == GamePhase.All);
+                            if (!showAllAbilities)
+                            {
+                                if (activeTurn is not null)
+                                    g = g.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value));
+                                g = g.Where(a => !IsStatReflectedAbility(a, e.Unit));
+                            }
+                            return g.Any();
+                        });
+                    }
+                    @if (hasGeneral)
                     {
                         <div class="abilities-panel-divider-row">
-                            <span class="abilities-panel-divider-text">General Abilities</span>
+                            <span class="abilities-panel-divider-text">General</span>
                         </div>
                         @foreach (var entry in PanelUnits)
                         {
-                            var generalAbilities = entry.Abilities.Where(a => a.Phases == GamePhase.All).ToList();
-                            if (activeTurn is not null)
-                                generalAbilities = generalAbilities.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value)).ToList();
-                            if (!showAllAbilities)
-                                generalAbilities = generalAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit)).ToList();
-                            if (generalAbilities.Count == 0) { continue; }
+                            var isOtherFocused2 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
+                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
+                            if (isOtherFocused2) { continue; }
 
-                            var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
-                                                 (focusedUnit is not null && focusedUnit != entry.Unit);
-                            if (isOtherFocused) { continue; }
+                            var genAbilities = entry.Abilities.Where(a => a.Phases == GamePhase.All);
+                            if (!showAllAbilities)
+                            {
+                                if (activeTurn is not null)
+                                    genAbilities = genAbilities.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value));
+                                genAbilities = genAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit));
+                            }
+
+                            var genList = genAbilities.ToList();
+                            if (genList.Count == 0) { continue; }
 
                             <div class="abilities-panel-unit">
                                 <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                                @foreach (var ability in generalAbilities)
+                                @foreach (var ability in genList)
                                 {
-                                    <div class="abilities-panel-item @(focusedAbility == ability ? "zoomed" : "")" @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
-                                        <strong>@ability.Name:</strong> @ability.Description
+                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                        <span class="ability-name">@ability.Name</span>
+                                        @if (focusedAbility == ability)
+                                        {
+                                            <div class="ability-desc">@ability.Description</div>
+                                        }
                                     </div>
                                 }
                             </div>
                         }
                     }
+
                 </div>
             }
         </div>
@@ -459,52 +492,7 @@
             </div>
         </div>
     }
-    <div class="rules-panel">
-        <div class="rules-panel-header" @onclick="ToggleRulesPanel">
-            <span>📖 Rules Search</span>
-            <span class="collapse-icon">@(rulesPanelOpen ? "▾" : "▸")</span>
-        </div>
-        @if (rulesPanelOpen)
-        {
-            <div class="rules-panel-body">
-                @if (!rulesLoaded)
-                {
-                    <div class="rules-empty">No rules data loaded. Run <code>scripts/extract_rules.py</code> first.</div>
-                }
-                else
-                {
-                    <div class="rules-search-row">
-                        <input class="rules-input"
-                               placeholder="e.g. How does cover work?"
-                               @bind="rulesQuery"
-                               @bind:event="oninput"
-                               @onkeydown="OnRulesKey" />
-                        <button class="rules-search-btn"
-                                @onclick="SearchRules"
-                                disabled="@rulesSearching">
-                            @(rulesSearching ? "…" : "🔍")
-                        </button>
-                    </div>
-                    @if (rulesResults.Count > 0)
-                    {
-                        @foreach (var r in rulesResults)
-                        {
-                            <div class="rules-result">@r.Text</div>
-                        }
-                    }
-                    else if (rulesSearched)
-                    {
-                        <div class="rules-empty">No matching rules found.</div>
-                    }
-                }
-            </div>
-        }
-    </div>
-
-    <div class="version-row">
-        <span class="version-tag" @onclick="() => showChangelog = true">v1.4</span>
-        <button class="theme-btn" @onclick="ToggleTheme" title="Toggle light/dark mode">@(lightMode ? "🌙" : "☀️")</button>
-    </div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.4</div>
 
     @if (showChangelog)
     {
@@ -604,13 +592,6 @@
     private bool stratDetailsZoomed;
     private bool showChangelog;
     private bool playMode;
-    private bool lightMode;
-    private bool rulesPanelOpen;
-    private bool rulesLoaded;
-    private bool rulesSearching;
-    private bool rulesSearched;
-    private string rulesQuery = "";
-    private List<RulesSearchResult> rulesResults = [];
     private readonly HashSet<UnitEntry> killedUnits = [];
     private int defenderPrimary;
     private int aggressorPrimary;
@@ -626,39 +607,6 @@
             loaded = true;
             StateHasChanged();
         }
-    }
-
-    private async Task ToggleTheme()
-    {
-        lightMode = !lightMode;
-        await JS.InvokeVoidAsync("setTheme", lightMode);
-    }
-
-    private async Task ToggleRulesPanel()
-    {
-        rulesPanelOpen = !rulesPanelOpen;
-        if (rulesPanelOpen && !RulesSearch.IsLoaded)
-        {
-            rulesLoaded = await RulesSearch.EnsureLoadedAsync();
-            StateHasChanged();
-        }
-    }
-
-    private async Task SearchRules()
-    {
-        if (string.IsNullOrWhiteSpace(rulesQuery)) return;
-        rulesSearching = true;
-        rulesSearched  = false;
-        rulesResults   = [];
-        await Task.Yield();
-        rulesResults   = RulesSearch.Search(rulesQuery);
-        rulesSearched  = true;
-        rulesSearching = false;
-    }
-
-    private async Task OnRulesKey(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter") await SearchRules();
     }
 
     private IEnumerable<UnitEntry> DisplayUnits
@@ -975,18 +923,31 @@
 
     private static bool IsAbilityAvailableOnTurn(string description, TurnFilter turn)
     {
-        bool mentionsEnemy = description.Contains("opponent", StringComparison.OrdinalIgnoreCase) ||
-                             description.Contains("enemy", StringComparison.OrdinalIgnoreCase);
+        // Explicit enemy-turn indicator: your opponent is the actor
+        bool opponentActing = description.Contains("your opponent", StringComparison.OrdinalIgnoreCase);
 
-        var stripped = description.Replace("your opponent", "", StringComparison.OrdinalIgnoreCase);
-        bool mentionsYour = stripped.Contains("your", StringComparison.OrdinalIgnoreCase);
+        // Strip references where "enemy" is just the TARGET (enemy unit/model), not the actor,
+        // then check if "you/your" appears — indicating it's YOUR ability
+        var stripped = description
+            .Replace("your opponent", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("enemy unit", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("enemy model", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("enemy", "", StringComparison.OrdinalIgnoreCase);
 
-        if (!mentionsYour && !mentionsEnemy) return true;
+        bool youActing = stripped.Contains("your", StringComparison.OrdinalIgnoreCase) ||
+                         stripped.Contains(" you ", StringComparison.OrdinalIgnoreCase) ||
+                         stripped.Contains(" you,", StringComparison.OrdinalIgnoreCase) ||
+                         stripped.Contains(" you.", StringComparison.OrdinalIgnoreCase);
+
+        // No clear indicator → show for both turns
+        if (!opponentActing && !youActing) return true;
+        // Appears in both contexts → show for both turns
+        if (opponentActing && youActing) return true;
 
         return turn switch
         {
-            TurnFilter.MyTurn => mentionsYour,
-            TurnFilter.EnemyTurn => mentionsEnemy,
+            TurnFilter.MyTurn => youActing,
+            TurnFilter.EnemyTurn => opponentActing,
             _ => true
         };
     }
