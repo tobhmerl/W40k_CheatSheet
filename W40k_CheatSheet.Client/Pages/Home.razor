@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @using W40k_CheatSheet.Client.Models
 @using W40k_CheatSheet.Client.Services
 @using System.Text.Json
@@ -27,6 +27,50 @@
             {
                 <div class="error-msg">@errorMessage</div>
             }
+        </div>
+    }
+    else if (!setupConfirmed)
+    {
+        <div class="setup-page">
+            <div class="setup-header">
+                <h2>⚙️ Configure Abilities</h2>
+                <p>Set when each ability is available. These settings drive the turn and phase filters on the main page.</p>
+                <p class="setup-hint">Uncheck both turns to hide an ability from the panel entirely.</p>
+            </div>
+
+            @foreach (var unit in army!.Units)
+            {
+                @if (unit.Abilities.Count > 0)
+                {
+                    <div class="setup-unit">
+                        <div class="setup-unit-name">@unit.Name@(unit.IsLeader ? " (Leader)" : "")</div>
+                        @foreach (var ability in unit.Abilities)
+                        {
+                            var cfg = GetOrCreateConfig(ability);
+                            <div class="setup-row">
+                                <div class="setup-ability-info">
+                                    <span class="setup-ability-name">@ability.Name</span>
+                                    <span class="setup-ability-desc">@ability.Description</span>
+                                </div>
+                                <span class="setup-checks">
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
+                                    <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
+                                    <span class="setup-sep">|</span>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" /> Cmd</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Move" /> Mov</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Shoot" /> Sht</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Charge" /> Chg</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Fight" /> Fgt</label>
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+
+            <div class="setup-actions">
+                <button class="import-btn" @onclick="ConfirmSetup">✓ Done — Go to Roster</button>
+            </div>
         </div>
     }
     else
@@ -64,21 +108,21 @@
             {
                 <div class="abilities-panel-body">
 
-                    @* ── Phase-specific abilities ── *@
+                    @* ── Phase-specific abilities (1-3 phases checked) ── *@
                     @foreach (var entry in PanelUnits)
                     {
                         var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
                                              (focusedUnit is not null && focusedUnit != entry.Unit);
                         if (isOtherFocused) { continue; }
 
-                        var phaseAbilities = entry.Abilities.Where(a => a.Phases != GamePhase.All);
+                        var phaseAbilities = entry.Abilities.Where(a => HasPhasesConfigured(a) && !IsAlwaysActive(a));
                         if (!showAllAbilities)
                         {
+                            phaseAbilities = phaseAbilities.Where(a => !IsHiddenAbility(a));
                             if (activePhase is not null)
-                                phaseAbilities = phaseAbilities.Where(a => a.Phases.HasFlag(activePhase.Value));
+                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForPhase(a, activePhase.Value));
                             if (activeTurn is not null)
-                                phaseAbilities = phaseAbilities.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value));
-                            phaseAbilities = phaseAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit));
+                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
                         }
 
                         var phaseList = phaseAbilities.ToList();
@@ -91,27 +135,76 @@
                                 <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
                                      @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
                                     <span class="ability-name">@ability.Name</span>
-                                    @if (focusedAbility == ability)
-                                    {
-                                        <div class="ability-desc">@ability.Description</div>
-                                    }
+                                    <div class="ability-desc">@ability.Description</div>
                                 </div>
                             }
                         </div>
                     }
 
-                    @* ── General abilities (GamePhase.All) — phase filter never applies here ── *@
+                    @* ── Always active abilities (≥ 4 phases checked — phase filter skipped) ── *@
+                    @{
+                        bool hasAlwaysActive = PanelUnits.Any(e =>
+                        {
+                            if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
+                                (focusedUnit is not null && focusedUnit != e.Unit)) return false;
+                            var aa = e.Abilities.Where(a => IsAlwaysActive(a));
+                            if (!showAllAbilities)
+                            {
+                                aa = aa.Where(a => !IsHiddenAbility(a));
+                                if (activeTurn is not null)
+                                    aa = aa.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
+                            }
+                            return aa.Any();
+                        });
+                    }
+                    @if (hasAlwaysActive)
+                    {
+                        <div class="abilities-panel-divider-row">
+                            <span class="abilities-panel-divider-text always-active">Always active</span>
+                        </div>
+                        @foreach (var entry in PanelUnits)
+                        {
+                            var isOtherFocused3 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
+                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
+                            if (isOtherFocused3) { continue; }
+
+                            var aaAbilities = entry.Abilities.Where(a => IsAlwaysActive(a));
+                            if (!showAllAbilities)
+                            {
+                                aaAbilities = aaAbilities.Where(a => !IsHiddenAbility(a));
+                                if (activeTurn is not null)
+                                    aaAbilities = aaAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
+                            }
+
+                            var aaList = aaAbilities.ToList();
+                            if (aaList.Count == 0) { continue; }
+
+                            <div class="abilities-panel-unit">
+                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
+                                @foreach (var ability in aaList)
+                                {
+                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                        <span class="ability-name">@ability.Name</span>
+                                        <div class="ability-desc">@ability.Description</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+
+                    @* ── General abilities (no phases configured) ── *@
                     @{
                         bool hasGeneral = PanelUnits.Any(e =>
                         {
                             if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
                                 (focusedUnit is not null && focusedUnit != e.Unit)) return false;
-                            var g = e.Abilities.Where(a => a.Phases == GamePhase.All);
+                            var g = e.Abilities.Where(a => !HasPhasesConfigured(a));
                             if (!showAllAbilities)
                             {
+                                g = g.Where(a => !IsHiddenAbility(a));
                                 if (activeTurn is not null)
-                                    g = g.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value));
-                                g = g.Where(a => !IsStatReflectedAbility(a, e.Unit));
+                                    g = g.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
                             }
                             return g.Any();
                         });
@@ -127,11 +220,12 @@
                                                   (focusedUnit is not null && focusedUnit != entry.Unit);
                             if (isOtherFocused2) { continue; }
 
-                            var genAbilities = entry.Abilities.Where(a => a.Phases == GamePhase.All);
+                            var genAbilities = entry.Abilities.Where(a => !HasPhasesConfigured(a));
                             if (!showAllAbilities)
                             {
+                                genAbilities = genAbilities.Where(a => !IsHiddenAbility(a));
                                 if (activeTurn is not null)
-                                    genAbilities = genAbilities.Where(a => IsAbilityAvailableOnTurn(a.Description, activeTurn.Value));
+                                    genAbilities = genAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
                                 genAbilities = genAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit));
                             }
 
@@ -145,10 +239,7 @@
                                     <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
                                          @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
                                         <span class="ability-name">@ability.Name</span>
-                                        @if (focusedAbility == ability)
-                                        {
-                                            <div class="ability-desc">@ability.Description</div>
-                                        }
+                                        <div class="ability-desc">@ability.Description</div>
                                     </div>
                                 }
                             </div>
@@ -473,6 +564,7 @@
             <hr class="footer-divider" />
             <div class="roster-actions">
                 <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Live" : "⚔️ Play mode")</button>
+                <button class="setup-btn" @onclick="() => setupConfirmed = false">⚙️ Abilities</button>
                 <label class="import-btn small">
                     📁 Re-import
                     <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
@@ -492,7 +584,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.4</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.5</div>
 
     @if (showChangelog)
     {
@@ -503,63 +595,83 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
-                    <div class="changelog-version">v1.4 — 2026-03-14</div>
+
+                    <div class="changelog-version">v1.5</div>
                     <ul class="changelog-list">
-                        <li>Added Play mode (⚔️) — toggle in footer to enter live game tracking</li>
-                        <li>Kill units with ☠ button on each card and attached leader row</li>
-                        <li>Killed units move below a “☠ Destroyed” divider, greyed out with strike-through</li>
-                        <li>Killing a bodyguard splits the group — surviving leaders become standalone</li>
-                        <li>Abilities of killed units hidden from the Abilities panel</li>
-                        <li>“While leading” abilities auto-hidden when bodyguard is destroyed</li>
-                        <li>Exiting Play mode resets all kills</li>
-                        <li>Simplified all stratagem text to concise shorthand (ER, MW, ≤6″, etc.)</li>
-                        <li>Abilities panel: stat-reflected abilities (FNP, invuln) hidden by default</li>
-                        <li>Added “Show all” / “Hide stats” toggle in Abilities panel header</li>
-                        <li>Stratagem details now zoom as a whole block instead of per-field</li>
+                        <li class="cl-new">Ability Setup page - manually assign turn and phase per ability before entering the roster view</li>
+                        <li class="cl-new">Per-ability checkboxes: My Turn, Enemy Turn, Cmd, Mov, Sht, Chg, Fgt</li>
+                        <li class="cl-new">Ability configs auto-populated from parsed phase data and saved to localStorage</li>
+                        <li class="cl-new">Abilities button in footer to re-open setup at any time</li>
+                        <li class="cl-new">Always active section for abilities with 4+ phases checked (exempt from phase filter)</li>
+                        <li class="cl-new">Ability descriptions always visible on each item (no click needed)</li>
+                        <li class="cl-changed">Ability panel items are now individual bordered cards - same visual style as stratagems</li>
+                        <li class="cl-changed">Ability click-to-zoom matches stratagem zoom (blue border, left-strip, larger text)</li>
+                        <li class="cl-changed">Show all now bypasses all filters (turn + phase + stat-reflected), was stat-reflected only</li>
+                        <li class="cl-changed">Show all button renamed to Filter while active</li>
+                        <li class="cl-changed">Phase and turn filtering for abilities driven by manual config</li>
+                        <li class="cl-removed">Heuristic-based automatic turn detection for abilities</li>
+                        <li class="cl-removed">Heuristic-based automatic phase detection for abilities</li>
                     </ul>
-                    <div class="changelog-version">v1.3 — 2026-03-14</div>
+
+                    <div class="changelog-version">v1.4</div>
                     <ul class="changelog-list">
-                        <li>Hardcoded stratagem turn colors (blue/red/green/gradients) for accurate display</li>
-                        <li>Stratagem headers now show applicable phases (Cmd, Mov, Sht, Chg, Fgt)</li>
-                        <li>Stratagem text fields (When, Target, Effect, Restriction) are now click-to-zoom</li>
-                        <li>Added red→blue gradient for enemy-first mixed stratagems (e.g. Undying Legions)</li>
-                        <li>Fixed Protocol of the Undying Legions: no longer shows in My turn + Shoot</li>
-                        <li>Per-turn phase filtering for stratagems with mixed turn/phase availability</li>
-                        <li>Colored stratagems now sort before green (any phase) stratagems</li>
-                        <li>Unit grid: grouped units (with leaders) in left column, standalone in right column</li>
-                        <li>Added tap-to-move reorder for mobile (☰ handle on each unit card)</li>
-                        <li>Clickable changelog popup on version tag</li>
+                        <li class="cl-new">Play mode - live game tracking via footer toggle</li>
+                        <li class="cl-new">Kill units with skull button; killed units move below a Destroyed divider</li>
+                        <li class="cl-new">Killing a bodyguard detaches surviving leaders to standalone cards</li>
+                        <li class="cl-new">Abilities of killed units hidden from the Abilities panel</li>
+                        <li class="cl-new">While leading abilities auto-hidden when the bodyguard is destroyed</li>
+                        <li class="cl-new">Show all / Hide stats toggle in Abilities panel header</li>
+                        <li class="cl-changed">Stratagem details zoom as a single block on click (was per-field)</li>
+                        <li class="cl-changed">Simplified all stratagem text to concise shorthand</li>
+                        <li class="cl-changed">Abilities panel: stat-reflected abilities (FNP, invuln) hidden by default</li>
                     </ul>
-                    <div class="changelog-version">v1.2 — 2026-03-14</div>
+
+                    <div class="changelog-version">v1.3</div>
                     <ul class="changelog-list">
-                        <li>Added "My turn" / "Enemy turn" filter buttons</li>
-                        <li>Stratagem headers color-coded by turn (blue = yours, red = enemy, green = both)</li>
-                        <li>Abilities panel now filters by turn</li>
-                        <li>Removed duplicate abilities section from unit cards</li>
-                        <li>Added pipe separator between invuln save and feel-no-pain in shield column</li>
+                        <li class="cl-new">Stratagem headers show applicable phases (Cmd, Mov, Sht, Chg, Fgt)</li>
+                        <li class="cl-new">Red to blue gradient for enemy-first mixed stratagems</li>
+                        <li class="cl-new">Per-turn phase filtering for stratagems with mixed availability</li>
+                        <li class="cl-new">Two-column unit grid: grouped units left, standalone right</li>
+                        <li class="cl-new">Tap-to-move reorder for mobile (handle per unit card)</li>
+                        <li class="cl-new">Clickable changelog popup on version tag</li>
+                        <li class="cl-changed">Stratagem turn colours hardcoded for accurate display</li>
+                        <li class="cl-changed">Stratagem text fields click-to-zoom (was always expanded)</li>
+                        <li class="cl-changed">Colored stratagems sort before green (any-phase) stratagems</li>
+                        <li class="cl-changed">Fixed Protocol of the Undying Legions turn/phase filtering</li>
                     </ul>
-                    <div class="changelog-version">v1.1 — 2026-03-13</div>
+
+                    <div class="changelog-version">v1.2</div>
                     <ul class="changelog-list">
-                        <li>Added stratagems panel with Core and Detachment stratagems</li>
-                        <li>Added abilities overview panel with phase filtering</li>
-                        <li>Added detachment rule display</li>
-                        <li>Added scoped weapon highlight when focusing a stat row</li>
-                        <li>Added feel-no-pain parsing and display</li>
-                        <li>Added weapon zoom on click</li>
-                        <li>Added stat-row focus to filter weapons by owner</li>
-                        <li>Added score tracker for primary and secondary objectives</li>
-                        <li>Added version tag</li>
+                        <li class="cl-new">My turn / Enemy turn filter buttons</li>
+                        <li class="cl-new">Stratagem headers color-coded by turn (blue / red / green)</li>
+                        <li class="cl-new">Abilities panel filters by active turn</li>
+                        <li class="cl-new">Pipe separator between invuln save and feel-no-pain in shield column</li>
+                        <li class="cl-removed">Duplicate abilities section from individual unit cards</li>
                     </ul>
-                    <div class="changelog-version">v1.0 — 2026-03-10</div>
+
+                    <div class="changelog-version">v1.1</div>
                     <ul class="changelog-list">
-                        <li>Initial release — import BattleScribe roster JSON</li>
-                        <li>Unit cards with stats, weapons, keywords, and enhancements</li>
-                        <li>Leader attachment via drag-and-drop or tap</li>
-                        <li>Collapsible unit cards</li>
-                        <li>Phase filter buttons</li>
-                        <li>Local storage persistence</li>
-                        <li>Deployed as standalone Blazor WASM on GitHub Pages</li>
+                        <li class="cl-new">Stratagems panel - Core and Detachment stratagems with phase filter</li>
+                        <li class="cl-new">Abilities overview panel grouped by phase</li>
+                        <li class="cl-new">Detachment rule display in roster header</li>
+                        <li class="cl-new">Scoped weapon highlight when clicking a stat row</li>
+                        <li class="cl-new">Feel-no-pain parsing and display in stat table</li>
+                        <li class="cl-new">Weapon row click-to-zoom</li>
+                        <li class="cl-new">Score tracker for primary and secondary objectives</li>
+                        <li class="cl-new">Version tag in footer</li>
                     </ul>
+
+                    <div class="changelog-version">v1.0</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Initial release - import BattleScribe roster JSON</li>
+                        <li class="cl-new">Unit cards with stats, weapons, keywords and enhancements</li>
+                        <li class="cl-new">Leader attachment (drag-and-drop / tap)</li>
+                        <li class="cl-new">Collapsible unit cards</li>
+                        <li class="cl-new">Phase filter buttons (Command, Move, Shoot, Charge, Fight)</li>
+                        <li class="cl-new">Local storage persistence across sessions</li>
+                        <li class="cl-new">Deployed as standalone Blazor WASM on GitHub Pages</li>
+                    </ul>
+
                 </div>
             </div>
         </div>
@@ -592,6 +704,8 @@
     private bool stratDetailsZoomed;
     private bool showChangelog;
     private bool playMode;
+    private bool setupConfirmed;
+    private readonly Dictionary<string, AbilitySetupEntry> abilityConfigs = new(StringComparer.Ordinal);
     private readonly HashSet<UnitEntry> killedUnits = [];
     private int defenderPrimary;
     private int aggressorPrimary;
@@ -1098,6 +1212,9 @@
             using var reader = new StreamReader(stream);
             rawJson = await reader.ReadToEndAsync();
             army = parser.Parse(rawJson);
+            abilityConfigs.Clear();
+            InitAbilityConfigs();
+            setupConfirmed = false;
             await SaveToStorage();
         }
         catch (Exception ex)
@@ -1114,8 +1231,11 @@
         errorMessage = null;
         selectedLeader = null;
         collapsedUnits.Clear();
+        abilityConfigs.Clear();
+        setupConfirmed = false;
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-json");
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-state");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "ability-configs");
     }
 
     private async Task SaveToStorage()
@@ -1155,6 +1275,19 @@
                 if (state is not null)
                     ApplyState(state);
             }
+
+            var configJson = await JS.InvokeAsync<string?>("localStorage.getItem", "ability-configs");
+            if (!string.IsNullOrEmpty(configJson))
+            {
+                var saved = JsonSerializer.Deserialize<Dictionary<string, AbilitySetupEntry>>(configJson);
+                if (saved is not null)
+                {
+                    foreach (var (k, v) in saved)
+                        abilityConfigs[k] = v;
+                    setupConfirmed = true;
+                }
+            }
+            InitAbilityConfigs();
         }
         catch { /* corrupt data or storage unavailable */ }
     }
@@ -1201,5 +1334,108 @@
     {
         public string Leader { get; set; } = "";
         public string Host { get; set; } = "";
+    }
+
+    // ── Ability setup ────────────────────────────────────────────────────────
+
+    private sealed class AbilitySetupEntry
+    {
+        public bool MyTurn    { get; set; }
+        public bool EnemyTurn { get; set; }
+        public bool Command   { get; set; }
+        public bool Move      { get; set; }
+        public bool Shoot     { get; set; }
+        public bool Charge    { get; set; }
+        public bool Fight     { get; set; }
+    }
+
+    private static string AbilityKey(AbilityEntry a) => a.Name;
+
+    private AbilitySetupEntry GetOrCreateConfig(AbilityEntry a)
+    {
+        if (!abilityConfigs.TryGetValue(AbilityKey(a), out var cfg))
+        {
+            cfg = new AbilitySetupEntry();
+            abilityConfigs[AbilityKey(a)] = cfg;
+        }
+        return cfg;
+    }
+
+    private bool HasPhasesConfigured(AbilityEntry a) =>
+        abilityConfigs.TryGetValue(AbilityKey(a), out var c) &&
+        (c.Command || c.Move || c.Shoot || c.Charge || c.Fight);
+
+    // Both turns unchecked = explicitly hidden from the abilities panel
+    private bool IsHiddenAbility(AbilityEntry a) =>
+        abilityConfigs.TryGetValue(AbilityKey(a), out var c) && !c.MyTurn && !c.EnemyTurn;
+
+    // ≥ 4 phases checked → "always active" group (shown regardless of phase filter)
+    private bool IsAlwaysActive(AbilityEntry a)
+    {
+        if (!abilityConfigs.TryGetValue(AbilityKey(a), out var c)) return false;
+        int count = (c.Command ? 1 : 0) + (c.Move ? 1 : 0) + (c.Shoot ? 1 : 0)
+                  + (c.Charge ? 1 : 0) + (c.Fight ? 1 : 0);
+        return count >= 4;
+    }
+
+    private bool IsConfiguredForTurn(AbilityEntry a, TurnFilter turn) =>
+        !abilityConfigs.TryGetValue(AbilityKey(a), out var c) ||
+        (turn == TurnFilter.MyTurn ? c.MyTurn : c.EnemyTurn);
+
+    private bool IsConfiguredForPhase(AbilityEntry a, GamePhase phase)
+    {
+        if (!abilityConfigs.TryGetValue(AbilityKey(a), out var c)) return true;
+        return phase switch
+        {
+            GamePhase.Command => c.Command,
+            GamePhase.Move    => c.Move,
+            GamePhase.Shoot   => c.Shoot,
+            GamePhase.Charge  => c.Charge,
+            GamePhase.Fight   => c.Fight,
+            _                 => true
+        };
+    }
+
+    private void InitAbilityConfigs()
+    {
+        if (army is null) return;
+        foreach (var unit in army.Units)
+        {
+            foreach (var ability in unit.Abilities)
+            {
+                var key = AbilityKey(ability);
+                if (abilityConfigs.ContainsKey(key)) continue;
+
+                bool opponentActing = ability.Description.Contains("your opponent", StringComparison.OrdinalIgnoreCase);
+                bool isStatReflected = IsStatReflectedAbility(ability, unit);
+
+                abilityConfigs[key] = new AbilitySetupEntry
+                {
+                    MyTurn    = !isStatReflected && !opponentActing,
+                    EnemyTurn = !isStatReflected && opponentActing,
+                    Command   = ability.Phases.HasFlag(GamePhase.Command),
+                    Move      = ability.Phases.HasFlag(GamePhase.Move),
+                    Shoot     = ability.Phases.HasFlag(GamePhase.Shoot),
+                    Charge    = ability.Phases.HasFlag(GamePhase.Charge),
+                    Fight     = ability.Phases.HasFlag(GamePhase.Fight),
+                };
+            }
+        }
+    }
+
+    private async Task ConfirmSetup()
+    {
+        setupConfirmed = true;
+        await SaveAbilityConfigs();
+    }
+
+    private async Task SaveAbilityConfigs()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "ability-configs",
+                JsonSerializer.Serialize(abilityConfigs));
+        }
+        catch { }
     }
 }
