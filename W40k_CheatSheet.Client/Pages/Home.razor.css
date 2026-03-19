@@ -99,9 +99,15 @@
 
 .setup-checks {
     display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex-shrink: 0;
+}
+
+.setup-checks-row {
+    display: flex;
     align-items: center;
     gap: 0.1rem;
-    flex-wrap: wrap;
 }
 
 .setup-lbl {

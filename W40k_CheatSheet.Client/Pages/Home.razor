@@ -52,16 +52,19 @@
                                     <span class="setup-ability-name">@ability.Name</span>
                                     <span class="setup-ability-desc">@ability.Description</span>
                                 </div>
-                                <span class="setup-checks">
-                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
-                                    <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
-                                    <span class="setup-sep">|</span>
-                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" /> Cmd</label>
-                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Move" /> Mov</label>
-                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Shoot" /> Sht</label>
-                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Charge" /> Chg</label>
-                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Fight" /> Fgt</label>
-                                </span>
+                                <div class="setup-checks">
+                                    <div class="setup-checks-row">
+                                        <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
+                                        <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
+                                    </div>
+                                    <div class="setup-checks-row">
+                                        <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" /> Cmd</label>
+                                        <label class="setup-lbl"><input type="checkbox" @bind="cfg.Move" /> Mov</label>
+                                        <label class="setup-lbl"><input type="checkbox" @bind="cfg.Shoot" /> Sht</label>
+                                        <label class="setup-lbl"><input type="checkbox" @bind="cfg.Charge" /> Chg</label>
+                                        <label class="setup-lbl"><input type="checkbox" @bind="cfg.Fight" /> Fgt</label>
+                                    </div>
+                                </div>
                             </div>
                         }
                     </div>
