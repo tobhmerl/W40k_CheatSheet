@@ -61,6 +61,17 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
+@media (max-width: 700px) {
+    .setup-row {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .setup-checks {
+        width: 100%;
+    }
+}
+
 .setup-row:last-child {
     border-bottom: none;
 }
