@@ -692,7 +692,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.5</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.6</div>
 
     @if (showChangelog)
     {
@@ -703,6 +703,14 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.6</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Wrath of the Rock (Dark Angels) detachment stratagems added</li>
+                        <li class="cl-new">Starshatter Arsenal (Necrons) detachment stratagems added</li>
+                        <li class="cl-changed">Stratagem details on main page now show full rules text instead of shorthand</li>
+                        <li class="cl-changed">Stratagem setup page now shows full rules text instead of shorthand</li>
+                    </ul>
 
                     <div class="changelog-version">v1.5</div>
                     <ul class="changelog-list">

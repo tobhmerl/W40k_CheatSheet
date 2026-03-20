@@ -383,6 +383,203 @@ public static class CoreStratagems
             FullWhen = "Your opponent's Shooting phase or the Fight phase, just after an enemy unit has selected its targets.",
             FullTarget = "One Necrons Vehicle unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
             FullEffect = "Until the end of the phase, models in your unit have a 4+ invulnerable save."
+        },
+
+        // ── Wrath of the Rock ──
+
+        new()
+        {
+            Name = "Tactical Mastery",
+            Cost = "1CP",
+            Category = "Wrath of the Rock – Battle Tactic",
+            Detachment = "Wrath of the Rock",
+            Phases = GamePhase.Move,
+            TurnColor = StratagemTurn.Blue,
+            When = "Your Movement phase.",
+            Target = "1 ADEPTUS ASTARTES unit.",
+            Effect = "Til end of turn → eligible to shoot and charge after Advancing. RAVENWING: also after Falling Back.",
+            FullWhen = "Your Movement phase.",
+            FullTarget = "One Adeptus Astartes unit from your army.",
+            FullEffect = "Until the end of the turn, your unit is eligible to shoot and declare a charge in a turn in which it Advanced. If your unit has the Ravenwing keyword, it is also eligible to shoot and declare a charge in a turn in which it Fell Back."
+        },
+        new()
+        {
+            Name = "Relics of the Dark Age",
+            Cost = "1CP",
+            Category = "Wrath of the Rock – Strategic Ploy",
+            Detachment = "Wrath of the Rock",
+            Phases = GamePhase.Shoot,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Infantry", "Mounted"],
+            When = "Your Shooting phase.",
+            Target = "1 ADEPTUS ASTARTES INFANTRY or MOUNTED unit, not yet shot.",
+            Effect = "Til phase end → ranged weapons +2S.",
+            FullWhen = "Your Shooting phase.",
+            FullTarget = "One Adeptus Astartes Infantry or Adeptus Astartes Mounted unit from your army that has not been selected to shoot this phase.",
+            FullEffect = "Until the end of the phase, add 2 to the Strength characteristic of ranged weapons equipped by models in your unit."
+        },
+        new()
+        {
+            Name = "Leonine Aggression",
+            Cost = "1CP",
+            Category = "Wrath of the Rock – Strategic Ploy",
+            Detachment = "Wrath of the Rock",
+            Phases = GamePhase.Charge,
+            TurnColor = StratagemTurn.Red,
+            When = "End of enemy Charge phase.",
+            Target = "1 ADEPTUS ASTARTES unit ≤3\" of enemies, or 1 DEATHWING unit ≤6\" of enemies.",
+            Effect = "Your unit charges those enemy units.",
+            Restriction = "No Charge bonus this turn.",
+            FullWhen = "End of your opponent's Charge phase.",
+            FullTarget = "One Adeptus Astartes unit from your army within 3\" of one or more enemy units, or one Deathwing unit from your army within 6\" of one or more enemy units.",
+            FullEffect = "Your unit now declares a charge that only targets one or more of those enemy units, and you resolve that charge.",
+            FullRestriction = "Note that even if this charge is successful, your unit does not receive any Charge bonus this turn."
+        },
+        new()
+        {
+            Name = "Inescapable Justice",
+            Cost = "2CP",
+            Category = "Wrath of the Rock – Battle Tactic",
+            Detachment = "Wrath of the Rock",
+            Phases = GamePhase.All,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Character"],
+            When = "Any phase — after your Oath of Moment target is destroyed.",
+            Target = "1 ADEPTUS ASTARTES CHARACTER unit on the battlefield.",
+            Effect = "Pick 1 enemy ≤12\" & visible → becomes Oath of Moment target til next Command phase.",
+            FullWhen = "Any phase, just after your Oath of Moment target is destroyed.",
+            FullTarget = "One Adeptus Astartes Character unit that is on the battlefield.",
+            FullEffect = "Select one enemy unit within 12\" and visible to your unit. That enemy unit becomes your Oath of Moment target until the start of your next Command phase."
+        },
+        new()
+        {
+            Name = "Lion's Will",
+            Cost = "1CP",
+            Category = "Wrath of the Rock – Strategic Ploy",
+            Detachment = "Wrath of the Rock",
+            Phases = GamePhase.Command,
+            TurnColor = StratagemTurn.Green,
+            When = "Command phase.",
+            Target = "1 ADEPTUS ASTARTES unit in ER of 1+ enemies.",
+            Effect = "Til next Command phase → +1 OC. Non-DEATHWING/RAVENWING/VEHICLE: also +1 to hit.",
+            FullWhen = "Command phase.",
+            FullTarget = "One Adeptus Astartes unit from your army that is within Engagement Range of one or more enemy units.",
+            FullEffect = "Until the start of your next Command phase, add 1 to the Objective Control characteristic of models in your unit. In addition, until the end of the turn, if your unit does not have the Deathwing, Ravenwing or Vehicle keyword, each time a model in your unit makes an attack, add 1 to the Hit roll."
+        },
+        new()
+        {
+            Name = "Armour of Contempt",
+            Cost = "1CP",
+            Category = "Wrath of the Rock – Battle Tactic",
+            Detachment = "Wrath of the Rock",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            MyTurnPhases = GamePhase.Fight,
+            EnemyTurnPhases = GamePhase.Shoot | GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            When = "Enemy Shooting phase or Fight phase — after an enemy selects targets.",
+            Target = "1 ADEPTUS ASTARTES unit targeted by the attacker.",
+            Effect = "Til attacker finishes → worsen AP of attacks targeting your unit by 1.",
+            FullWhen = "Your opponent's Shooting phase or the Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One Adeptus Astartes unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the attacking unit has finished making its attacks, each time an attack targets your unit, worsen the Armour Penetration characteristic of that attack by 1."
+        },
+
+        // ── Starshatter Arsenal ──
+
+        new()
+        {
+            Name = "Endless Servitude",
+            Cost = "1CP",
+            Category = "Starshatter Arsenal – Strategic Ploy",
+            Detachment = "Starshatter Arsenal",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Blue,
+            When = "End of your Fight phase.",
+            Target = "1 NECRONS unit (excl. TITANIC) in range of a controlled objective.",
+            Effect = "Reanimation Protocols activate.",
+            FullWhen = "End of your Fight phase.",
+            FullTarget = "One Necrons unit (excluding Titanic units) from your army that is within range of one or more objective markers you control.",
+            FullEffect = "Your unit's Reanimation Protocols activate."
+        },
+        new()
+        {
+            Name = "Chronoshift",
+            Cost = "1CP",
+            Category = "Starshatter Arsenal – Strategic Ploy",
+            Detachment = "Starshatter Arsenal",
+            Phases = GamePhase.Move,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Vehicle", "Mounted"],
+            When = "Your Movement phase.",
+            Target = "1 NECRONS VEHICLE or MOUNTED unit (excl. TITANIC), not yet moved.",
+            Effect = "If Advancing → no Advance roll, instead +6\" to M.",
+            FullWhen = "Your Movement phase.",
+            FullTarget = "One Necrons Vehicle or Necrons Mounted unit (excluding Titanic units) from your army that has not been selected to move this phase.",
+            FullEffect = "Until the end of the phase, if your unit Advances, do not make an Advance roll for it. Instead, until the end of the phase, add 6\" to the Move characteristic of models in your unit."
+        },
+        new()
+        {
+            Name = "Dimensional Tunnel",
+            Cost = "1CP",
+            Category = "Starshatter Arsenal – Strategic Ploy",
+            Detachment = "Starshatter Arsenal",
+            Phases = GamePhase.Move,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Vehicle", "Mounted"],
+            When = "Your Movement phase.",
+            Target = "1 NECRONS VEHICLE or MOUNTED unit (excl. TITANIC).",
+            Effect = "Til phase end → move through models and terrain horizontally.",
+            FullWhen = "Your Movement phase.",
+            FullTarget = "One Necrons Vehicle or Necrons Mounted unit (excluding Titanic units) from your army.",
+            FullEffect = "Until the end of the phase, models in your unit can move horizontally through models and terrain features."
+        },
+        new()
+        {
+            Name = "Reactive Reposition",
+            Cost = "1CP",
+            Category = "Starshatter Arsenal – Strategic Ploy",
+            Detachment = "Starshatter Arsenal",
+            Phases = GamePhase.Shoot,
+            TurnColor = StratagemTurn.Red,
+            When = "Enemy Shooting phase — after an enemy unit has shot.",
+            Target = "1 NECRONS unit (excl. TITANIC) targeted by the attacker.",
+            Effect = "Normal move up to D6\".",
+            FullWhen = "Your opponent's Shooting phase, just after an enemy unit has shot.",
+            FullTarget = "One Necrons unit from your army (excluding Titanic units) that was the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Your unit can make a Normal move of up to D6\"."
+        },
+        new()
+        {
+            Name = "Merciless Reclamation",
+            Cost = "2CP",
+            Category = "Starshatter Arsenal – Battle Tactic",
+            Detachment = "Starshatter Arsenal",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            TurnColor = StratagemTurn.Blue,
+            When = "Your Shooting phase or Fight phase.",
+            Target = "1 NECRONS unit (excl. TITANIC), not yet shot or fought.",
+            Effect = "Til phase end → +1 to wound if target is in range of an objective.",
+            FullWhen = "Your Shooting phase or the Fight phase.",
+            FullTarget = "One Necrons unit (excluding Titanic units) from your army that has not been selected to shoot or fight this phase.",
+            FullEffect = "Until the end of the phase, each time a model in your unit makes an attack, if the target of that attack is within range of one or more objective markers, add 1 to the Wound roll."
+        },
+        new()
+        {
+            Name = "Unyielding Forms",
+            Cost = "2CP",
+            Category = "Starshatter Arsenal – Battle Tactic",
+            Detachment = "Starshatter Arsenal",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            MyTurnPhases = GamePhase.Fight,
+            EnemyTurnPhases = GamePhase.Shoot | GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Vehicle", "Mounted"],
+            When = "Enemy Shooting phase or Fight phase — after an enemy selects targets.",
+            Target = "1 NECRONS VEHICLE or MOUNTED unit (excl. TITANIC) targeted by the attacker.",
+            Effect = "Til phase end → if S > T, subtract 1 from wound roll.",
+            FullWhen = "Your opponent's Shooting phase or the Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One Necrons Vehicle or Necrons Mounted unit (excluding Titanic units) from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the end of the phase, each time an attack targets a model in your unit, if the Strength characteristic of that attack is greater than the Toughness characteristic of that unit, subtract 1 from the Wound roll."
         }
     ];
 }

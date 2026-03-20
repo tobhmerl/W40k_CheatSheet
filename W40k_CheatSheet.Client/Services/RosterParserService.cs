@@ -6,6 +6,9 @@ namespace W40k_CheatSheet.Client.Services;
 
 public partial class RosterParserService
 {
+    private static string SanitizeText(string text) =>
+        text.Replace("^^", "").Replace("**", "").Trim();
+
     public ArmyRoster Parse(string json)
     {
         var root = JsonSerializer.Deserialize<RosterRoot>(json)
@@ -35,7 +38,7 @@ public partial class RosterParserService
                             army.Detachment = det.Name;
                             var rule = det.Rules.FirstOrDefault(r => !r.Hidden);
                             if (rule != null)
-                                army.DetachmentRule = rule.Description;
+                                army.DetachmentRule = SanitizeText(rule.Description);
                         }
                     }
                     continue;
@@ -106,8 +109,8 @@ public partial class RosterParserService
                 break;
 
             case "Abilities":
-                var desc = profile.Characteristics
-                    .FirstOrDefault(c => c.Name == "Description")?.Text ?? "";
+                var desc = SanitizeText(profile.Characteristics
+                    .FirstOrDefault(c => c.Name == "Description")?.Text ?? "");
                 if (profile.Name == "Invulnerable Save")
                 {
                     var match = InvulnRegex().Match(desc);
@@ -170,8 +173,8 @@ public partial class RosterParserService
             var enhProfile = sub.Profiles.FirstOrDefault(p => p.TypeName == "Abilities");
             if (enhProfile != null)
             {
-                var desc = enhProfile.Characteristics
-                    .FirstOrDefault(c => c.Name == "Description")?.Text ?? "";
+                var desc = SanitizeText(enhProfile.Characteristics
+                    .FirstOrDefault(c => c.Name == "Description")?.Text ?? "");
                 unit.Enhancements.Add(enhProfile.Name);
                 unit.Abilities.Add(new AbilityEntry { Name = enhProfile.Name, Description = desc, Phases = ClassifyPhase(desc) });
             }
