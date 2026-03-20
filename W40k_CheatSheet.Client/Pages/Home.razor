@@ -72,7 +72,111 @@
             }
 
             <div class="setup-actions">
-                <button class="import-btn" @onclick="ConfirmSetup">✓ Done — Go to Roster</button>
+                <button class="import-btn" @onclick="ConfirmSetup">✓ Next — Configure Stratagems</button>
+            </div>
+        </div>
+    }
+    else if (!stratagemSetupConfirmed)
+    {
+        <div class="setup-page">
+            <div class="setup-header">
+                <h2>🎯 Configure Stratagems</h2>
+                <p>Set when each stratagem appears. These settings drive the turn and phase filters on the main page.</p>
+                <p class="setup-hint">Check Disable to hide a stratagem from the panel entirely.</p>
+            </div>
+
+            @{
+                var detachment = army!.Detachment ?? "";
+                var coreStrats = CoreStratagems.All.Where(s => string.IsNullOrEmpty(s.Detachment)).ToList();
+                var detachStrats = CoreStratagems.All.Where(s => !string.IsNullOrEmpty(s.Detachment) && s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            <div class="setup-unit">
+                <div class="setup-unit-name">Core Stratagems</div>
+                @foreach (var strat in coreStrats)
+                {
+                    var cfg = GetOrCreateStratConfig(strat);
+                    <div class="setup-row @(cfg.Disabled ? "strat-hidden" : "")">
+                        <div class="setup-ability-info">
+                            <span class="setup-ability-name">
+                                <span class="strat-setup-dot @GetStratDotClass(strat)"></span>
+                                @strat.Name
+                                <span class="strat-setup-cost">@strat.Cost</span>
+                            </span>
+                            <span class="setup-ability-desc">
+                                <strong>When:</strong> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)<br />
+                                <strong>Target:</strong> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)<br />
+                                <strong>Effect:</strong> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)
+                                @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
+                                {
+                                    <br /><strong class="strat-restriction-label">Restriction:</strong> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)
+                                }
+                            </span>
+                        </div>
+                        <div class="setup-checks">
+                            <div class="setup-checks-row">
+                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
+                                <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
+                                <label class="setup-lbl disable"><input type="checkbox" @bind="cfg.Disabled" /> Disable</label>
+                            </div>
+                            <div class="setup-checks-row">
+                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" /> Cmd</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Move" /> Mov</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Shoot" /> Sht</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Charge" /> Chg</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Fight" /> Fgt</label>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (detachStrats.Count > 0)
+            {
+                <div class="setup-unit">
+                    <div class="setup-unit-name">@detachment</div>
+                    @foreach (var strat in detachStrats)
+                    {
+                        var cfg = GetOrCreateStratConfig(strat);
+                        <div class="setup-row @(cfg.Disabled ? "strat-hidden" : "")">
+                            <div class="setup-ability-info">
+                                <span class="setup-ability-name">
+                                    <span class="strat-setup-dot @GetStratDotClass(strat)"></span>
+                                    @strat.Name
+                                    <span class="strat-setup-cost">@strat.Cost</span>
+                                </span>
+                                <span class="setup-ability-desc">
+                                    <strong>When:</strong> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)<br />
+                                    <strong>Target:</strong> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)<br />
+                                    <strong>Effect:</strong> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)
+                                    @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
+                                    {
+                                        <br /><strong class="strat-restriction-label">Restriction:</strong> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)
+                                    }
+                                </span>
+                            </div>
+                            <div class="setup-checks">
+                                <div class="setup-checks-row">
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
+                                    <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
+                                    <label class="setup-lbl disable"><input type="checkbox" @bind="cfg.Disabled" /> Disable</label>
+                                </div>
+                                <div class="setup-checks-row">
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" /> Cmd</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Move" /> Mov</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Shoot" /> Sht</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Charge" /> Chg</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="cfg.Fight" /> Fgt</label>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="setup-actions">
+                <button class="setup-btn" @onclick="() => { stratagemSetupConfirmed = false; setupConfirmed = false; }">← Back to Abilities</button>
+                <button class="import-btn" @onclick="ConfirmStratagemSetup">✓ Done — Go to Roster</button>
             </div>
         </div>
     }
@@ -271,16 +375,16 @@
                                 <span class="strat-name">@strat.Name <span class="strat-phases">@GetPhaseLabels(strat.Phases)</span></span>
                                 <span class="strat-cost">@strat.Cost</span>
                             </div>
-                            <div class="strat-category">@strat.Category</div>
+                            <div class="strat-category">@strat.Category · @strat.Effect</div>
                             @if (focusedStratagem == strat)
                             {
                                 <div class="strat-details @(stratDetailsZoomed ? "zoomed" : "")" @onclick="() => stratDetailsZoomed = !stratDetailsZoomed" @onclick:stopPropagation="true">
-                                    <div class="strat-field"><span class="strat-label">When:</span> @strat.When</div>
-                                    <div class="strat-field"><span class="strat-label">Target:</span> @strat.Target</div>
-                                    <div class="strat-field"><span class="strat-label">Effect:</span> @strat.Effect</div>
-                                    @if (!string.IsNullOrEmpty(strat.Restriction))
+                                    <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
+                                    <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
+                                    <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
+                                    @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
                                     {
-                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @strat.Restriction</div>
+                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
                                     }
                                 </div>
                             }
@@ -568,6 +672,7 @@
             <div class="roster-actions">
                 <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Live" : "⚔️ Play mode")</button>
                 <button class="setup-btn" @onclick="() => setupConfirmed = false">⚙️ Abilities</button>
+                <button class="setup-btn" @onclick="() => stratagemSetupConfirmed = false">🎯 Stratagems</button>
                 <label class="import-btn small">
                     📁 Re-import
                     <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
@@ -708,6 +813,8 @@
     private bool showChangelog;
     private bool playMode;
     private bool setupConfirmed;
+    private bool stratagemSetupConfirmed;
+    private readonly Dictionary<string, StratagemSetupEntry> stratagemConfigs = new(StringComparer.Ordinal);
     private readonly Dictionary<string, AbilitySetupEntry> abilityConfigs = new(StringComparer.Ordinal);
     private readonly HashSet<UnitEntry> killedUnits = [];
     private int defenderPrimary;
@@ -984,37 +1091,43 @@
             var detachment = army?.Detachment ?? "";
             var available = CoreStratagems.All
                 .Where(s => string.IsNullOrEmpty(s.Detachment) ||
-                            s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase));
+                            s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
+                .Where(s => !IsDisabledStratagem(s));
 
             if (activeTurn is not null)
-                available = available.Where(s => IsAvailableForTurn(s.TurnColor, activeTurn.Value));
+                available = available.Where(s => IsStratConfiguredForTurn(s, activeTurn.Value));
 
             if (activePhase is not null)
-            {
-                available = available.Where(s =>
-                {
-                    var phases = s.Phases;
-                    if (activeTurn is not null)
-                    {
-                        phases = activeTurn.Value == TurnFilter.MyTurn
-                            ? (s.MyTurnPhases ?? s.Phases)
-                            : (s.EnemyTurnPhases ?? s.Phases);
-                    }
-                    return phases.HasFlag(activePhase.Value);
-                });
-            }
+                available = available.Where(s => IsStratConfiguredForPhase(s, activePhase.Value));
 
             return available
-                .OrderBy(s => s.TurnColor == StratagemTurn.Green ? 1 : 0)
+                .OrderBy(s => LowestPhaseOrder(s))
+                .ThenBy(s => TurnColorOrder(s.TurnColor))
+                .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
+                .ThenBy(s => s.Name)
                 .ToList();
         }
     }
 
-    private static bool IsAvailableForTurn(StratagemTurn color, TurnFilter turn) => turn switch
+    private static int LowestPhaseOrder(Stratagem s)
     {
-        TurnFilter.MyTurn => color is StratagemTurn.Green or StratagemTurn.Blue or StratagemTurn.BlueRed or StratagemTurn.RedBlue,
-        TurnFilter.EnemyTurn => color is StratagemTurn.Green or StratagemTurn.Red or StratagemTurn.BlueRed or StratagemTurn.RedBlue,
-        _ => true
+        var phases = s.Phases;
+        if (phases.HasFlag(GamePhase.Command)) return 0;
+        if (phases.HasFlag(GamePhase.Move))    return 1;
+        if (phases.HasFlag(GamePhase.Shoot))   return 2;
+        if (phases.HasFlag(GamePhase.Charge))  return 3;
+        if (phases.HasFlag(GamePhase.Fight))   return 4;
+        return 5;
+    }
+
+    private static int TurnColorOrder(StratagemTurn color) => color switch
+    {
+        StratagemTurn.Blue    => 0,
+        StratagemTurn.BlueRed => 0,
+        StratagemTurn.Red     => 1,
+        StratagemTurn.RedBlue => 1,
+        StratagemTurn.Green   => 2,
+        _                     => 2
     };
 
     private static string GetStratTurnClass(Stratagem strat) => strat.TurnColor switch
@@ -1216,8 +1329,11 @@
             rawJson = await reader.ReadToEndAsync();
             army = parser.Parse(rawJson);
             abilityConfigs.Clear();
+            stratagemConfigs.Clear();
             InitAbilityConfigs();
+            InitStratagemConfigs();
             setupConfirmed = false;
+            stratagemSetupConfirmed = false;
             await SaveToStorage();
         }
         catch (Exception ex)
@@ -1235,10 +1351,13 @@
         selectedLeader = null;
         collapsedUnits.Clear();
         abilityConfigs.Clear();
+        stratagemConfigs.Clear();
         setupConfirmed = false;
+        stratagemSetupConfirmed = false;
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-json");
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-state");
         await JS.InvokeVoidAsync("localStorage.removeItem", "ability-configs");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "stratagem-configs");
     }
 
     private async Task SaveToStorage()
@@ -1290,6 +1409,23 @@
                     setupConfirmed = true;
                 }
             }
+
+            var stratConfigJson = await JS.InvokeAsync<string?>("localStorage.getItem", "stratagem-configs");
+            if (!string.IsNullOrEmpty(stratConfigJson))
+            {
+                var savedStrats = JsonSerializer.Deserialize<Dictionary<string, StratagemSetupEntry>>(stratConfigJson);
+                if (savedStrats is not null)
+                {
+                    foreach (var (k, v) in savedStrats)
+                        stratagemConfigs[k] = v;
+                    stratagemSetupConfirmed = true;
+                }
+            }
+            else
+            {
+                stratagemSetupConfirmed = setupConfirmed;
+            }
+            InitStratagemConfigs();
             InitAbilityConfigs();
         }
         catch { /* corrupt data or storage unavailable */ }
@@ -1337,6 +1473,108 @@
     {
         public string Leader { get; set; } = "";
         public string Host { get; set; } = "";
+    }
+
+    // ── Stratagem setup ──────────────────────────────────────────────────────
+
+    private sealed class StratagemSetupEntry
+    {
+        public bool MyTurn    { get; set; }
+        public bool EnemyTurn { get; set; }
+        public bool Command   { get; set; }
+        public bool Move      { get; set; }
+        public bool Shoot     { get; set; }
+        public bool Charge    { get; set; }
+        public bool Fight     { get; set; }
+        public bool Disabled  { get; set; }
+    }
+
+    private StratagemSetupEntry GetOrCreateStratConfig(Stratagem s)
+    {
+        if (!stratagemConfigs.TryGetValue(s.Name, out var cfg))
+        {
+            cfg = BuildDefaultStratConfig(s);
+            stratagemConfigs[s.Name] = cfg;
+        }
+        return cfg;
+    }
+
+    private static StratagemSetupEntry BuildDefaultStratConfig(Stratagem s)
+    {
+        bool myTurn = s.TurnColor is StratagemTurn.Green or StratagemTurn.Blue;
+        bool enemyTurn = s.TurnColor is StratagemTurn.Green or StratagemTurn.Red;
+        return new StratagemSetupEntry
+        {
+            MyTurn    = myTurn,
+            EnemyTurn = enemyTurn,
+            Command   = s.Phases.HasFlag(GamePhase.Command),
+            Move      = s.Phases.HasFlag(GamePhase.Move),
+            Shoot     = s.Phases.HasFlag(GamePhase.Shoot),
+            Charge    = s.Phases.HasFlag(GamePhase.Charge),
+            Fight     = s.Phases.HasFlag(GamePhase.Fight),
+            Disabled  = false
+        };
+    }
+
+    private void InitStratagemConfigs()
+    {
+        var detachment = army?.Detachment ?? "";
+        foreach (var s in CoreStratagems.All)
+        {
+            if (!string.IsNullOrEmpty(s.Detachment) &&
+                !s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (!stratagemConfigs.ContainsKey(s.Name))
+                stratagemConfigs[s.Name] = BuildDefaultStratConfig(s);
+        }
+    }
+
+    private bool IsDisabledStratagem(Stratagem s) =>
+        stratagemConfigs.TryGetValue(s.Name, out var c) && c.Disabled;
+
+    private bool IsStratConfiguredForTurn(Stratagem s, TurnFilter turn)
+    {
+        if (!stratagemConfigs.TryGetValue(s.Name, out var c))
+            return true;
+        return turn == TurnFilter.MyTurn ? c.MyTurn : c.EnemyTurn;
+    }
+
+    private bool IsStratConfiguredForPhase(Stratagem s, GamePhase phase)
+    {
+        if (!stratagemConfigs.TryGetValue(s.Name, out var c))
+            return true;
+        return phase switch
+        {
+            GamePhase.Command => c.Command,
+            GamePhase.Move    => c.Move,
+            GamePhase.Shoot   => c.Shoot,
+            GamePhase.Charge  => c.Charge,
+            GamePhase.Fight   => c.Fight,
+            _                 => true
+        };
+    }
+
+    private static string GetStratDotClass(Stratagem strat) => strat.TurnColor switch
+    {
+        StratagemTurn.Blue => "dot-blue",
+        StratagemTurn.Red  => "dot-red",
+        _                  => "dot-green"
+    };
+
+    private async Task ConfirmStratagemSetup()
+    {
+        stratagemSetupConfirmed = true;
+        await SaveStratagemConfigs();
+    }
+
+    private async Task SaveStratagemConfigs()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "stratagem-configs",
+                JsonSerializer.Serialize(stratagemConfigs));
+        }
+        catch { }
     }
 
     // ── Ability setup ────────────────────────────────────────────────────────

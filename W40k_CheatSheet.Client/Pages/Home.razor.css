@@ -148,7 +148,10 @@
 }
 
 .setup-actions {
-    text-align: center;
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
     margin-top: 1.5rem;
 }
 
@@ -210,6 +213,49 @@
     color: #9ca3af;
 }
 
+/* ============================================================
+   Stratagem Setup page
+   ============================================================ */
+.strat-setup-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+}
+
+.strat-setup-dot.dot-blue  { background: #2979ff; }
+.strat-setup-dot.dot-red   { background: #e94560; }
+.strat-setup-dot.dot-green { background: #2e7d32; }
+
+.strat-setup-cost {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #e94560;
+    margin-left: 0.4rem;
+}
+
+.setup-row.strat-hidden {
+    opacity: 0.35;
+}
+
+.setup-row.strat-hidden .setup-ability-name {
+    text-decoration: line-through;
+    text-decoration-color: #555;
+}
+
+.setup-lbl.disable:hover {
+    background: rgba(255, 152, 0, 0.1);
+}
+
+.setup-lbl.disable input[type="checkbox"] {
+    accent-color: #ff9800;
+}
+
+.strat-restriction-label {
+    color: #e94560;
+}
 
 
 /* Import screen */

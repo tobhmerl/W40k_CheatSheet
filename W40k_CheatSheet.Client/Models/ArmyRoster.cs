@@ -89,6 +89,10 @@ public class Stratagem
     public string Target { get; set; } = "";
     public string Effect { get; set; } = "";
     public string Restriction { get; set; } = "";
+    public string FullWhen { get; set; } = "";
+    public string FullTarget { get; set; } = "";
+    public string FullEffect { get; set; } = "";
+    public string FullRestriction { get; set; } = "";
     public GamePhase Phases { get; set; } = GamePhase.All;
     public GamePhase? MyTurnPhases { get; set; }
     public GamePhase? EnemyTurnPhases { get; set; }
