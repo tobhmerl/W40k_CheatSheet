@@ -551,7 +551,7 @@
                                 <div class="table-wrapper">
                                     <table class="weapons-table">
                                         <thead>
-                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>BS</th><th>S</th><th>AP</th><th>D</th><th>Keywords</th></tr>
+                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>BS</th><th>S</th><th>AP</th><th>D</th></tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var w in ranged)
@@ -560,8 +560,13 @@
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
-                                                    <td class="kw-cell">@w.Keywords</td>
                                                 </tr>
+                                                @if (!string.IsNullOrEmpty(w.Keywords))
+                                                {
+                                                    <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")">
+                                                        <td colspan="7" class="kw-cell">@w.Keywords</td>
+                                                    </tr>
+                                                }
                                             }
                                         </tbody>
                                     </table>
@@ -574,7 +579,7 @@
                                 <div class="table-wrapper">
                                     <table class="weapons-table">
                                         <thead>
-                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>WS</th><th>S</th><th>AP</th><th>D</th><th>Keywords</th></tr>
+                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>WS</th><th>S</th><th>AP</th><th>D</th></tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var w in melee)
@@ -583,8 +588,13 @@
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
-                                                    <td class="kw-cell">@w.Keywords</td>
                                                 </tr>
+                                                @if (!string.IsNullOrEmpty(w.Keywords))
+                                                {
+                                                    <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")">
+                                                        <td colspan="7" class="kw-cell">@w.Keywords</td>
+                                                    </tr>
+                                                }
                                             }
                                         </tbody>
                                     </table>

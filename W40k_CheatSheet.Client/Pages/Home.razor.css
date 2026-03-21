@@ -1388,6 +1388,21 @@
     color: #777;
     white-space: normal;
     overflow: hidden;
+    padding-top: 0;
+}
+
+.weapon-kw-row td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weapon-kw-row.dimmed td {
+    opacity: 0.3;
+}
+
+.weapon-kw-row.zoomed td {
+    background: rgba(0, 180, 216, 0.08);
+    font-size: 0.65rem;
+    color: #999;
 }
 
 .invuln {
