@@ -1339,9 +1339,7 @@
 
 /* Tables */
 .table-wrapper {
-    overflow-x: auto;
     margin-bottom: 0.4rem;
-    -webkit-overflow-scrolling: touch;
 }
 
 .stats-table,
