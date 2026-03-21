@@ -118,15 +118,24 @@ public partial class RosterParserService
                 }
                 else
                 {
+                    bool isLeaderAura = desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase);
+
                     var fnpMatch = MatchFnp(desc);
                     if (fnpMatch.Success)
                     {
                         var fnpValue = fnpMatch.Groups[1].Value;
-                        if (desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase))
+                        if (isLeaderAura)
                             unit.FeelNoPainAura = BetterValue(unit.FeelNoPainAura, fnpValue);
                         else
                             unit.FeelNoPain = BetterValue(unit.FeelNoPain, fnpValue);
                     }
+
+                    var invulnMatch = InvulnRegex().Match(desc);
+                    if (invulnMatch.Success && isLeaderAura)
+                    {
+                        unit.InvulnerableSaveAura = BetterValue(unit.InvulnerableSaveAura, invulnMatch.Groups[1].Value);
+                    }
+
                     unit.Abilities.Add(new AbilityEntry { Name = profile.Name, Description = desc, Phases = ClassifyPhase(desc) });
                 }
                 break;

@@ -1211,6 +1211,7 @@
     private static bool HasFnpInStats(UnitEntry unit)
     {
         if (!string.IsNullOrEmpty(unit.FeelNoPain)) return true;
+        if (!string.IsNullOrEmpty(unit.FeelNoPainAura)) return true;
         return unit.AttachedLeaders.Any(l =>
             !string.IsNullOrEmpty(l.FeelNoPain) || !string.IsNullOrEmpty(l.FeelNoPainAura));
     }
@@ -1218,7 +1219,9 @@
     private static bool HasInvulnInStats(UnitEntry unit)
     {
         if (!string.IsNullOrEmpty(unit.InvulnerableSave)) return true;
-        return unit.AttachedLeaders.Any(l => !string.IsNullOrEmpty(l.InvulnerableSave));
+        if (!string.IsNullOrEmpty(unit.InvulnerableSaveAura)) return true;
+        return unit.AttachedLeaders.Any(l =>
+            !string.IsNullOrEmpty(l.InvulnerableSave) || !string.IsNullOrEmpty(l.InvulnerableSaveAura));
     }
 
     private bool HasUnitFocus => focusedUnit is not null || focusedStatOwner is not null;
@@ -1272,17 +1275,21 @@
     private List<(StatLine Stat, string InvulnSave, string FeelNoPain, UnitEntry Owner)> GetAllStatLines(UnitEntry unit)
     {
         var unitWideFnp = unit.FeelNoPain;
+        var unitWideInvuln = unit.InvulnerableSave;
         foreach (var leader in unit.AttachedLeaders)
         {
             if (!string.IsNullOrEmpty(leader.FeelNoPainAura))
                 unitWideFnp = BetterFnp(unitWideFnp, leader.FeelNoPainAura);
+            if (!string.IsNullOrEmpty(leader.InvulnerableSaveAura))
+                unitWideInvuln = BetterFnp(unitWideInvuln, leader.InvulnerableSaveAura);
         }
 
-        var result = unit.StatLines.Select(s => (s, unit.InvulnerableSave, unitWideFnp, unit)).ToList();
+        var result = unit.StatLines.Select(s => (s, unitWideInvuln, unitWideFnp, unit)).ToList();
         foreach (var leader in unit.AttachedLeaders)
         {
             var leaderFnp = BetterFnp(unitWideFnp, leader.FeelNoPain);
-            result.AddRange(leader.StatLines.Select(s => (s, leader.InvulnerableSave, leaderFnp, leader)));
+            var leaderInvuln = BetterFnp(unitWideInvuln, leader.InvulnerableSave);
+            result.AddRange(leader.StatLines.Select(s => (s, leaderInvuln, leaderFnp, leader)));
         }
         return result;
     }
