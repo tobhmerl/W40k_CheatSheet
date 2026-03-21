@@ -1352,11 +1352,15 @@
     private static string UnitAnchorId(string name) =>
         "unit-" + name.Replace(" ", "-").Replace("'", "").ToLowerInvariant();
 
-    private async Task ScrollToUnit(string name) =>
-        await JS.InvokeVoidAsync("scrollToEl", UnitAnchorId(name));
+    private async Task ScrollToUnit(string name)
+    {
+        try { await JS.InvokeVoidAsync("scrollToEl", UnitAnchorId(name)); } catch { }
+    }
 
-    private async Task ScrollToElement(string id) =>
-        await JS.InvokeVoidAsync("scrollToEl", id);
+    private async Task ScrollToElement(string id)
+    {
+        try { await JS.InvokeVoidAsync("scrollToEl", id); } catch { }
+    }
 
     private Task ScrollToAbilities() => ScrollToElement("nav-abilities");
 
