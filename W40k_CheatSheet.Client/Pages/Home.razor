@@ -40,14 +40,15 @@
 
             @foreach (var unit in army!.Units)
             {
-                @if (unit.Abilities.Count > 0)
+                var setupAbilities = unit.Abilities.Where(a => !IsSetupOnlyAbility(a)).ToList();
+                @if (setupAbilities.Count > 0)
                 {
                     <div class="setup-unit">
                         <div class="setup-unit-name">@unit.Name@(unit.IsLeader ? " (Leader)" : "")</div>
-                        @foreach (var ability in unit.Abilities)
+                        @foreach (var ability in setupAbilities)
                         {
                             var cfg = GetOrCreateConfig(ability);
-                            <div class="setup-row">
+                            <div class="setup-row @(cfg.AddToUnit ? "added-to-unit" : "")">
                                 <div class="setup-ability-info">
                                     <span class="setup-ability-name">@ability.Name</span>
                                     <span class="setup-ability-desc">@ability.Description</span>
@@ -56,6 +57,10 @@
                                     <div class="setup-checks-row">
                                         <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
                                         <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
+                                        @if (CanAddToUnit(ability))
+                                        {
+                                            <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="cfg.AddToUnit" /> Unit</label>
+                                        }
                                     </div>
                                     <div class="setup-checks-row">
                                         <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" /> Cmd</label>
@@ -182,7 +187,7 @@
     }
     else
     {
-        <div class="roster-header">
+        <div id="roster-top" class="roster-header">
             <h1>@army.Name</h1>
             <div class="turn-buttons">
                 <button class="turn-btn my-turn @(activeTurn == TurnFilter.MyTurn ? "active" : "")" @onclick="() => ToggleTurn(TurnFilter.MyTurn)">My turn</button>
@@ -203,7 +208,14 @@
             }
         </div>
 
-        <div class="abilities-panel">
+        <div id="nav-abilities" class="unit-jump-buttons">
+            @foreach (var u in AliveUnits)
+            {
+                <button class="unit-jump-btn" @onclick="() => ScrollToUnit(u.Name)">@u.Name</button>
+            }
+        </div>
+
+        <div id="abilities-panel" class="abilities-panel">
             <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
                 <span>📜 Abilities Overview</span>
                 <span class="abilities-panel-controls">
@@ -357,7 +369,14 @@
             }
         </div>
 
-        <div class="stratagems-panel">
+        <div id="nav-stratagems" class="unit-jump-buttons">
+            @foreach (var u in AliveUnits)
+            {
+                <button class="unit-jump-btn" @onclick="() => ScrollToUnit(u.Name)">@u.Name</button>
+            }
+        </div>
+
+        <div id="stratagems-panel" class="stratagems-panel">
             <div class="stratagems-panel-header" @onclick="() => stratagemsPanelOpen = !stratagemsPanelOpen">
                 <span>🎯 Stratagems</span>
                 <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
@@ -430,7 +449,9 @@
                 var melee = GetAllMeleeWeapons(unit);
                 var enhancements = GetAllEnhancements(unit);
                 var keywords = GetAllKeywords(unit);
-                var totalPts = GetTotalPoints(unit);
+                var extraRangedKw = GetExtraWeaponKeywords(unit, false);
+                var extraMeleeKw = GetExtraWeaponKeywords(unit, true);
+                var extraDef = GetExtraDefensiveAuras(unit);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var collapsed = IsCollapsed(unit);
 
@@ -442,7 +463,7 @@
                     </div>
                 }
 
-                <div class="unit-card @CardClass(unit)"
+                <div id="@UnitAnchorId(unit.Name)" class="unit-card @CardClass(unit)"
                      draggable="true"
                      @ondragstart="() => DragStart(unit)"
                      @ondragend="DragEnd"
@@ -465,7 +486,6 @@
                         </div>
                         <div class="header-right">
                             <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
-                            <span class="unit-points">@totalPts pts</span>
                             @if (!playMode)
                             {
                                 <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
@@ -474,13 +494,17 @@
                             {
                                 <button class="kill-btn" @onclick="() => KillUnit(unit)" @onclick:stopPropagation="true">☠</button>
                             }
+                            @if (playMode && IsKilled(unit))
+                            {
+                                <button class="revive-btn" @onclick="() => ReviveUnit(unit)" @onclick:stopPropagation="true">↩</button>
+                            }
                         </div>
                     </div>
 
                     @foreach (var leader in unit.AttachedLeaders)
                     {
                         <div class="attached-leader @(IsKilled(leader) ? "killed" : "")">
-                            <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "") (@leader.Points pts)</span>
+                            <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "")</span>
                             @if (playMode && !IsKilled(leader))
                             {
                                 <button class="kill-btn" @onclick="() => KillAttachedUnit(unit, leader)" @onclick:stopPropagation="true">☠</button>
@@ -495,16 +519,6 @@
                     @if (!collapsed)
                     {
                         <div class="unit-body">
-                            @if (keywords.Count > 0)
-                            {
-                                <div class="unit-keywords">
-                                    @foreach (var kw in keywords)
-                                    {
-                                        <span class="keyword">@kw</span>
-                                    }
-                                </div>
-                            }
-
                             @if (enhancements.Count > 0)
                             {
                                 <div class="unit-enhancements">
@@ -528,15 +542,19 @@
                                         <tbody>
                                             @foreach (var s in stats)
                                             {
+                                                var effectiveInvuln = BetterFnp(s.InvulnSave, extraDef.ExtraInvuln);
+                                                var effectiveFnp = BetterFnp(s.FeelNoPain, extraDef.ExtraFnp);
+                                                var invulnIsExtra = !string.IsNullOrEmpty(extraDef.ExtraInvuln) && effectiveInvuln == extraDef.ExtraInvuln && string.IsNullOrEmpty(s.InvulnSave);
+                                                var fnpIsExtra = !string.IsNullOrEmpty(extraDef.ExtraFnp) && effectiveFnp == extraDef.ExtraFnp && string.IsNullOrEmpty(s.FeelNoPain);
                                                 <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner, unit)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@s.Stat.Name</td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
                                                     <td>
-                                                        @if (!string.IsNullOrEmpty(s.InvulnSave)) { <span class="invuln">@s.InvulnSave</span> }
-                                                        @if (!string.IsNullOrEmpty(s.InvulnSave) && !string.IsNullOrEmpty(s.FeelNoPain)) { <span class="save-sep">|</span> }
-                                                        @if (!string.IsNullOrEmpty(s.FeelNoPain)) { <span class="fnp">@(s.FeelNoPain.Replace("+", "++"))</span> }
-                                                        @if (string.IsNullOrEmpty(s.InvulnSave) && string.IsNullOrEmpty(s.FeelNoPain)) { <span>-</span> }
+                                                        @if (!string.IsNullOrEmpty(effectiveInvuln)) { <span class="@(invulnIsExtra ? "invuln-extra" : "invuln")">@effectiveInvuln</span> }
+                                                        @if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp)) { <span class="save-sep">|</span> }
+                                                        @if (!string.IsNullOrEmpty(effectiveFnp)) { <span class="@(fnpIsExtra ? "fnp-extra" : "fnp")">@(effectiveFnp.Replace("+", "++"))</span> }
+                                                        @if (string.IsNullOrEmpty(effectiveInvuln) && string.IsNullOrEmpty(effectiveFnp)) { <span>-</span> }
                                                     </td>
                                                 </tr>
                                             }
@@ -560,10 +578,10 @@
                                                     <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
-                                                @if (!string.IsNullOrEmpty(w.Keywords))
+                                                @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraRangedKw)))
                                                 {
                                                     <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")">
-                                                        <td colspan="7" class="kw-cell">@w.Keywords</td>
+                                                        <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraRangedKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraRangedKw)){<span class="kw-extra">@extraRangedKw</span>}</td>
                                                     </tr>
                                                 }
                                             }
@@ -587,10 +605,10 @@
                                                     <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
-                                                @if (!string.IsNullOrEmpty(w.Keywords))
+                                                @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraMeleeKw)))
                                                 {
                                                     <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")">
-                                                        <td colspan="7" class="kw-cell">@w.Keywords</td>
+                                                        <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraMeleeKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraMeleeKw)){<span class="kw-extra">@extraMeleeKw</span>}</td>
                                                     </tr>
                                                 }
                                             }
@@ -605,6 +623,21 @@
                                     🔗 Attach to unit
                                 </button>
                             }
+                            <div class="card-footer-row">
+                                @if (keywords.Count > 0)
+                                {
+                                    <div class="unit-keywords">
+                                        @foreach (var kw in keywords)
+                                        {
+                                            <span class="keyword">@kw</span>
+                                        }
+                                    </div>
+                                }
+                                <div class="card-nav-buttons">
+                                    <button class="card-nav-btn" @onclick="ScrollToAbilities" @onclick:stopPropagation="true">A</button>
+                                    <button class="card-nav-btn" @onclick="ScrollToStratagems" @onclick:stopPropagation="true">S</button>
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
@@ -868,7 +901,10 @@
 
     private List<AbilityEntry> GetFilteredAbilities(UnitEntry unit)
     {
-        var abilities = GetAllAbilities(unit);
+        var abilities = GetAllAbilities(unit)
+            .Where(a => !IsSetupOnlyAbility(a))
+            .Where(a => !IsAddedToUnit(a))
+            .ToList();
         if (!playMode) return abilities;
         return abilities.Where(a =>
         {
@@ -912,6 +948,12 @@
     {
         killedUnits.Add(leader);
         host.AttachedLeaders.Remove(leader);
+    }
+
+    private void ReviveUnit(UnitEntry unit)
+    {
+        killedUnits.Remove(unit);
+        collapsedUnits.Remove(unit);
     }
 
     private void ToggleCollapse(UnitEntry unit)
@@ -1204,6 +1246,13 @@
         return false;
     }
 
+    private static bool IsSetupOnlyAbility(AbilityEntry ability)
+    {
+        var name = ability.Name;
+        return name.Equals("Leader", StringComparison.OrdinalIgnoreCase) ||
+               name.Contains("Retinue", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool HasFnpInStats(UnitEntry unit)
     {
         if (!string.IsNullOrEmpty(unit.FeelNoPain)) return true;
@@ -1272,13 +1321,6 @@
     {
         var unitWideFnp = unit.FeelNoPain;
         var unitWideInvuln = unit.InvulnerableSave;
-        foreach (var leader in unit.AttachedLeaders)
-        {
-            if (!string.IsNullOrEmpty(leader.FeelNoPainAura))
-                unitWideFnp = BetterFnp(unitWideFnp, leader.FeelNoPainAura);
-            if (!string.IsNullOrEmpty(leader.InvulnerableSaveAura))
-                unitWideInvuln = BetterFnp(unitWideInvuln, leader.InvulnerableSaveAura);
-        }
 
         var result = unit.StatLines.Select(s => (s, unitWideInvuln, unitWideFnp, unit)).ToList();
         foreach (var leader in unit.AttachedLeaders)
@@ -1299,6 +1341,22 @@
 
     private static string ShortRange(string range) =>
         string.Equals(range, "Melee", StringComparison.OrdinalIgnoreCase) ? "M" : range;
+
+    private static string UnitAnchorId(string name) =>
+        "unit-" + name.Replace(" ", "-").Replace("'", "").ToLowerInvariant();
+
+    private async Task ScrollToUnit(string name) =>
+        await JS.InvokeVoidAsync("scrollToEl", UnitAnchorId(name));
+
+    private async Task ScrollToElement(string id) =>
+        await JS.InvokeVoidAsync("scrollToEl", id);
+
+    private Task ScrollToAbilities() => ScrollToElement("nav-abilities");
+
+    private Task ScrollToStratagems() => ScrollToElement("nav-stratagems");
+
+    private List<UnitEntry> AliveUnits =>
+        DisplayUnits.Where(u => !IsKilled(u)).ToList();
 
     private static List<WeaponProfile> GetAllRangedWeapons(UnitEntry unit) =>
         unit.RangedWeapons
@@ -1602,6 +1660,7 @@
         public bool Shoot     { get; set; }
         public bool Charge    { get; set; }
         public bool Fight     { get; set; }
+        public bool AddToUnit { get; set; }
     }
 
     private static string AbilityKey(AbilityEntry a) => a.Name;
@@ -1623,6 +1682,108 @@
     // Both turns unchecked = explicitly hidden from the abilities panel
     private bool IsHiddenAbility(AbilityEntry a) =>
         abilityConfigs.TryGetValue(AbilityKey(a), out var c) && !c.MyTurn && !c.EnemyTurn;
+
+    // "Add to unit" — inject the keyword onto weapon rows instead of showing in panel
+    private bool IsAddedToUnit(AbilityEntry a) =>
+        abilityConfigs.TryGetValue(AbilityKey(a), out var c) && c.AddToUnit;
+
+    private enum WeaponTarget { Both, Ranged, Melee }
+
+    private static (string Keyword, WeaponTarget Target)? ParseLeaderWeaponAbility(AbilityEntry a)
+    {
+        var desc = a.Description;
+        if (!desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase) &&
+            !desc.Contains("while leading", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var kwMatch = System.Text.RegularExpressions.Regex.Match(desc, @"\[([A-Z][A-Z\s\d\+]+)\]");
+        if (!kwMatch.Success) return null;
+
+        var keyword = kwMatch.Groups[1].Value.Trim();
+        var target = WeaponTarget.Both;
+        if (desc.Contains("melee weapons", StringComparison.OrdinalIgnoreCase))
+            target = WeaponTarget.Melee;
+        else if (desc.Contains("ranged weapons", StringComparison.OrdinalIgnoreCase))
+            target = WeaponTarget.Ranged;
+
+        return (keyword, target);
+    }
+
+    private enum DefensiveAuraType { Invulnerable, FeelNoPain }
+
+    private static (DefensiveAuraType Type, string Value)? ParseLeaderDefensiveAura(AbilityEntry a)
+    {
+        var desc = a.Description;
+        if (!desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase) &&
+            !desc.Contains("while leading", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var invulnMatch = System.Text.RegularExpressions.Regex.Match(desc, @"(\d)\+\s*invulnerable\s+save", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (invulnMatch.Success)
+            return (DefensiveAuraType.Invulnerable, invulnMatch.Groups[1].Value + "+");
+
+        var fnpMatch = System.Text.RegularExpressions.Regex.Match(desc, @"feel\s+no\s+pain\s+(\d)\+", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (fnpMatch.Success)
+            return (DefensiveAuraType.FeelNoPain, fnpMatch.Groups[1].Value + "+");
+
+        return null;
+    }
+
+    private static bool CanAddToUnit(AbilityEntry a) =>
+        ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null;
+
+    private string GetExtraWeaponKeywords(UnitEntry unit, bool isMelee)
+    {
+        var extras = new List<string>();
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                var parsed = ParseLeaderWeaponAbility(ability);
+                if (parsed is null) continue;
+                var (kw, target) = parsed.Value;
+                if (target == WeaponTarget.Both ||
+                    (target == WeaponTarget.Melee && isMelee) ||
+                    (target == WeaponTarget.Ranged && !isMelee))
+                {
+                    if (!extras.Contains(kw))
+                        extras.Add(kw);
+                }
+            }
+        }
+        return extras.Count > 0 ? string.Join(", ", extras) : "";
+    }
+
+    private static string CombineKeywords(string baseKw, string extra)
+    {
+        if (string.IsNullOrEmpty(baseKw)) return extra;
+        if (string.IsNullOrEmpty(extra)) return baseKw;
+        return baseKw + ", " + extra;
+    }
+
+    private (string ExtraInvuln, string ExtraFnp) GetExtraDefensiveAuras(UnitEntry unit)
+    {
+        string invuln = "";
+        string fnp = "";
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                var parsed = ParseLeaderDefensiveAura(ability);
+                if (parsed is null) continue;
+                var (type, value) = parsed.Value;
+                if (type == DefensiveAuraType.Invulnerable)
+                    invuln = BetterFnp(invuln, value);
+                else
+                    fnp = BetterFnp(fnp, value);
+            }
+        }
+        return (invuln, fnp);
+    }
 
     // ≥ 4 phases checked → "always active" group (shown regardless of phase filter)
     private bool IsAlwaysActive(AbilityEntry a)
@@ -1663,11 +1824,12 @@
 
                 bool opponentActing = ability.Description.Contains("your opponent", StringComparison.OrdinalIgnoreCase);
                 bool isStatReflected = IsStatReflectedAbility(ability, unit);
+                bool isSetupOnly = IsSetupOnlyAbility(ability);
 
                 abilityConfigs[key] = new AbilitySetupEntry
                 {
-                    MyTurn    = !isStatReflected && !opponentActing,
-                    EnemyTurn = !isStatReflected && opponentActing,
+                    MyTurn    = !isStatReflected && !isSetupOnly && !opponentActing,
+                    EnemyTurn = !isStatReflected && !isSetupOnly && opponentActing,
                     Command   = ability.Phases.HasFlag(GamePhase.Command),
                     Move      = ability.Phases.HasFlag(GamePhase.Move),
                     Shoot     = ability.Phases.HasFlag(GamePhase.Shoot),

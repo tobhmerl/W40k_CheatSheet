@@ -76,6 +76,15 @@
     border-bottom: none;
 }
 
+.setup-row.added-to-unit {
+    opacity: 0.35;
+}
+
+.setup-row.added-to-unit .setup-ability-name {
+    text-decoration: line-through;
+    text-decoration-color: #bb86fc;
+}
+
 .setup-ability-info {
     display: flex;
     flex-direction: column;
@@ -139,6 +148,14 @@
 
 .setup-lbl.enemy input[type="checkbox"] {
     accent-color: #e94560;
+}
+
+.setup-lbl.unit-lbl:hover {
+    background: rgba(187, 134, 252, 0.1);
+}
+
+.setup-lbl.unit-lbl input[type="checkbox"] {
+    accent-color: #bb86fc;
 }
 
 .setup-sep {
@@ -999,6 +1016,98 @@
     color: #555;
 }
 
+.revive-btn {
+    background: none;
+    border: 1px solid #555;
+    color: #4caf50;
+    border-radius: 4px;
+    width: 1.6rem;
+    height: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.revive-btn:hover {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: #4caf50;
+}
+
+/* Unit jump buttons */
+.unit-jump-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: center;
+    margin: 0.5rem 0 0.4rem;
+}
+
+.unit-jump-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #2a2a2a;
+    color: #777;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.unit-jump-btn:hover {
+    background: rgba(0, 180, 216, 0.1);
+    border-color: #00b4d8;
+    color: #ccc;
+}
+
+/* Card nav buttons (A / S anchors) */
+.card-footer-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+}
+
+.card-footer-row .unit-keywords {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.card-nav-buttons {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.card-nav-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #2a2a2a;
+    color: #555;
+    width: 1.4rem;
+    height: 1.2rem;
+    border-radius: 3px;
+    font-size: 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.card-nav-btn:hover {
+    background: rgba(0, 180, 216, 0.1);
+    border-color: #00b4d8;
+    color: #00b4d8;
+}
+
 /* Killed leader row */
 .attached-leader.killed {
     opacity: 0.35;
@@ -1391,6 +1500,11 @@
     padding-top: 0;
 }
 
+.kw-extra {
+    color: #bb86fc;
+    font-weight: 600;
+}
+
 .weapon-kw-row td {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1410,8 +1524,19 @@
     font-weight: 700;
 }
 
+.invuln-extra {
+    color: #4caf50;
+    font-weight: 700;
+}
+
 .fnp {
     color: #4caf50;
+    font-weight: 700;
+    margin-left: 0.2rem;
+}
+
+.fnp-extra {
+    color: gold;
     font-weight: 700;
     margin-left: 0.2rem;
 }
