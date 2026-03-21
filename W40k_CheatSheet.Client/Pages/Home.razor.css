@@ -1356,7 +1356,7 @@
 .weapons-table th {
     background: #1a1a1a;
     padding: 0.25rem 0.3rem;
-    text-align: center;
+    text-align: left;
     font-weight: 600;
     color: #00b4d8;
     font-size: 0.6rem;
@@ -1366,17 +1366,17 @@
 .stats-table td,
 .weapons-table td {
     padding: 0.25rem 0.3rem;
-    text-align: center;
+    text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .name-cell {
-    text-align: left !important;
+    text-align: left;
     font-weight: 600;
 }
 
 .kw-cell {
-    text-align: left !important;
+    text-align: left;
     font-size: 0.55rem;
     color: #777;
     white-space: normal;
