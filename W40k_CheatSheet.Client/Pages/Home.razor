@@ -547,18 +547,17 @@
 
                             @if (ranged.Count > 0)
                             {
-                                <h4 class="section-title">🎯 Ranged Weapons</h4>
                                 <div class="table-wrapper">
                                     <table class="weapons-table">
                                         <thead>
-                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>BS</th><th>S</th><th>AP</th><th>D</th></tr>
+                                            <tr><th>🎯 Ranged</th><th>Rng</th><th>A</th><th>BS</th><th>S</th><th>AP</th><th>D</th></tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var w in ranged)
                                             {
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(w.Keywords))
@@ -575,18 +574,17 @@
 
                             @if (melee.Count > 0)
                             {
-                                <h4 class="section-title">⚔️ Melee Weapons</h4>
                                 <div class="table-wrapper">
                                     <table class="weapons-table">
                                         <thead>
-                                            <tr><th>Weapon</th><th>Rng</th><th>A</th><th>WS</th><th>S</th><th>AP</th><th>D</th></tr>
+                                            <tr><th>⚔️ Melee</th><th>Rng</th><th>A</th><th>WS</th><th>S</th><th>AP</th><th>D</th></tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var w in melee)
                                             {
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@w.Range</td><td>@w.A</td><td>@w.Skill</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(w.Keywords))
@@ -1298,6 +1296,9 @@
         if (string.IsNullOrEmpty(b)) return a;
         return string.Compare(a, b, StringComparison.Ordinal) <= 0 ? a : b;
     }
+
+    private static string ShortRange(string range) =>
+        string.Equals(range, "Melee", StringComparison.OrdinalIgnoreCase) ? "M" : range;
 
     private static List<WeaponProfile> GetAllRangedWeapons(UnitEntry unit) =>
         unit.RangedWeapons
