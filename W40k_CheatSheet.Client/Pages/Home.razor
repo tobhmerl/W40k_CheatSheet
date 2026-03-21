@@ -431,7 +431,6 @@
                 var enhancements = GetAllEnhancements(unit);
                 var keywords = GetAllKeywords(unit);
                 var totalPts = GetTotalPoints(unit);
-                var hasSpecialSave = stats.Any(s => !string.IsNullOrEmpty(s.InvulnSave) || !string.IsNullOrEmpty(s.FeelNoPain));
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var collapsed = IsCollapsed(unit);
 
@@ -523,7 +522,7 @@
                                         <thead>
                                             <tr>
                                                 <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
-                                                @if (hasSpecialSave) { <th>🛡️</th> }
+                                                <th>🛡️</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -533,15 +532,12 @@
                                                     <td class="name-cell">@s.Stat.Name</td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
-                                                    @if (hasSpecialSave)
-                                                    {
-                                                        <td>
-                                                            @if (!string.IsNullOrEmpty(s.InvulnSave)) { <span class="invuln">@s.InvulnSave</span> }
-                                                            @if (!string.IsNullOrEmpty(s.InvulnSave) && !string.IsNullOrEmpty(s.FeelNoPain)) { <span class="save-sep">|</span> }
-                                                            @if (!string.IsNullOrEmpty(s.FeelNoPain)) { <span class="fnp">@(s.FeelNoPain.Replace("+", "++"))</span> }
-                                                            @if (string.IsNullOrEmpty(s.InvulnSave) && string.IsNullOrEmpty(s.FeelNoPain)) { <span>-</span> }
-                                                        </td>
-                                                    }
+                                                    <td>
+                                                        @if (!string.IsNullOrEmpty(s.InvulnSave)) { <span class="invuln">@s.InvulnSave</span> }
+                                                        @if (!string.IsNullOrEmpty(s.InvulnSave) && !string.IsNullOrEmpty(s.FeelNoPain)) { <span class="save-sep">|</span> }
+                                                        @if (!string.IsNullOrEmpty(s.FeelNoPain)) { <span class="fnp">@(s.FeelNoPain.Replace("+", "++"))</span> }
+                                                        @if (string.IsNullOrEmpty(s.InvulnSave) && string.IsNullOrEmpty(s.FeelNoPain)) { <span>-</span> }
+                                                    </td>
                                                 </tr>
                                             }
                                         </tbody>
