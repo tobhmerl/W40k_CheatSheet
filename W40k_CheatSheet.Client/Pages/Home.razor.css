@@ -1347,7 +1347,6 @@
 .stats-table,
 .weapons-table {
     width: 100%;
-    min-width: 26rem;
     border-collapse: collapse;
     font-size: 0.65rem;
     white-space: nowrap;
