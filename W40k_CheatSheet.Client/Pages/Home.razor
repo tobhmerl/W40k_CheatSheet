@@ -421,8 +421,6 @@
 
         <div class="unit-grid">
             @{
-                bool hasGrouped = DisplayUnits.Any(u => !IsKilled(u) && u.AttachedLeaders.Count > 0);
-                bool breakInserted = false;
                 bool killedDividerInserted = false;
             }
             @foreach (var unit in DisplayUnits)
@@ -436,12 +434,6 @@
                 var hasSpecialSave = stats.Any(s => !string.IsNullOrEmpty(s.InvulnSave) || !string.IsNullOrEmpty(s.FeelNoPain));
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var collapsed = IsCollapsed(unit);
-
-                @if (hasGrouped && !breakInserted && !IsKilled(unit) && unit.AttachedLeaders.Count == 0)
-                {
-                    breakInserted = true;
-                    <div class="column-break"></div>
-                }
 
                 @if (playMode && !killedDividerInserted && IsKilled(unit))
                 {

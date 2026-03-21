@@ -1011,8 +1011,7 @@
     align-items: center;
     margin: 0.4rem 0;
     gap: 0.5rem;
-    break-inside: avoid;
-    column-span: all;
+    grid-column: 1 / -1;
 }
 
 .killed-divider::before,
@@ -1136,24 +1135,12 @@
     border-style: dashed;
 }
 
-/* Grid — left column: grouped units, right column: standalone */
+/* Grid — responsive auto-fill columns */
 .unit-grid {
-    columns: 2;
-    column-gap: 0.6rem;
-}
-
-.column-break {
-    break-before: column;
-    margin: 0;
-    padding: 0;
-    height: 0;
-    line-height: 0;
-}
-
-@media (max-width: 700px) {
-    .unit-grid {
-        columns: 1;
-    }
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 0.6rem;
+    align-items: start;
 }
 
 /* Unit cards */
@@ -1166,8 +1153,6 @@
     cursor: grab;
     transition: border-color 0.15s, opacity 0.15s, box-shadow 0.15s;
     font-size: 0.85rem;
-    break-inside: avoid;
-    margin-bottom: 1.1rem;
 }
 
 .unit-card:active {
