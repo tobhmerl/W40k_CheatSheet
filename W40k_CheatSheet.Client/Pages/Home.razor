@@ -721,7 +721,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.6</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.7</div>
 
     @if (showChangelog)
     {
@@ -732,6 +732,17 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.7</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">"Add to Unit" checkbox on ability setup — applies leader weapon keywords (e.g. Lethal Hits, Sustained Hits) directly onto weapon rows in purple</li>
+                        <li class="cl-new">"Add to Unit" for defensive auras — leader invulnerable save shown in green, Feel No Pain shown in gold on stat rows</li>
+                        <li class="cl-new">Unit checkbox only appears for abilities that can be parsed (weapon keywords or defensive auras)</li>
+                        <li class="cl-new">Setup rows greyed out with purple strikethrough when "Unit" is checked</li>
+                        <li class="cl-changed">Leader auras (invuln / FnP) no longer auto-applied when attaching — must explicitly check "Unit" on ability setup</li>
+                        <li class="cl-changed">Setup-only abilities (Leader, Retinue) now hidden from abilities panel regardless of saved config state</li>
+                        <li class="cl-changed">Added spacing between unit jump buttons and panels below</li>
+                    </ul>
 
                     <div class="changelog-version">v1.6</div>
                     <ul class="changelog-list">
