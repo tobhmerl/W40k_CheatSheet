@@ -14,6 +14,12 @@
 
 <body>
     <Routes />
+    <script>
+        window.scrollToElement = function (id) {
+            var el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+    </script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
