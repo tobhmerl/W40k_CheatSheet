@@ -871,6 +871,10 @@
     {
         if (firstRender)
         {
+            await JS.InvokeVoidAsync("eval",
+                "window.scrollToElement=window.scrollToElement||function(id){" +
+                "var el=document.getElementById(id);" +
+                "if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}");
             await LoadFromStorage();
             loaded = true;
             StateHasChanged();
@@ -1352,8 +1356,11 @@
     private static string UnitAnchorId(string name) =>
         "unit-" + name.Replace(" ", "-").Replace("'", "").ToLowerInvariant();
 
-    private async Task ScrollToAsync(string id) =>
-        await JS.InvokeVoidAsync("scrollToElement", id);
+    private async Task ScrollToAsync(string id)
+    {
+        try { await JS.InvokeVoidAsync("scrollToElement", id); }
+        catch (JSException) { }  // function may not be registered yet
+    }
 
     private List<UnitEntry> AliveUnits =>
         DisplayUnits.Where(u => !IsKilled(u)).ToList();
