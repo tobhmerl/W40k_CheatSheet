@@ -208,217 +208,10 @@
             }
         </div>
 
-        <div id="nav-abilities" class="unit-jump-buttons">
+        <div id="nav-top" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
                 <button class="unit-jump-btn" @onclick="() => ScrollToAsync(UnitAnchorId(u.Name))">@u.Name</button>
-            }
-        </div>
-
-        <div id="abilities-panel" class="abilities-panel">
-            <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
-                <span>📜 Abilities Overview</span>
-                <span class="abilities-panel-controls">
-                    <button class="show-all-btn @(showAllAbilities ? "active" : "")" @onclick="() => showAllAbilities = !showAllAbilities" @onclick:stopPropagation="true">@(showAllAbilities ? "Filter" : "Show all")</button>
-                    <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
-                </span>
-            </div>
-            @if (abilitiesPanelOpen)
-            {
-                <div class="abilities-panel-body">
-
-                    @* ── Phase-specific abilities (1-3 phases checked) ── *@
-                    @foreach (var entry in PanelUnits)
-                    {
-                        var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
-                                             (focusedUnit is not null && focusedUnit != entry.Unit);
-                        if (isOtherFocused) { continue; }
-
-                        var phaseAbilities = entry.Abilities.Where(a => HasPhasesConfigured(a) && !IsAlwaysActive(a));
-                        if (!showAllAbilities)
-                        {
-                            phaseAbilities = phaseAbilities.Where(a => !IsHiddenAbility(a));
-                            if (activePhase is not null)
-                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForPhase(a, activePhase.Value));
-                            if (activeTurn is not null)
-                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                        }
-
-                        var phaseList = phaseAbilities.ToList();
-                        if (phaseList.Count == 0) { continue; }
-
-                        <div class="abilities-panel-unit">
-                            <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                            @foreach (var ability in phaseList)
-                            {
-                                <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
-                                     @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
-                                    <span class="ability-name">@ability.Name</span>
-                                    <div class="ability-desc">@ability.Description</div>
-                                </div>
-                            }
-                        </div>
-                    }
-
-                    @* ── Always active abilities (≥ 4 phases checked — phase filter skipped) ── *@
-                    @{
-                        bool hasAlwaysActive = PanelUnits.Any(e =>
-                        {
-                            if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
-                                (focusedUnit is not null && focusedUnit != e.Unit)) return false;
-                            var aa = e.Abilities.Where(a => IsAlwaysActive(a));
-                            if (!showAllAbilities)
-                            {
-                                aa = aa.Where(a => !IsHiddenAbility(a));
-                                if (activeTurn is not null)
-                                    aa = aa.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                            }
-                            return aa.Any();
-                        });
-                    }
-                    @if (hasAlwaysActive)
-                    {
-                        <div class="abilities-panel-divider-row">
-                            <span class="abilities-panel-divider-text always-active">Always active</span>
-                        </div>
-                        @foreach (var entry in PanelUnits)
-                        {
-                            var isOtherFocused3 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
-                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
-                            if (isOtherFocused3) { continue; }
-
-                            var aaAbilities = entry.Abilities.Where(a => IsAlwaysActive(a));
-                            if (!showAllAbilities)
-                            {
-                                aaAbilities = aaAbilities.Where(a => !IsHiddenAbility(a));
-                                if (activeTurn is not null)
-                                    aaAbilities = aaAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                            }
-
-                            var aaList = aaAbilities.ToList();
-                            if (aaList.Count == 0) { continue; }
-
-                            <div class="abilities-panel-unit">
-                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                                @foreach (var ability in aaList)
-                                {
-                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
-                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
-                                        <span class="ability-name">@ability.Name</span>
-                                        <div class="ability-desc">@ability.Description</div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                    }
-
-                    @* ── General abilities (no phases configured) ── *@
-                    @{
-                        bool hasGeneral = PanelUnits.Any(e =>
-                        {
-                            if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
-                                (focusedUnit is not null && focusedUnit != e.Unit)) return false;
-                            var g = e.Abilities.Where(a => !HasPhasesConfigured(a));
-                            if (!showAllAbilities)
-                            {
-                                g = g.Where(a => !IsHiddenAbility(a));
-                                if (activeTurn is not null)
-                                    g = g.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                            }
-                            return g.Any();
-                        });
-                    }
-                    @if (hasGeneral)
-                    {
-                        <div class="abilities-panel-divider-row">
-                            <span class="abilities-panel-divider-text">General</span>
-                        </div>
-                        @foreach (var entry in PanelUnits)
-                        {
-                            var isOtherFocused2 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
-                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
-                            if (isOtherFocused2) { continue; }
-
-                            var genAbilities = entry.Abilities.Where(a => !HasPhasesConfigured(a));
-                            if (!showAllAbilities)
-                            {
-                                genAbilities = genAbilities.Where(a => !IsHiddenAbility(a));
-                                if (activeTurn is not null)
-                                    genAbilities = genAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                                genAbilities = genAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit));
-                            }
-
-                            var genList = genAbilities.ToList();
-                            if (genList.Count == 0) { continue; }
-
-                            <div class="abilities-panel-unit">
-                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                                @foreach (var ability in genList)
-                                {
-                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
-                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
-                                        <span class="ability-name">@ability.Name</span>
-                                        <div class="ability-desc">@ability.Description</div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                    }
-
-                </div>
-            }
-        </div>
-
-        <div id="nav-stratagems" class="unit-jump-buttons">
-            @foreach (var u in AliveUnits)
-            {
-                <button class="unit-jump-btn" @onclick="() => ScrollToAsync(UnitAnchorId(u.Name))">@u.Name</button>
-            }
-        </div>
-
-        <div id="stratagems-panel" class="stratagems-panel">
-            <div class="stratagems-panel-header" @onclick="() => stratagemsPanelOpen = !stratagemsPanelOpen">
-                <span>🎯 Stratagems</span>
-                <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
-            </div>
-            @if (stratagemsPanelOpen)
-            {
-                <div class="stratagems-panel-body">
-                    @foreach (var strat in FilteredStratagems)
-                    {
-                        var canUse = CanFocusedUnitUse(strat);
-                        if (HasUnitFocus && !canUse) { continue; }
-                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "")"
-                             @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
-                            <div class="strat-header @GetStratTurnClass(strat)">
-                                <span class="strat-name">@strat.Name <span class="strat-phases">@GetPhaseLabels(strat.Phases)</span></span>
-                                <span class="strat-cost">@strat.Cost</span>
-                            </div>
-                            <div class="strat-category">@strat.Category · @strat.Effect</div>
-                            @if (focusedStratagem == strat)
-                            {
-                                <div class="strat-details @(stratDetailsZoomed ? "zoomed" : "")" @onclick="() => stratDetailsZoomed = !stratDetailsZoomed" @onclick:stopPropagation="true">
-                                    <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
-                                    <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
-                                    <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
-                                    @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
-                                    {
-                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
-                                    }
-                                </div>
-                            }
-                            @if (strat.RequiredKeywords.Count > 0 && focusedStratagem != strat)
-                            {
-                                <div class="strat-keywords">
-                                    @foreach (var kw in strat.RequiredKeywords)
-                                    {
-                                        <span class="strat-kw-badge">@kw.ToUpperInvariant()</span>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    }
-                </div>
             }
         </div>
 
@@ -687,13 +480,220 @@
                                     </div>
                                 }
                                 <div class="card-nav-buttons">
-                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("nav-abilities")' @onclick:stopPropagation="true">A</button>
-                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("nav-stratagems")' @onclick:stopPropagation="true">S</button>
+                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("abilities-panel")' @onclick:stopPropagation="true">A</button>
+                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("stratagems-panel")' @onclick:stopPropagation="true">S</button>
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
+            }
+        </div>
+
+        <div id="abilities-panel" class="abilities-panel">
+            <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
+                <span>📜 Abilities Overview</span>
+                <span class="abilities-panel-controls">
+                    <button class="show-all-btn @(showAllAbilities ? "active" : "")" @onclick="() => showAllAbilities = !showAllAbilities" @onclick:stopPropagation="true">@(showAllAbilities ? "Filter" : "Show all")</button>
+                    <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
+                </span>
+            </div>
+            @if (abilitiesPanelOpen)
+            {
+                <div class="abilities-panel-body">
+
+                    @* ── Phase-specific abilities (1-3 phases checked) ── *@
+                    @foreach (var entry in PanelUnits)
+                    {
+                        var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
+                                             (focusedUnit is not null && focusedUnit != entry.Unit);
+                        if (isOtherFocused) { continue; }
+
+                        var phaseAbilities = entry.Abilities.Where(a => HasPhasesConfigured(a) && !IsAlwaysActive(a));
+                        if (!showAllAbilities)
+                        {
+                            phaseAbilities = phaseAbilities.Where(a => !IsHiddenAbility(a));
+                            if (activePhase is not null)
+                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForPhase(a, activePhase.Value));
+                            if (activeTurn is not null)
+                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
+                        }
+
+                        var phaseList = phaseAbilities.ToList();
+                        if (phaseList.Count == 0) { continue; }
+
+                        <div class="abilities-panel-unit">
+                            <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
+                            @foreach (var ability in phaseList)
+                            {
+                                <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                     @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                    <span class="ability-name">@ability.Name</span>
+                                    <div class="ability-desc">@ability.Description</div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @* ── Always active abilities (≥ 4 phases checked — phase filter skipped) ── *@
+                    @{
+                        bool hasAlwaysActive = PanelUnits.Any(e =>
+                        {
+                            if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
+                                (focusedUnit is not null && focusedUnit != e.Unit)) return false;
+                            var aa = e.Abilities.Where(a => IsAlwaysActive(a));
+                            if (!showAllAbilities)
+                            {
+                                aa = aa.Where(a => !IsHiddenAbility(a));
+                                if (activeTurn is not null)
+                                    aa = aa.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
+                            }
+                            return aa.Any();
+                        });
+                    }
+                    @if (hasAlwaysActive)
+                    {
+                        <div class="abilities-panel-divider-row">
+                            <span class="abilities-panel-divider-text always-active">Always active</span>
+                        </div>
+                        @foreach (var entry in PanelUnits)
+                        {
+                            var isOtherFocused3 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
+                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
+                            if (isOtherFocused3) { continue; }
+
+                            var aaAbilities = entry.Abilities.Where(a => IsAlwaysActive(a));
+                            if (!showAllAbilities)
+                            {
+                                aaAbilities = aaAbilities.Where(a => !IsHiddenAbility(a));
+                                if (activeTurn is not null)
+                                    aaAbilities = aaAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
+                            }
+
+                            var aaList = aaAbilities.ToList();
+                            if (aaList.Count == 0) { continue; }
+
+                            <div class="abilities-panel-unit">
+                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
+                                @foreach (var ability in aaList)
+                                {
+                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                        <span class="ability-name">@ability.Name</span>
+                                        <div class="ability-desc">@ability.Description</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+
+                    @* ── General abilities (no phases configured) ── *@
+                    @{
+                        bool hasGeneral = PanelUnits.Any(e =>
+                        {
+                            if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
+                                (focusedUnit is not null && focusedUnit != e.Unit)) return false;
+                            var g = e.Abilities.Where(a => !HasPhasesConfigured(a));
+                            if (!showAllAbilities)
+                            {
+                                g = g.Where(a => !IsHiddenAbility(a));
+                                if (activeTurn is not null)
+                                    g = g.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
+                            }
+                            return g.Any();
+                        });
+                    }
+                    @if (hasGeneral)
+                    {
+                        <div class="abilities-panel-divider-row">
+                            <span class="abilities-panel-divider-text">General</span>
+                        </div>
+                        @foreach (var entry in PanelUnits)
+                        {
+                            var isOtherFocused2 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
+                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
+                            if (isOtherFocused2) { continue; }
+
+                            var genAbilities = entry.Abilities.Where(a => !HasPhasesConfigured(a));
+                            if (!showAllAbilities)
+                            {
+                                genAbilities = genAbilities.Where(a => !IsHiddenAbility(a));
+                                if (activeTurn is not null)
+                                    genAbilities = genAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
+                                genAbilities = genAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit));
+                            }
+
+                            var genList = genAbilities.ToList();
+                            if (genList.Count == 0) { continue; }
+
+                            <div class="abilities-panel-unit">
+                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
+                                @foreach (var ability in genList)
+                                {
+                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                        <span class="ability-name">@ability.Name</span>
+                                        <div class="ability-desc">@ability.Description</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+
+                </div>
+            }
+        </div>
+
+        <div id="stratagems-panel" class="stratagems-panel">
+            <div class="stratagems-panel-header" @onclick="() => stratagemsPanelOpen = !stratagemsPanelOpen">
+                <span>🎯 Stratagems</span>
+                <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
+            </div>
+            @if (stratagemsPanelOpen)
+            {
+                <div class="stratagems-panel-body">
+                    @foreach (var strat in FilteredStratagems)
+                    {
+                        var canUse = CanFocusedUnitUse(strat);
+                        if (HasUnitFocus && !canUse) { continue; }
+                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "")"
+                             @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
+                            <div class="strat-header @GetStratTurnClass(strat)">
+                                <span class="strat-name">@strat.Name <span class="strat-phases">@GetPhaseLabels(strat.Phases)</span></span>
+                                <span class="strat-cost">@strat.Cost</span>
+                            </div>
+                            <div class="strat-category">@strat.Category · @strat.Effect</div>
+                            @if (focusedStratagem == strat)
+                            {
+                                <div class="strat-details @(stratDetailsZoomed ? "zoomed" : "")" @onclick="() => stratDetailsZoomed = !stratDetailsZoomed" @onclick:stopPropagation="true">
+                                    <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
+                                    <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
+                                    <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
+                                    @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
+                                    {
+                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
+                                    }
+                                </div>
+                            }
+                            @if (strat.RequiredKeywords.Count > 0 && focusedStratagem != strat)
+                            {
+                                <div class="strat-keywords">
+                                    @foreach (var kw in strat.RequiredKeywords)
+                                    {
+                                        <span class="strat-kw-badge">@kw.ToUpperInvariant()</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div id="nav-bottom" class="unit-jump-buttons">
+            @foreach (var u in AliveUnits)
+            {
+                <button class="unit-jump-btn" @onclick="() => ScrollToAsync(UnitAnchorId(u.Name))">@u.Name</button>
             }
         </div>
 
