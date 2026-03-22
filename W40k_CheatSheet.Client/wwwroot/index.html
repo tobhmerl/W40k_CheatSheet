@@ -24,17 +24,10 @@
     </div>
 
     <script>
-        document.addEventListener('click', function (e) {
-            var btn = e.target.closest('[data-scroll-to]');
-            if (!btn) return;
-            var id = btn.getAttribute('data-scroll-to');
-            if (!id) return;
+        window.scrollToElement = function (id) {
             var el = document.getElementById(id);
-            if (el) {
-                e.stopPropagation();
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, true);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
     </script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>

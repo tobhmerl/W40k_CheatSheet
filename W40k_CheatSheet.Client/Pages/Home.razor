@@ -211,7 +211,7 @@
         <div id="nav-abilities" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
-                <button class="unit-jump-btn" data-scroll-to="@UnitAnchorId(u.Name)">@u.Name</button>
+                <button class="unit-jump-btn" @onclick="() => ScrollToAsync(UnitAnchorId(u.Name))">@u.Name</button>
             }
         </div>
 
@@ -372,7 +372,7 @@
         <div id="nav-stratagems" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
-                <button class="unit-jump-btn" data-scroll-to="@UnitAnchorId(u.Name)">@u.Name</button>
+                <button class="unit-jump-btn" @onclick="() => ScrollToAsync(UnitAnchorId(u.Name))">@u.Name</button>
             }
         </div>
 
@@ -634,8 +634,8 @@
                                     </div>
                                 }
                                 <div class="card-nav-buttons">
-                                    <button class="card-nav-btn" data-scroll-to="nav-abilities">A</button>
-                                    <button class="card-nav-btn" data-scroll-to="nav-stratagems">S</button>
+                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("nav-abilities")' @onclick:stopPropagation="true">A</button>
+                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("nav-stratagems")' @onclick:stopPropagation="true">S</button>
                                 </div>
                             </div>
                         </div>
@@ -1351,6 +1351,9 @@
 
     private static string UnitAnchorId(string name) =>
         "unit-" + name.Replace(" ", "-").Replace("'", "").ToLowerInvariant();
+
+    private async Task ScrollToAsync(string id) =>
+        await JS.InvokeVoidAsync("scrollToElement", id);
 
     private List<UnitEntry> AliveUnits =>
         DisplayUnits.Where(u => !IsKilled(u)).ToList();
