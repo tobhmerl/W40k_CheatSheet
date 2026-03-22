@@ -623,6 +623,59 @@
                                     🔗 Attach to unit
                                 </button>
                             }
+
+                            @{
+                                var cardAbilities = GetCardAbilities(unit);
+                            }
+                            @if (cardAbilities.Count > 0)
+                            {
+                                <div class="card-abilities">
+                                    @foreach (var ability in cardAbilities)
+                                    {
+                                        <div class="card-ability-item"
+                                             @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
+                                            <span class="card-ability-name">@ability.Name</span>
+                                            <div class="card-ability-desc">@ability.Description</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            @{
+                                var cardStratagems = GetCardStratagems(unit);
+                            }
+                            @if (cardStratagems.Count > 0)
+                            {
+                                <div class="card-stratagems">
+                                    @foreach (var strat in cardStratagems)
+                                    {
+                                        <div class="card-strat-item @(focusedStratagem == strat ? "expanded" : "")"
+                                             @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
+                                            <div class="card-strat-header @GetStratTurnClass(strat)">
+                                                <span class="card-strat-name">@strat.Name <span class="card-strat-phases">@GetPhaseLabels(strat.Phases)</span></span>
+                                                <span class="card-strat-cost">@strat.Cost</span>
+                                            </div>
+                                            @if (focusedStratagem == strat)
+                                            {
+                                                <div class="card-strat-details">
+                                                    <div class="card-strat-effect">@strat.Effect</div>
+                                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
+                                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
+                                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
+                                                    @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
+                                                    {
+                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="card-strat-effect">@strat.Effect</div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+
                             <div class="card-footer-row">
                                 @if (keywords.Count > 0)
                                 {
@@ -849,9 +902,9 @@
     private bool longPressTriggered;
     private GamePhase? activePhase;
     private TurnFilter? activeTurn;
-    private bool abilitiesPanelOpen = true;
+    private bool abilitiesPanelOpen;
     private bool showAllAbilities;
-    private bool stratagemsPanelOpen = true;
+    private bool stratagemsPanelOpen;
     private Stratagem? focusedStratagem;
     private bool stratDetailsZoomed;
     private bool showChangelog;
@@ -932,6 +985,48 @@
             }
             return true;
         }).ToList();
+    }
+
+    private List<AbilityEntry> GetCardAbilities(UnitEntry unit)
+    {
+        var all = GetFilteredAbilities(unit)
+            .Where(a => !IsHiddenAbility(a))
+            .ToList();
+
+        if (activeTurn is not null)
+            all = all.Where(a => IsConfiguredForTurn(a, activeTurn.Value)).ToList();
+
+        if (activePhase is not null)
+            all = all.Where(a => IsAlwaysActive(a) || IsConfiguredForPhase(a, activePhase.Value)).ToList();
+
+        return all;
+    }
+
+    private List<Stratagem> GetCardStratagems(UnitEntry unit)
+    {
+        var detachment = army?.Detachment ?? "";
+        var unitKeywords = GetAllKeywords(unit);
+
+        var available = CoreStratagems.All
+            .Where(s => string.IsNullOrEmpty(s.Detachment) ||
+                        s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
+            .Where(s => !IsDisabledStratagem(s))
+            .Where(s => s.RequiredKeywords.Count == 0 ||
+                        s.RequiredKeywords.Any(rk =>
+                            unitKeywords.Any(uk => string.Equals(uk, rk, StringComparison.OrdinalIgnoreCase))));
+
+        if (activeTurn is not null)
+            available = available.Where(s => IsStratConfiguredForTurn(s, activeTurn.Value));
+
+        if (activePhase is not null)
+            available = available.Where(s => IsStratConfiguredForPhase(s, activePhase.Value));
+
+        return available
+            .OrderBy(s => LowestPhaseOrder(s))
+            .ThenBy(s => TurnColorOrder(s.TurnColor))
+            .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
+            .ThenBy(s => s.Name)
+            .ToList();
     }
 
     private void TogglePlayMode()

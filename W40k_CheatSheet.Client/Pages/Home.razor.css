@@ -1395,6 +1395,173 @@
     padding-top: 0.3rem;
 }
 
+/* In-card abilities */
+.card-abilities {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin: 0.4rem 0;
+    padding-top: 0.3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-ability-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #2a2a2a;
+    border-radius: 5px;
+    padding: 0.25rem 0.4rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.card-ability-item:hover {
+    border-color: #444;
+}
+
+.card-ability-name {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #aaa;
+}
+
+.card-ability-desc {
+    font-size: 0.6rem;
+    line-height: 1.5;
+    color: #999;
+    margin-top: 0.15rem;
+}
+
+.card-ability-item.expanded {
+    background: rgba(0, 180, 216, 0.06);
+    border-color: #00b4d8;
+}
+
+.card-ability-item.expanded .card-ability-name {
+    color: #00b4d8;
+}
+
+.card-ability-item.expanded .card-ability-desc {
+    color: #ccc;
+}
+
+/* In-card stratagems */
+.card-stratagems {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin: 0.3rem 0;
+    padding-top: 0.3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-strat-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #2a2a2a;
+    border-radius: 5px;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    overflow: hidden;
+}
+
+.card-strat-item:hover {
+    border-color: #444;
+}
+
+.card-strat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px 4px 0 0;
+}
+
+.card-strat-header.turn-myturn {
+    background: #1e4d6b;
+}
+
+.card-strat-header.turn-enemyturn {
+    background: #6b2839;
+}
+
+.card-strat-header.turn-both {
+    background: #2a5040;
+}
+
+.card-strat-header.turn-bluered {
+    background: linear-gradient(to right, #1e4d6b, #6b2839);
+}
+
+.card-strat-header.turn-redblue {
+    background: linear-gradient(to right, #6b2839, #1e4d6b);
+}
+
+.card-strat-name {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.card-strat-phases {
+    font-size: 0.45rem;
+    font-weight: 400;
+    opacity: 0.5;
+    margin-left: 0.2rem;
+}
+
+.card-strat-cost {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+}
+
+.card-strat-effect {
+    font-size: 0.55rem;
+    line-height: 1.4;
+    color: #888;
+    padding: 0.15rem 0.4rem 0.2rem;
+}
+
+.card-strat-details {
+    padding: 0.2rem 0.4rem 0.3rem;
+}
+
+.card-strat-details .card-strat-effect {
+    padding: 0;
+    margin-bottom: 0.2rem;
+    color: #aaa;
+}
+
+.card-strat-field {
+    font-size: 0.55rem;
+    line-height: 1.4;
+    color: #999;
+    margin-bottom: 0.1rem;
+}
+
+.card-strat-label {
+    font-weight: 700;
+    color: #00b4d8;
+}
+
+.card-strat-label.restriction {
+    color: #e94560;
+}
+
+.card-strat-item.expanded {
+    background: rgba(0, 180, 216, 0.05);
+    border-color: #00b4d8;
+}
+
+.card-strat-item.expanded .card-strat-name {
+    color: #fff;
+}
+
+.card-strat-item.expanded .card-strat-field {
+    color: #bbb;
+}
+
 /* Keywords */
 .unit-keywords {
     display: flex;
