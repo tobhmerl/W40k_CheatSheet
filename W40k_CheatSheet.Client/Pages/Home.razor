@@ -647,7 +647,10 @@
         <div id="stratagems-panel" class="stratagems-panel">
             <div class="stratagems-panel-header" @onclick="() => stratagemsPanelOpen = !stratagemsPanelOpen">
                 <span>🎯 Stratagems</span>
-                <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
+                <span class="abilities-panel-controls">
+                    <button class="show-all-btn @(showAllStratagems ? "active" : "")" @onclick="() => showAllStratagems = !showAllStratagems" @onclick:stopPropagation="true">@(showAllStratagems ? "Filter" : "Show all")</button>
+                    <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
+                </span>
             </div>
             @if (stratagemsPanelOpen)
             {
@@ -904,6 +907,7 @@
     private TurnFilter? activeTurn;
     private bool abilitiesPanelOpen;
     private bool showAllAbilities;
+    private bool showAllStratagems;
     private bool stratagemsPanelOpen;
     private Stratagem? focusedStratagem;
     private bool stratDetailsZoomed;
@@ -1246,11 +1250,14 @@
                             s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
                 .Where(s => !IsDisabledStratagem(s));
 
-            if (activeTurn is not null)
-                available = available.Where(s => IsStratConfiguredForTurn(s, activeTurn.Value));
+            if (!showAllStratagems)
+            {
+                if (activeTurn is not null)
+                    available = available.Where(s => IsStratConfiguredForTurn(s, activeTurn.Value));
 
-            if (activePhase is not null)
-                available = available.Where(s => IsStratConfiguredForPhase(s, activePhase.Value));
+                if (activePhase is not null)
+                    available = available.Where(s => IsStratConfiguredForPhase(s, activePhase.Value));
+            }
 
             return available
                 .OrderBy(s => LowestPhaseOrder(s))
