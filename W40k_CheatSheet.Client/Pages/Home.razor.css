@@ -1405,6 +1405,13 @@
     margin-left: 0.25rem;
 }
 
+.unit-counts {
+    font-size: 0.55rem;
+    font-weight: 400;
+    color: #555;
+    margin-left: 0.3rem;
+}
+
 .header-right {
     display: flex;
     align-items: center;

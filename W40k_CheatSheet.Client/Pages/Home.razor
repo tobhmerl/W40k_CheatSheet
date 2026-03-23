@@ -262,6 +262,8 @@
                 var extraMeleeKw = GetExtraWeaponKeywords(unit, true);
                 var extraDef = GetExtraDefensiveAuras(unit);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
+                var abilityCount = GetCardAbilities(unit).Count;
+                var stratagemCount = GetCardStratagems(unit).Count;
                 var collapsed = IsCollapsed(unit);
 
                 @if (playMode && !killedDividerInserted && IsKilled(unit))
@@ -292,6 +294,7 @@
                             {
                                 <span class="warlord-badge">⭐</span>
                             }
+                            <span class="unit-counts">(@abilityCount, @stratagemCount)</span>
                         </div>
                         <div class="header-right">
                             <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
@@ -959,7 +962,7 @@
     private int aggressorPrimary;
     private int defenderSecondary;
     private int aggressorSecondary;
-    private readonly HashSet<UnitEntry> collapsedUnits = [];
+    private readonly HashSet<UnitEntry> expandedUnits = [];
     private List<SavedArmyMeta> savedArmies = [];
 
     private string FactionClass => army?.Faction switch
@@ -1003,7 +1006,7 @@
 
     private bool IsKilled(UnitEntry unit) => killedUnits.Contains(unit);
 
-    private bool IsCollapsed(UnitEntry unit) => collapsedUnits.Contains(unit);
+    private bool IsCollapsed(UnitEntry unit) => !expandedUnits.Contains(unit);
 
     private record struct PanelUnitEntry(UnitEntry Unit, List<AbilityEntry> Abilities);
 
@@ -1097,7 +1100,7 @@
                     unit.AttachedLeaders.Remove(leader);
             }
         }
-        collapsedUnits.Add(unit);
+        expandedUnits.Remove(unit);
     }
 
     private void KillAttachedUnit(UnitEntry host, UnitEntry leader)
@@ -1109,13 +1112,13 @@
     private void ReviveUnit(UnitEntry unit)
     {
         killedUnits.Remove(unit);
-        collapsedUnits.Remove(unit);
+        expandedUnits.Add(unit);
     }
 
     private void ToggleCollapse(UnitEntry unit)
     {
-        if (!collapsedUnits.Remove(unit))
-            collapsedUnits.Add(unit);
+        if (!expandedUnits.Remove(unit))
+            expandedUnits.Add(unit);
     }
 
     private string CardClass(UnitEntry unit)
@@ -1608,7 +1611,7 @@
         selectedLeader = null;
         draggedUnit = null;
         dragOverUnit = null;
-        collapsedUnits.Clear();
+        expandedUnits.Clear();
         try
         {
             var file = e.File;
@@ -1637,7 +1640,7 @@
         rawJson = null;
         errorMessage = null;
         selectedLeader = null;
-        collapsedUnits.Clear();
+        expandedUnits.Clear();
         abilityConfigs.Clear();
         stratagemConfigs.Clear();
         setupConfirmed = false;
@@ -2164,7 +2167,7 @@
 
             setupConfirmed = true;
             stratagemSetupConfirmed = true;
-            collapsedUnits.Clear();
+            expandedUnits.Clear();
             killedUnits.Clear();
             playMode = false;
             errorMessage = null;
