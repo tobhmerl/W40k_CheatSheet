@@ -6,7 +6,7 @@
 
 <PageTitle>W40k Roster</PageTitle>
 
-<div class="roster-app">
+<div class="roster-app @FactionClass">
     @if (!loaded)
     {
         <div class="import-section">
@@ -329,7 +329,6 @@
                                         <thead>
                                             <tr>
                                                 <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
-                                                <th>🛡️</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -340,15 +339,11 @@
                                                 var invulnIsExtra = !string.IsNullOrEmpty(extraDef.ExtraInvuln) && effectiveInvuln == extraDef.ExtraInvuln && string.IsNullOrEmpty(s.InvulnSave);
                                                 var fnpIsExtra = !string.IsNullOrEmpty(extraDef.ExtraFnp) && effectiveFnp == extraDef.ExtraFnp && string.IsNullOrEmpty(s.FeelNoPain);
                                                 <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner, unit)" @onclick:stopPropagation="true">
-                                                    <td class="name-cell">@s.Stat.Name</td>
+                                                    <td class="name-cell">@s.Stat.Name@if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
+                                                        {<span class="stat-saves">(<span class="@(invulnIsExtra ? "invuln-extra" : "invuln")">@effectiveInvuln</span>@if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp)){<text>, </text>}@if (!string.IsNullOrEmpty(effectiveFnp)){<span class="@(fnpIsExtra ? "fnp-extra" : "fnp")">@(effectiveFnp.Replace("+", "++"))</span>})</span>}
+                                                    </td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
-                                                    <td>
-                                                        @if (!string.IsNullOrEmpty(effectiveInvuln)) { <span class="@(invulnIsExtra ? "invuln-extra" : "invuln")">@effectiveInvuln</span> }
-                                                        @if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp)) { <span class="save-sep">|</span> }
-                                                        @if (!string.IsNullOrEmpty(effectiveFnp)) { <span class="@(fnpIsExtra ? "fnp-extra" : "fnp")">@(effectiveFnp.Replace("+", "++"))</span> }
-                                                        @if (string.IsNullOrEmpty(effectiveInvuln) && string.IsNullOrEmpty(effectiveFnp)) { <span>-</span> }
-                                                    </td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -425,10 +420,19 @@
                                 <div class="card-abilities">
                                     @foreach (var ability in cardAbilities)
                                     {
-                                        <div class="card-ability-item"
+                                        <div class="card-ability-item @(focusedAbility == ability ? "expanded" : "")"
                                              @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
                                             <span class="card-ability-name">@ability.Name</span>
-                                            <div class="card-ability-desc">@ability.Description</div>
+                                            <div class="card-ability-desc">
+                                                @if (focusedAbility == ability)
+                                                {
+                                                    @HighlightKeywords(ability.Description)
+                                                }
+                                                else
+                                                {
+                                                    @ability.Description
+                                                }
+                                            </div>
                                         </div>
                                     }
                                 </div>
@@ -450,13 +454,13 @@
                                             @if (focusedStratagem == strat)
                                             {
                                                 <div class="card-strat-details">
-                                                    <div class="card-strat-effect">@strat.Effect</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
+                                                    <div class="card-strat-effect">@HighlightKeywords(strat.Effect)</div>
+                                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @HighlightKeywords(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
+                                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @HighlightKeywords(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
+                                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @HighlightKeywords(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
                                                     @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
                                                     {
-                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
+                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @HighlightKeywords(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
                                                     }
                                                 </div>
                                             }
@@ -923,6 +927,13 @@
     private int defenderSecondary;
     private int aggressorSecondary;
     private readonly HashSet<UnitEntry> collapsedUnits = [];
+
+    private string FactionClass => army?.Faction switch
+    {
+        var f when f?.Contains("Necron", StringComparison.OrdinalIgnoreCase) == true => "faction-necrons",
+        var f when f?.Contains("Dark Angel", StringComparison.OrdinalIgnoreCase) == true => "faction-dark-angels",
+        _ => ""
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -1491,6 +1502,52 @@
         unit.Keywords
             .Concat(unit.AttachedLeaders.SelectMany(l => l.Keywords))
             .Distinct().ToList();
+
+    private static readonly System.Text.RegularExpressions.Regex KeywordHighlightRegex = new(
+        string.Join("|", [
+            // Phase with optional timing & turn context: "at the start of your opponent's Shooting phase"
+            @"(?:at the (?:start|end) of )?(?:your )?(?:opponent'?s? )?(?:Command|Movement|Shooting|Charge|Fight) phase",
+            // Dice rolls with prefix: "roll 2 D6"
+            @"\broll \d+\s*D\d+",
+            // Standalone dice: "D3", "2D6", "D6+1"
+            @"\b\d*D\d+(?:\+\d+)?\b",
+            // Distances: "within 12""
+            @"within \d+[""\u2033]",
+            // Attack keywords
+            @"\b(?:Critical (?:Wound|Hit)s?|Devastating Wounds?|Lethal Hits?|Sustained Hits?)\b",
+            // Thresholds: "on a 6", "on a 2-5", "on a 4+"
+            @"on a \d+(?:-\d+|\+)?",
+            // Unit type references
+            @"\b(?:Necrons?|Character) (?:unit|model)s?\b",
+            // Timing
+            @"\b(?:once per (?:turn|battle)|each time)\b",
+            // Re-roll
+            @"\bre-rolls?(?:ed|ing)?\b",
+        ]),
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    private static MarkupString HighlightKeywords(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return new MarkupString("");
+        var matches = KeywordHighlightRegex.Matches(text);
+        if (matches.Count == 0)
+            return new MarkupString(System.Net.WebUtility.HtmlEncode(text));
+        var sb = new System.Text.StringBuilder();
+        int last = 0;
+        foreach (System.Text.RegularExpressions.Match m in matches)
+        {
+            if (m.Index < last) continue;
+            if (m.Index > last)
+                sb.Append(System.Net.WebUtility.HtmlEncode(text[last..m.Index]));
+            sb.Append("<span class=\"kw-hl\">");
+            sb.Append(System.Net.WebUtility.HtmlEncode(m.Value));
+            sb.Append("</span>");
+            last = m.Index + m.Length;
+        }
+        if (last < text.Length)
+            sb.Append(System.Net.WebUtility.HtmlEncode(text[last..]));
+        return new MarkupString(sb.ToString());
+    }
 
     private static int GetTotalPoints(UnitEntry unit) =>
         unit.Points + unit.AttachedLeaders.Sum(l => l.Points);

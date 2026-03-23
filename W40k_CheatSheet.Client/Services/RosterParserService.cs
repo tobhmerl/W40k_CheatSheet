@@ -76,8 +76,9 @@ public partial class RosterParserService
         unit.MeleeWeapons = unit.MeleeWeapons.DistinctBy(w => w.Name).ToList();
         unit.StatLines = unit.StatLines.DistinctBy(s => s.Name).ToList();
 
-        unit.IsLeader = unit.Keywords.Contains("Character")
-            && unit.Abilities.Any(a => a.Name == "Leader");
+        unit.IsLeader = (unit.Keywords.Contains("Character")
+            && unit.Abilities.Any(a => a.Name == "Leader"))
+            || unit.Abilities.Any(a => a.Name.Contains("Retinue", StringComparison.OrdinalIgnoreCase));
 
         unit.Abilities.RemoveAll(a => a.Name == "Leader");
 

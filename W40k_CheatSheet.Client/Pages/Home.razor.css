@@ -430,6 +430,7 @@
     background: #111;
     border: 1px solid #2a2a2a;
     border-radius: 8px;
+    margin-top: 1rem;
     margin-bottom: 0.75rem;
     overflow: hidden;
 }
@@ -1441,7 +1442,15 @@
 }
 
 .card-ability-item.expanded .card-ability-desc {
-    color: #ccc;
+    color: #999;
+}
+
+/* Keyword highlighting on click */
+::deep .kw-hl {
+    color: #00b4d8;
+    font-weight: 700;
+    padding: 0.05rem 0.2rem;
+    border-radius: 2px;
 }
 
 /* In-card stratagems */
@@ -1559,7 +1568,7 @@
 }
 
 .card-strat-item.expanded .card-strat-field {
-    color: #bbb;
+    color: #999;
 }
 
 /* Keywords */
@@ -1686,32 +1695,30 @@
     color: #999;
 }
 
+.stat-saves {
+    margin-left: 0.3rem;
+    font-size: 0.55rem;
+    color: #888;
+}
+
 .invuln {
     color: gold;
     font-weight: 700;
 }
 
 .invuln-extra {
-    color: #4caf50;
+    color: #bb86fc;
     font-weight: 700;
 }
 
 .fnp {
     color: #4caf50;
     font-weight: 700;
-    margin-left: 0.2rem;
 }
 
 .fnp-extra {
-    color: gold;
+    color: #bb86fc;
     font-weight: 700;
-    margin-left: 0.2rem;
-}
-
-.save-sep {
-    color: #555;
-    margin: 0 0.15rem;
-    font-weight: 400;
 }
 
 /* Stat row — clickable to highlight owned weapons */
@@ -1947,3 +1954,37 @@
     color: #0096b0;
     border-bottom-color: rgba(0, 150, 176, 0.2);
 }
+
+/* ============================================================
+   Faction-themed button colors (Necrons = dark green, DA = bright green)
+   Excludes: .kill-btn, .detach-btn, .clear-btn
+   ============================================================ */
+.roster-app.faction-necrons .import-btn { background: #185724; }
+.roster-app.faction-necrons .import-btn:hover { background: #1e6e2e; }
+.roster-app.faction-necrons .setup-btn:hover { border-color: #2da145; color: #2da145; background: rgba(45, 161, 69, 0.1); }
+.roster-app.faction-necrons .turn-btn.my-turn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; }
+.roster-app.faction-necrons .turn-btn.my-turn.active { background: rgba(45, 161, 69, 0.2); border-color: #2da145; color: #2da145; }
+.roster-app.faction-necrons .phase-btn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; }
+.roster-app.faction-necrons .phase-btn.active { background: rgba(45, 161, 69, 0.2); border-color: #2da145; color: #2da145; }
+.roster-app.faction-necrons .show-all-btn.active { background: rgba(45, 161, 69, 0.15); border-color: #2da145; color: #2da145; }
+.roster-app.faction-necrons .unit-jump-btn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; }
+.roster-app.faction-necrons .card-nav-btn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; color: #2da145; }
+.roster-app.faction-necrons .score-btn:hover { background: rgba(45, 161, 69, 0.15); border-color: #2da145; color: #2da145; }
+.roster-app.faction-necrons .score-value { color: #2da145; }
+.roster-app.faction-necrons .play-btn:hover { border-color: #2da145; color: #2da145; background: rgba(45, 161, 69, 0.1); }
+.roster-app.faction-necrons .play-btn.active { background: rgba(45, 161, 69, 0.2); border-color: #2da145; color: #2da145; }
+
+.roster-app.faction-dark-angels .import-btn { background: #2DA145; }
+.roster-app.faction-dark-angels .import-btn:hover { background: #237B35; }
+.roster-app.faction-dark-angels .setup-btn:hover { border-color: #2da145; color: #2da145; background: rgba(45, 161, 69, 0.1); }
+.roster-app.faction-dark-angels .turn-btn.my-turn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; }
+.roster-app.faction-dark-angels .turn-btn.my-turn.active { background: rgba(45, 161, 69, 0.2); border-color: #2da145; color: #2da145; }
+.roster-app.faction-dark-angels .phase-btn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; }
+.roster-app.faction-dark-angels .phase-btn.active { background: rgba(45, 161, 69, 0.2); border-color: #2da145; color: #2da145; }
+.roster-app.faction-dark-angels .show-all-btn.active { background: rgba(45, 161, 69, 0.15); border-color: #2da145; color: #2da145; }
+.roster-app.faction-dark-angels .unit-jump-btn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; }
+.roster-app.faction-dark-angels .card-nav-btn:hover { background: rgba(45, 161, 69, 0.1); border-color: #2da145; color: #2da145; }
+.roster-app.faction-dark-angels .score-btn:hover { background: rgba(45, 161, 69, 0.15); border-color: #2da145; color: #2da145; }
+.roster-app.faction-dark-angels .score-value { color: #2da145; }
+.roster-app.faction-dark-angels .play-btn:hover { border-color: #2da145; color: #2da145; background: rgba(45, 161, 69, 0.1); }
+.roster-app.faction-dark-angels .play-btn.active { background: rgba(45, 161, 69, 0.2); border-color: #2da145; color: #2da145; }
