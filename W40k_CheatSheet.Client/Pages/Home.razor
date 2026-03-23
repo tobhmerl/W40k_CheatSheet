@@ -27,6 +27,22 @@
             {
                 <div class="error-msg">@errorMessage</div>
             }
+            @if (savedArmies.Count > 0)
+            {
+                <div class="saved-armies">
+                    <h3>📦 Saved Armies</h3>
+                    @foreach (var sa in savedArmies)
+                    {
+                        <div class="saved-army-row">
+                            <div class="saved-army-info" @onclick="() => LoadSavedArmy(sa.Name)">
+                                <span class="saved-army-name">@sa.Name</span>
+                                <span class="saved-army-meta">@sa.Faction · @sa.Detachment · @sa.Points pts</span>
+                            </div>
+                            <button class="saved-army-delete" @onclick="() => DeleteSavedArmy(sa.Name)" @onclick:stopPropagation="true">🗑</button>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     }
     else if (!setupConfirmed)
@@ -760,6 +776,7 @@
             <hr class="footer-divider" />
             <div class="roster-actions">
                 <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Setup" : "⚔️ Play")</button>
+                <button class="setup-btn" @onclick="SaveCurrentArmy">💾 Save</button>
                 <button class="setup-btn" @onclick="() => setupConfirmed = false">⚙️ Abilities</button>
                 <button class="setup-btn" @onclick="() => stratagemSetupConfirmed = false">🎯 Stratagems</button>
                 <button class="clear-btn" @onclick="ClearRoster">🗑️ Clear</button>
@@ -777,7 +794,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.8</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.9</div>
 
     @if (showChangelog)
     {
@@ -788,6 +805,14 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.9</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Save &amp; Load armies — 💾 Save button in footer stores current army with all setup (abilities, stratagems, leader attachments) to localStorage</li>
+                        <li class="cl-new">Saved armies list on import page — tap to restore a fully configured army instantly, skip setup pages</li>
+                        <li class="cl-new">Delete saved armies via 🗑 button per row</li>
+                        <li class="cl-changed">Stat row model names shortened for space — strips "Canoptek" prefix, "the &lt;Title&gt;" suffix, abbreviates 3+ word names to initials (e.g. LHD)</li>
+                    </ul>
 
                     <div class="changelog-version">v1.8</div>
                     <ul class="changelog-list">
@@ -935,6 +960,7 @@
     private int defenderSecondary;
     private int aggressorSecondary;
     private readonly HashSet<UnitEntry> collapsedUnits = [];
+    private List<SavedArmyMeta> savedArmies = [];
 
     private string FactionClass => army?.Faction switch
     {
@@ -952,6 +978,7 @@
                 "var el=document.getElementById(id);" +
                 "if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}");
             await LoadFromStorage();
+            await LoadSavedArmiesIndex();
             loaded = true;
             StateHasChanged();
         }
@@ -2043,5 +2070,116 @@
                 JsonSerializer.Serialize(abilityConfigs));
         }
         catch { }
+    }
+
+    // ── Saved armies ─────────────────────────────────────────────────────────
+
+    private class SavedArmyMeta
+    {
+        public string Name { get; set; } = "";
+        public string Faction { get; set; } = "";
+        public string Detachment { get; set; } = "";
+        public int Points { get; set; }
+    }
+
+    private class SavedArmyData
+    {
+        public string RawJson { get; set; } = "";
+        public RosterState? State { get; set; }
+        public Dictionary<string, AbilitySetupEntry> AbilityConfigs { get; set; } = new();
+        public Dictionary<string, StratagemSetupEntry> StratagemConfigs { get; set; } = new();
+    }
+
+    private async Task LoadSavedArmiesIndex()
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string?>("localStorage.getItem", "saved-armies-index");
+            if (!string.IsNullOrEmpty(json))
+                savedArmies = JsonSerializer.Deserialize<List<SavedArmyMeta>>(json) ?? [];
+        }
+        catch { savedArmies = []; }
+    }
+
+    private async Task SaveCurrentArmy()
+    {
+        if (army is null || rawJson is null) return;
+
+        var name = army.Name;
+        var state = new RosterState
+        {
+            UnitOrder = army.Units.Select(u => u.Name).ToList(),
+            Attachments = army.Units
+                .SelectMany(u => u.AttachedLeaders.Select(l => new AttachmentInfo { Leader = l.Name, Host = u.Name }))
+                .ToList()
+        };
+
+        var data = new SavedArmyData
+        {
+            RawJson = rawJson,
+            State = state,
+            AbilityConfigs = new Dictionary<string, AbilitySetupEntry>(abilityConfigs),
+            StratagemConfigs = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs)
+        };
+
+        await JS.InvokeVoidAsync("localStorage.setItem", $"saved-army:{name}", JsonSerializer.Serialize(data));
+
+        savedArmies.RemoveAll(a => a.Name == name);
+        savedArmies.Insert(0, new SavedArmyMeta
+        {
+            Name = name,
+            Faction = army.Faction ?? "",
+            Detachment = army.Detachment ?? "",
+            Points = army.TotalPoints
+        });
+        await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
+    }
+
+    private async Task LoadSavedArmy(string name)
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string?>("localStorage.getItem", $"saved-army:{name}");
+            if (string.IsNullOrEmpty(json)) return;
+
+            var data = JsonSerializer.Deserialize<SavedArmyData>(json);
+            if (data is null) return;
+
+            rawJson = data.RawJson;
+            army = parser.Parse(rawJson);
+
+            if (data.State is not null)
+                ApplyState(data.State);
+
+            abilityConfigs.Clear();
+            foreach (var (k, v) in data.AbilityConfigs)
+                abilityConfigs[k] = v;
+
+            stratagemConfigs.Clear();
+            foreach (var (k, v) in data.StratagemConfigs)
+                stratagemConfigs[k] = v;
+
+            InitAbilityConfigs();
+            InitStratagemConfigs();
+
+            setupConfirmed = true;
+            stratagemSetupConfirmed = true;
+            collapsedUnits.Clear();
+            killedUnits.Clear();
+            playMode = false;
+            errorMessage = null;
+
+            await SaveToStorage();
+            await SaveAbilityConfigs();
+            await SaveStratagemConfigs();
+        }
+        catch { errorMessage = "Failed to load saved army."; }
+    }
+
+    private async Task DeleteSavedArmy(string name)
+    {
+        savedArmies.RemoveAll(a => a.Name == name);
+        await JS.InvokeVoidAsync("localStorage.removeItem", $"saved-army:{name}");
+        await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
     }
 }
