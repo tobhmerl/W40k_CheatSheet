@@ -263,7 +263,10 @@
                 var extraDef = GetExtraDefensiveAuras(unit);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var abilityCount = GetCardAbilities(unit).Count;
-                var stratagemCount = GetCardStratagems(unit).Count;
+                var cardStrats = GetCardStratagems(unit);
+                var blueStrats = cardStrats.Count(s => s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed);
+                var redStrats = cardStrats.Count(s => s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue);
+                var greenStrats = cardStrats.Count(s => s.TurnColor is StratagemTurn.Green);
                 var collapsed = IsCollapsed(unit);
 
                 @if (playMode && !killedDividerInserted && IsKilled(unit))
@@ -294,7 +297,7 @@
                             {
                                 <span class="warlord-badge">⭐</span>
                             }
-                            <span class="unit-counts">(@abilityCount, @stratagemCount)</span>
+                            <span class="unit-counts">(@abilityCount, <span class="cnt-blue">@blueStrats</span>, <span class="cnt-red">@redStrats</span>, <span class="cnt-green">@greenStrats</span>)</span>
                         </div>
                         <div class="header-right">
                             <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>

@@ -1406,10 +1406,22 @@
 }
 
 .unit-counts {
-    font-size: 0.55rem;
-    font-weight: 400;
-    color: #555;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: #888;
     margin-left: 0.3rem;
+}
+
+.unit-counts .cnt-blue {
+    color: #2979ff;
+}
+
+.unit-counts .cnt-red {
+    color: #e94560;
+}
+
+.unit-counts .cnt-green {
+    color: #4caf50;
 }
 
 .header-right {
