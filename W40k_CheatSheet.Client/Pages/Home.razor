@@ -800,7 +800,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.9</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.10</div>
 
     @if (showChangelog)
     {
@@ -811,6 +811,12 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.10</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Unit cards collapsed by default — tap to expand for a cleaner overview</li>
+                        <li class="cl-new">Header counts per unit — (abilities, <span style="color:#5a9bd5">blue</span>, <span style="color:#c97a85">red</span>, <span style="color:#7baa7d">green</span> strats) reflecting current turn/phase filters</li>
+                    </ul>
 
                     <div class="changelog-version">v1.9</div>
                     <ul class="changelog-list">
