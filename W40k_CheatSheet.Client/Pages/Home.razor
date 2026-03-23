@@ -339,7 +339,7 @@
                                                 var invulnIsExtra = !string.IsNullOrEmpty(extraDef.ExtraInvuln) && effectiveInvuln == extraDef.ExtraInvuln && string.IsNullOrEmpty(s.InvulnSave);
                                                 var fnpIsExtra = !string.IsNullOrEmpty(extraDef.ExtraFnp) && effectiveFnp == extraDef.ExtraFnp && string.IsNullOrEmpty(s.FeelNoPain);
                                                 <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner, unit)" @onclick:stopPropagation="true">
-                                                    <td class="name-cell">@s.Stat.Name@if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
+                                                    <td class="name-cell">@ShortStatName(s.Stat.Name)@if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
                                                         {<span class="stat-saves">(<span class="@(invulnIsExtra ? "invuln-extra" : "invuln")">@effectiveInvuln</span>@if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp)){<text>, </text>}@if (!string.IsNullOrEmpty(effectiveFnp)){<span class="@(fnpIsExtra ? "fnp-extra" : "fnp")">@(effectiveFnp.Replace("+", "++"))</span>})</span>}
                                                     </td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
@@ -777,7 +777,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.7</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.8</div>
 
     @if (showChangelog)
     {
@@ -788,6 +788,14 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.8</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Keyword highlighting in ability and stratagem descriptions — cyan text on click for game terms (phases, dice, distances, re-rolls, etc.)</li>
+                        <li class="cl-new">Faction-themed button accents — green hover/active states for Necrons and Dark Angels (kill, detach, clear buttons excluded)</li>
+                        <li class="cl-changed">Invuln save and Feel No Pain moved inline after model name — e.g. "Canoptek Wraiths (4+, 5++)" — freeing table space</li>
+                        <li class="cl-changed">Shield column (🛡️) removed from stats table — 6 columns now have more room</li>
+                    </ul>
 
                     <div class="changelog-version">v1.7</div>
                     <ul class="changelog-list">
@@ -1465,6 +1473,21 @@
 
     private static string ShortRange(string range) =>
         string.Equals(range, "Melee", StringComparison.OrdinalIgnoreCase) ? "M" : range;
+
+    private static string ShortStatName(string name)
+    {
+        var s = name;
+        // Strip common prefixes
+        s = s.Replace("Canoptek ", "", StringComparison.OrdinalIgnoreCase);
+        // Strip "the <Title>" suffixes: "Imotekh the Stormlord" → "Imotekh"
+        var theIdx = s.IndexOf(" the ", StringComparison.OrdinalIgnoreCase);
+        if (theIdx > 0) s = s[..theIdx];
+        // 3+ words → initials: "Lokhust Heavy Destroyer" → "LHD"
+        var words = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length >= 3)
+            s = string.Concat(words.Select(w => char.ToUpperInvariant(w[0])));
+        return s;
+    }
 
     private static string UnitAnchorId(string name) =>
         "unit-" + name.Replace(" ", "-").Replace("'", "").ToLowerInvariant();
