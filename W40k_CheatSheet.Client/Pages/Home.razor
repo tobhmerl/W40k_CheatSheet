@@ -817,7 +817,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.10</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.11</div>
 
     @if (showChangelog)
     {
@@ -828,6 +828,15 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.11</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Phase-aware weapon highlighting — ranged weapons zoom only in Shooting, melee only in Fight phase</li>
+                        <li class="cl-new">Active jump button — tapped unit nav button stays highlighted with faction accent</li>
+                        <li class="cl-changed">Zoomed weapon and stat rows use transparent backgrounds with bolder text for cleaner contrast</li>
+                        <li class="cl-changed">Faction-themed highlight colors — zoomed weapons and focused stats use faction green (Necrons, Dark Angels) instead of default cyan</li>
+                        <li class="cl-changed">Invuln/FnP saves in stat row now use orange text for better visibility</li>
+                    </ul>
 
                     <div class="changelog-version">v1.10</div>
                     <ul class="changelog-list">
