@@ -227,7 +227,7 @@
         <div id="nav-top" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
-                <button class="unit-jump-btn" @onclick="() => ScrollToAsync(UnitAnchorId(u.Name))">@u.Name</button>
+                <button class="unit-jump-btn" @onclick="() => JumpToUnit(u.Name)">@u.Name</button>
             }
         </div>
 
@@ -285,7 +285,7 @@
                      @ondragover:preventDefault
                      @ondrop="() => Drop(unit)">
 
-                    <div class="unit-header"
+                    <div class="unit-header @(collapsed ? "" : "expanded")"
                          @onclick="e => HandleHeaderClick(unit, e)"
                          @onpointerdown="() => HeaderPointerDown(unit)"
                          @onpointerup="HeaderPointerUp"
@@ -297,7 +297,24 @@
                             {
                                 <span class="warlord-badge">⭐</span>
                             }
-                            <span class="unit-counts">(@abilityCount, <span class="cnt-blue">@blueStrats</span>, <span class="cnt-red">@redStrats</span>, <span class="cnt-green">@greenStrats</span>)</span>
+                            @{
+                                var visibleCounts = new List<(string value, string cssClass)>();
+                                if (abilityCount > 0) visibleCounts.Add((abilityCount.ToString(), ""));
+                                if (blueStrats > 0) visibleCounts.Add((blueStrats.ToString(), "cnt-blue"));
+                                if (redStrats > 0) visibleCounts.Add((redStrats.ToString(), "cnt-red"));
+                                if (greenStrats > 0) visibleCounts.Add((greenStrats.ToString(), "cnt-green"));
+                            }
+                            @if (visibleCounts.Count > 0)
+                            {
+                                <span class="unit-counts">(@for (var ci = 0; ci < visibleCounts.Count; ci++)
+                                    {
+                                        @if (ci > 0){<text>, </text>}
+                                        @if (!string.IsNullOrEmpty(visibleCounts[ci].cssClass))
+                                        {<span class="@visibleCounts[ci].cssClass">@visibleCounts[ci].value</span>}
+                                        else
+                                        {@visibleCounts[ci].value}
+                                    })</span>
+                            }
                         </div>
                         <div class="header-right">
                             <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
@@ -383,14 +400,14 @@
                                         <tbody>
                                             @foreach (var w in ranged)
                                             {
-                                                <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
+                                                <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraRangedKw)))
                                                 {
-                                                    <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")">
+                                                    <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "dimmed" : "")">
                                                         <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraRangedKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraRangedKw)){<span class="kw-extra">@extraRangedKw</span>}</td>
                                                     </tr>
                                                 }
@@ -410,14 +427,14 @@
                                         <tbody>
                                             @foreach (var w in melee)
                                             {
-                                                <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
+                                                <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
                                                     <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraMeleeKw)))
                                                 {
-                                                    <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !IsWeaponOwnedByFocused(w) ? "dimmed" : "")">
+                                                    <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "dimmed" : "")">
                                                         <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraMeleeKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraMeleeKw)){<span class="kw-extra">@extraMeleeKw</span>}</td>
                                                     </tr>
                                                 }
@@ -722,7 +739,7 @@
         <div id="nav-bottom" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
-                <button class="unit-jump-btn" @onclick="() => ScrollToAsync(UnitAnchorId(u.Name))">@u.Name</button>
+                <button class="unit-jump-btn" @onclick="() => JumpToUnit(u.Name)">@u.Name</button>
             }
         </div>
 
@@ -973,6 +990,7 @@
     private int aggressorSecondary;
     private readonly HashSet<UnitEntry> expandedUnits = [];
     private List<SavedArmyMeta> savedArmies = [];
+    private string? activeJumpUnit;
 
     private string FactionClass => army?.Faction switch
     {
@@ -1482,6 +1500,14 @@
         (focusedStatOwner.RangedWeapons.Any(w => w.Name == weapon.Name) ||
          focusedStatOwner.MeleeWeapons.Any(w => w.Name == weapon.Name));
 
+    private bool IsWeaponPhaseRelevant(bool isRanged) =>
+        activePhase switch
+        {
+            GamePhase.Shoot => isRanged,
+            GamePhase.Fight => !isRanged,
+            _ => true
+        };
+
     private async Task DetachLeader(UnitEntry unit, UnitEntry leader)
     {
         unit.AttachedLeaders.Remove(leader);
@@ -1535,6 +1561,11 @@
     {
         try { await JS.InvokeVoidAsync("scrollToElement", id); }
         catch (JSException) { }  // function may not be registered yet
+    }
+
+    private async Task JumpToUnit(string unitName)
+    {
+        await ScrollToAsync(UnitAnchorId(unitName));
     }
 
     private List<UnitEntry> AliveUnits =>
