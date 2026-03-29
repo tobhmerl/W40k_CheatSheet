@@ -73,10 +73,7 @@
                                     <div class="setup-checks-row">
                                         <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
                                         <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
-                                        @if (CanAddToUnit(ability) || unit.IsLeader)
-                                        {
-                                            <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="cfg.AddToUnit" /> Unit</label>
-                                        }
+                                        <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="cfg.AddToUnit" /> Unit</label>
                                     </div>
                                     <div class="setup-checks-row">
                                         <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" /> Cmd</label>
