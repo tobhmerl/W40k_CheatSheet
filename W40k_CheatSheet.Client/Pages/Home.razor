@@ -1988,6 +1988,15 @@
     private bool IsAddedToUnit(AbilityEntry a) =>
         abilityConfigs.TryGetValue(AbilityKey(a), out var c) && c.AddToUnit;
 
+    // Check if an "added to unit" ability is visible given current turn/phase filters
+    private bool IsAddedToUnitVisible(AbilityEntry a)
+    {
+        if (IsHiddenAbility(a)) return false;
+        if (activeTurn is not null && !IsConfiguredForTurn(a, activeTurn.Value)) return false;
+        if (activePhase is not null && !IsAlwaysActive(a) && !IsConfiguredForPhase(a, activePhase.Value)) return false;
+        return true;
+    }
+
     private enum WeaponTarget { Both, Ranged, Melee }
 
     private static (string Keyword, WeaponTarget Target)? ParseLeaderWeaponAbility(AbilityEntry a)
@@ -2085,6 +2094,7 @@
             foreach (var ability in leader.Abilities)
             {
                 if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
                 var parsed = ParseLeaderCritModifier(ability);
                 if (parsed is null) continue;
                 var (threshold, target) = parsed.Value;
@@ -2122,6 +2132,7 @@
             foreach (var ability in abilities)
             {
                 if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
                 var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
@@ -2155,6 +2166,7 @@
             foreach (var ability in abilities)
             {
                 if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
                 var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
@@ -2188,6 +2200,7 @@
             foreach (var ability in leader.Abilities)
             {
                 if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
                 var parsed = ParseLeaderWeaponAbility(ability);
                 if (parsed is null) continue;
                 var (kw, target) = parsed.Value;
@@ -2220,6 +2233,7 @@
             foreach (var ability in leader.Abilities)
             {
                 if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
                 var parsed = ParseLeaderDefensiveAura(ability);
                 if (parsed is null) continue;
                 var (type, value) = parsed.Value;
