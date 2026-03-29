@@ -381,7 +381,7 @@
                                                 var invulnIsExtra = !string.IsNullOrEmpty(extraDef.ExtraInvuln) && effectiveInvuln == extraDef.ExtraInvuln && string.IsNullOrEmpty(s.InvulnSave);
                                                 var fnpIsExtra = !string.IsNullOrEmpty(extraDef.ExtraFnp) && effectiveFnp == extraDef.ExtraFnp && string.IsNullOrEmpty(s.FeelNoPain);
                                                 <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner, unit)" @onclick:stopPropagation="true">
-                                                    <td class="name-cell">@ShortStatName(s.Stat.Name)@if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
+                                                    <td class="name-cell"><span class="stat-name-text">@ShortStatName(s.Stat.Name)</span>@if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
                                                         {<span class="stat-saves">(<span class="@(invulnIsExtra ? "invuln-extra" : "invuln")">@effectiveInvuln</span>@if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp)){<text>, </text>}@if (!string.IsNullOrEmpty(effectiveFnp)){<span class="@(fnpIsExtra ? "fnp-extra" : "fnp")">@(effectiveFnp.Replace("+", "++"))</span>})</span>}
                                                     </td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
@@ -840,7 +840,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.11</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.12</div>
 
     @if (showChangelog)
     {
@@ -851,6 +851,15 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.12</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Leader critical hit modifiers — "Add to Unit" now parses crit abilities (e.g. Critical Wound 5+) and displays the threshold next to weapon skill in orange</li>
+                        <li class="cl-new">Leader unit keywords — abilities granting unit-wide keywords (e.g. Stealth) shown as orange [ KEYWORD ] labels on unit cards</li>
+                        <li class="cl-new">Extra keywords expand on tap — click the keyword row to reveal full ability descriptions with orange left-strip styling</li>
+                        <li class="cl-changed">"Add to Unit" checkbox now also recognises crit modifier and unit keyword abilities</li>
+                        <li class="cl-changed">Ability header count color softened to neutral #ccc</li>
+                    </ul>
 
                     <div class="changelog-version">v1.11</div>
                     <ul class="changelog-list">

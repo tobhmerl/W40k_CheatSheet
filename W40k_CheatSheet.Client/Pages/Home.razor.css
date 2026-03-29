@@ -1752,8 +1752,8 @@
 
 .enhancement {
     display: inline-block;
-    background: rgba(138, 43, 226, 0.15);
-    color: #bb86fc;
+    background: rgba(255, 152, 0, 0.12);
+    color: #ff9800;
     padding: 0.1rem 0.4rem;
     border-radius: 3px;
     font-size: 0.65rem;
@@ -1820,8 +1820,18 @@
     text-align: left;
     font-weight: 400;
     overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    align-items: baseline;
+    min-width: 0;
+}
+
+.stat-name-text {
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .kw-cell {
@@ -1862,6 +1872,8 @@
     margin-left: 0.3rem;
     font-size: 0.55rem;
     color: #888;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .invuln {
