@@ -264,6 +264,32 @@
     background: rgba(0, 180, 216, 0.1);
 }
 
+/* Save button — saved state (green) */
+.setup-btn.saved {
+    border-color: #4caf50;
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.setup-btn.saved:hover {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: #4caf50;
+    color: #4caf50;
+}
+
+/* Save toast */
+.save-toast {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #4caf50;
+    animation: toast-fade 2s ease-out forwards;
+}
+
+@keyframes toast-fade {
+    0%, 70% { opacity: 1; }
+    100%    { opacity: 0; }
+}
+
 /* Light mode */
 .roster-app.light .setup-unit {
     background: #fff;
@@ -504,8 +530,8 @@
     background: #111;
     border: 1px solid #2a2a2a;
     border-radius: 8px;
-    margin-top: 1rem;
-    margin-bottom: 0.75rem;
+    margin-top: 0.6rem;
+    margin-bottom: 0;
     overflow: hidden;
 }
 
@@ -672,7 +698,8 @@
     background: #111;
     border: 1px solid #2a2a2a;
     border-radius: 8px;
-    margin-bottom: 0.75rem;
+    margin-top: 0.6rem;
+    margin-bottom: 0;
     overflow: hidden;
 }
 
@@ -1119,7 +1146,7 @@
     flex-wrap: wrap;
     gap: 0.3rem;
     justify-content: center;
-    margin: 0.5rem 0 0.4rem;
+    margin: 0.6rem 0 0.4rem;
 }
 
 .unit-jump-btn {
@@ -1600,6 +1627,58 @@
 
 .card-ability-item.expanded .card-ability-desc {
     color: #ccc;
+}
+
+/* Inline ability setup checkboxes (setup mode) */
+.abilities-panel-item .setup-checks,
+.card-ability-item .setup-checks {
+    margin-top: 0.25rem;
+    padding-top: 0.2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.abilities-panel-item.added-to-unit {
+    opacity: 0.35;
+}
+
+.abilities-panel-item.added-to-unit .ability-name {
+    text-decoration: line-through;
+    text-decoration-color: #bb86fc;
+}
+
+.card-ability-item.added-to-unit {
+    opacity: 0.35;
+}
+
+.card-ability-item.added-to-unit .card-ability-name {
+    text-decoration: line-through;
+    text-decoration-color: #bb86fc;
+}
+
+/* Inline stratagem setup checkboxes (setup mode) */
+.strat-item .setup-checks,
+.card-strat-item .setup-checks {
+    margin-top: 0.25rem;
+    padding-top: 0.2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.strat-item.strat-hidden {
+    opacity: 0.35;
+}
+
+.strat-item.strat-hidden .strat-name {
+    text-decoration: line-through;
+    text-decoration-color: #555;
+}
+
+.card-strat-item.strat-hidden {
+    opacity: 0.35;
+}
+
+.card-strat-item.strat-hidden .card-strat-name {
+    text-decoration: line-through;
+    text-decoration-color: #555;
 }
 
 /* Keyword highlighting on click */
