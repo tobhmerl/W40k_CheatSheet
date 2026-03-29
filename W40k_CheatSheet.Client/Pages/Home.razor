@@ -73,7 +73,7 @@
                                     <div class="setup-checks-row">
                                         <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" /> My</label>
                                         <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" /> Enem</label>
-                                        @if (CanAddToUnit(ability))
+                                        @if (CanAddToUnit(ability) || unit.IsLeader)
                                         {
                                             <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="cfg.AddToUnit" /> Unit</label>
                                         }
@@ -256,11 +256,17 @@
                 var stats = GetAllStatLines(unit);
                 var ranged = GetAllRangedWeapons(unit);
                 var melee = GetAllMeleeWeapons(unit);
-                var enhancements = GetAllEnhancements(unit);
+                var allAbilities = GetAllAbilities(unit);
+                var enhancements = GetAllEnhancements(unit)
+                    .Where(e => !allAbilities.Any(a => a.Name.Equals(e, StringComparison.OrdinalIgnoreCase) && IsAddedToUnit(a)))
+                    .ToList();
                 var keywords = GetAllKeywords(unit);
                 var extraRangedKw = GetExtraWeaponKeywords(unit, false);
                 var extraMeleeKw = GetExtraWeaponKeywords(unit, true);
                 var extraDef = GetExtraDefensiveAuras(unit);
+                var extraUnitKw = GetExtraUnitKeywords(unit);
+                var extraCritRanged = GetExtraCritModifier(unit, false);
+                var extraCritMelee = GetExtraCritModifier(unit, true);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var abilityCount = GetCardAbilities(unit).Count;
                 var cardStrats = GetCardStratagems(unit);
@@ -299,7 +305,7 @@
                             }
                             @{
                                 var visibleCounts = new List<(string value, string cssClass)>();
-                                if (abilityCount > 0) visibleCounts.Add((abilityCount.ToString(), ""));
+                                if (abilityCount > 0) visibleCounts.Add((abilityCount.ToString(), "cnt-ability"));
                                 if (blueStrats > 0) visibleCounts.Add((blueStrats.ToString(), "cnt-blue"));
                                 if (redStrats > 0) visibleCounts.Add((redStrats.ToString(), "cnt-red"));
                                 if (greenStrats > 0) visibleCounts.Add((greenStrats.ToString(), "cnt-green"));
@@ -309,10 +315,7 @@
                                 <span class="unit-counts">(@for (var ci = 0; ci < visibleCounts.Count; ci++)
                                     {
                                         @if (ci > 0){<text>, </text>}
-                                        @if (!string.IsNullOrEmpty(visibleCounts[ci].cssClass))
-                                        {<span class="@visibleCounts[ci].cssClass">@visibleCounts[ci].value</span>}
-                                        else
-                                        {@visibleCounts[ci].value}
+                                        <span class="@visibleCounts[ci].cssClass">@visibleCounts[ci].value</span>
                                     })</span>
                             }
                         </div>
@@ -402,7 +405,7 @@
                                             {
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra">@extraCritRanged</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraRangedKw)))
@@ -429,7 +432,7 @@
                                             {
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra">@extraCritMelee</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraMeleeKw)))
@@ -449,6 +452,26 @@
                                 <button class="attach-link" @onclick="() => StartAttach(unit)" @onclick:stopPropagation="true">
                                     🔗 Attach to unit
                                 </button>
+                            }
+
+                            @if (!string.IsNullOrEmpty(extraUnitKw))
+                            {
+                                var extraKwCss = "unit-extra-keywords" + (extraKwExpandedUnit == unit ? " expanded" : "");
+                                <div class="@extraKwCss" @onclick="() => { extraKwExpandedUnit = extraKwExpandedUnit == unit ? null : unit; }" @onclick:stopPropagation="true">
+                                    <span class="kw-extra">@extraUnitKw</span>
+                                    @if (extraKwExpandedUnit == unit)
+                                    {
+                                        <div class="extra-kw-details">
+                                            @foreach (var kwa in GetExtraUnitAbilities(unit))
+                                            {
+                                                <div class="extra-kw-item">
+                                                    <span class="extra-kw-name">@kwa.Label</span>
+                                                    <span class="extra-kw-desc">@kwa.Description</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
                             }
 
                             @{
@@ -1000,6 +1023,7 @@
     private readonly HashSet<UnitEntry> expandedUnits = [];
     private List<SavedArmyMeta> savedArmies = [];
     private string? activeJumpUnit;
+    private UnitEntry? extraKwExpandedUnit;
 
     private string FactionClass => army?.Faction switch
     {
@@ -1997,8 +2021,132 @@
         return null;
     }
 
+    private static bool IsLeaderAuraDescription(string desc) =>
+        desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase) ||
+        desc.Contains("while leading", StringComparison.OrdinalIgnoreCase) ||
+        desc.Contains("while the bearer is leading", StringComparison.OrdinalIgnoreCase) ||
+        desc.Contains("is leading this unit", StringComparison.OrdinalIgnoreCase);
+
     private static bool CanAddToUnit(AbilityEntry a) =>
-        ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null;
+        ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderUnitKeyword(a) is not null || ParseLeaderCritModifier(a) is not null || IsLeaderAuraDescription(a.Description);
+
+    private static (string Threshold, WeaponTarget Target)? ParseLeaderCritModifier(AbilityEntry a)
+    {
+        var desc = a.Description;
+        if (!desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase) &&
+            !desc.Contains("while leading", StringComparison.OrdinalIgnoreCase) &&
+            !desc.Contains("while the bearer is leading", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var match = System.Text.RegularExpressions.Regex.Match(desc,
+            @"(?:Hit\s+roll\s+of\s+|scores?\s+a\s+Critical\s+Hit\s+on\s+a?\s*)(\d)\+.*?Critical\s+Hit|Critical\s+Hit.*?(?:Hit\s+roll\s+of\s+|on\s+a?\s*)(\d)\+",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (!match.Success) return null;
+
+        var threshold = (match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value) + "+";
+
+        var target = WeaponTarget.Both;
+        if (desc.Contains("melee attack", StringComparison.OrdinalIgnoreCase) ||
+            desc.Contains("melee weapon", StringComparison.OrdinalIgnoreCase))
+            target = WeaponTarget.Melee;
+        else if (desc.Contains("ranged attack", StringComparison.OrdinalIgnoreCase) ||
+                 desc.Contains("ranged weapon", StringComparison.OrdinalIgnoreCase))
+            target = WeaponTarget.Ranged;
+
+        return (threshold, target);
+    }
+
+    private string GetExtraCritModifier(UnitEntry unit, bool isMelee)
+    {
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                var parsed = ParseLeaderCritModifier(ability);
+                if (parsed is null) continue;
+                var (threshold, target) = parsed.Value;
+                if (target == WeaponTarget.Both ||
+                    (target == WeaponTarget.Melee && isMelee) ||
+                    (target == WeaponTarget.Ranged && !isMelee))
+                    return threshold;
+            }
+        }
+        return "";
+    }
+
+    private static string? ParseLeaderUnitKeyword(AbilityEntry a)
+    {
+        var desc = a.Description;
+        if (!desc.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase) &&
+            !desc.Contains("while leading", StringComparison.OrdinalIgnoreCase) &&
+            !desc.Contains("while the bearer is leading", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var match = System.Text.RegularExpressions.Regex.Match(desc,
+            @"have the (\w+(?:\s\w+)*?) ability",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (match.Success)
+            return match.Groups[1].Value.Trim().ToUpperInvariant();
+
+        return null;
+    }
+
+    private string GetExtraUnitKeywords(UnitEntry unit)
+    {
+        var extras = new List<string>();
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                var keyword = ParseLeaderUnitKeyword(ability);
+                if (keyword is not null)
+                {
+                    if (!extras.Contains(keyword))
+                        extras.Add(keyword);
+                }
+                else if (ParseLeaderWeaponAbility(ability) is null &&
+                         ParseLeaderDefensiveAura(ability) is null &&
+                         ParseLeaderCritModifier(ability) is null)
+                {
+                    if (!extras.Contains(ability.Name))
+                        extras.Add(ability.Name);
+                }
+            }
+        }
+        return extras.Count > 0 ? string.Join(" : ", extras.Select(e => $"[ {e} ]")) : "";
+    }
+
+    private List<(string Label, string Description)> GetExtraUnitAbilities(UnitEntry unit)
+    {
+        var result = new List<(string Label, string Description)>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                var keyword = ParseLeaderUnitKeyword(ability);
+                if (keyword is not null)
+                {
+                    if (seen.Add(keyword))
+                        result.Add((keyword, ability.Description));
+                }
+                else if (ParseLeaderWeaponAbility(ability) is null &&
+                         ParseLeaderDefensiveAura(ability) is null &&
+                         ParseLeaderCritModifier(ability) is null)
+                {
+                    if (seen.Add(ability.Name))
+                        result.Add((ability.Name, ability.Description));
+                }
+            }
+        }
+        return result;
+    }
 
     private string GetExtraWeaponKeywords(UnitEntry unit, bool isMelee)
     {

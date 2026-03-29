@@ -1427,6 +1427,10 @@
     font-size: 0.75rem;
 }
 
+.unit-counts .cnt-ability {
+    color: #ccc;
+}
+
 .unit-counts .cnt-blue {
     color: #5a9bd5;
 }
@@ -1502,6 +1506,51 @@
     margin-top: 0.3rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding-top: 0.3rem;
+}
+
+/* Extra unit keywords (leader auras shown as labels) */
+.unit-extra-keywords {
+    padding: 0.3rem 0.3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.unit-extra-keywords:hover {
+    background: rgba(255, 152, 0, 0.04);
+}
+
+.unit-extra-keywords.expanded {
+    background: rgba(255, 152, 0, 0.06);
+    border-top-color: rgba(255, 152, 0, 0.2);
+}
+
+.extra-kw-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+}
+
+.extra-kw-item {
+    border-left: 2px solid #ff9800;
+    padding: 0.2rem 0 0.2rem 0.4rem;
+}
+
+.extra-kw-name {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #ff9800;
+}
+
+.extra-kw-desc {
+    display: block;
+    font-size: 0.58rem;
+    line-height: 1.5;
+    color: #999;
+    margin-top: 0.1rem;
 }
 
 /* In-card abilities */
@@ -1785,8 +1834,14 @@
 }
 
 .kw-extra {
-    color: #bb86fc;
+    color: #ff9800;
     font-weight: 600;
+}
+
+.crit-extra {
+    color: #ff9800;
+    font-weight: 600;
+    font-size: 0.55rem;
 }
 
 .weapon-kw-row td {
@@ -1815,7 +1870,7 @@
 }
 
 .invuln-extra {
-    color: #bb86fc;
+    color: #ff9800;
     font-weight: 700;
 }
 
@@ -1825,7 +1880,7 @@
 }
 
 .fnp-extra {
-    color: #bb86fc;
+    color: #ff9800;
     font-weight: 700;
 }
 
