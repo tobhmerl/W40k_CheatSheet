@@ -268,7 +268,7 @@
                 var extraCritRanged = GetExtraCritModifier(unit, false);
                 var extraCritMelee = GetExtraCritModifier(unit, true);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
-                var abilityCount = GetCardAbilities(unit).Count;
+                var abilityCount = GetCardAbilities(unit).Count + GetExtraUnitAbilities(unit).Count;
                 var cardStrats = GetCardStratagems(unit);
                 var blueStrats = cardStrats.Count(s => s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed);
                 var redStrats = cardStrats.Count(s => s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue);
@@ -2036,8 +2036,20 @@
         desc.Contains("while the bearer is leading", StringComparison.OrdinalIgnoreCase) ||
         desc.Contains("is leading this unit", StringComparison.OrdinalIgnoreCase);
 
+    private static string? ParseBearerKeyword(AbilityEntry a)
+    {
+        var desc = a.Description;
+        if (IsLeaderAuraDescription(desc)) return null;
+        var match = System.Text.RegularExpressions.Regex.Match(desc,
+            @"(?:bearer|model|unit)\s+has\s+the\s+(\w+(?:\s\w+)*?)\s+ability",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (match.Success)
+            return match.Groups[1].Value.Trim().ToUpperInvariant();
+        return null;
+    }
+
     private static bool CanAddToUnit(AbilityEntry a) =>
-        ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderUnitKeyword(a) is not null || ParseLeaderCritModifier(a) is not null || IsLeaderAuraDescription(a.Description);
+        ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderUnitKeyword(a) is not null || ParseLeaderCritModifier(a) is not null || ParseBearerKeyword(a) is not null || IsLeaderAuraDescription(a.Description);
 
     private static (string Threshold, WeaponTarget Target)? ParseLeaderCritModifier(AbilityEntry a)
     {
@@ -2105,13 +2117,12 @@
     private string GetExtraUnitKeywords(UnitEntry unit)
     {
         var extras = new List<string>();
-        foreach (var leader in unit.AttachedLeaders)
+        void ScanAbilities(IEnumerable<AbilityEntry> abilities)
         {
-            if (IsKilled(leader)) continue;
-            foreach (var ability in leader.Abilities)
+            foreach (var ability in abilities)
             {
                 if (!IsAddedToUnit(ability)) continue;
-                var keyword = ParseLeaderUnitKeyword(ability);
+                var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
                     if (!extras.Contains(keyword))
@@ -2126,6 +2137,12 @@
                 }
             }
         }
+        ScanAbilities(unit.Abilities);
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            ScanAbilities(leader.Abilities);
+        }
         return extras.Count > 0 ? string.Join(" : ", extras.Select(e => $"[ {e} ]")) : "";
     }
 
@@ -2133,13 +2150,12 @@
     {
         var result = new List<(string Label, string Description)>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var leader in unit.AttachedLeaders)
+        void ScanAbilities(IEnumerable<AbilityEntry> abilities)
         {
-            if (IsKilled(leader)) continue;
-            foreach (var ability in leader.Abilities)
+            foreach (var ability in abilities)
             {
                 if (!IsAddedToUnit(ability)) continue;
-                var keyword = ParseLeaderUnitKeyword(ability);
+                var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
                     if (seen.Add(keyword))
@@ -2153,6 +2169,12 @@
                         result.Add((ability.Name, ability.Description));
                 }
             }
+        }
+        ScanAbilities(unit.Abilities);
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            ScanAbilities(leader.Abilities);
         }
         return result;
     }
