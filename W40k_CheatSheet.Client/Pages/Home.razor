@@ -111,6 +111,7 @@
                 var extraUnitKw = GetExtraUnitKeywords(unit);
                 var extraCritRanged = GetExtraCritModifier(unit, false);
                 var extraCritMelee = GetExtraCritModifier(unit, true);
+                var hitBonus = UnitHasDetachmentHitBonus(unit);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var abilityCount = GetCardAbilities(unit).Count + GetExtraUnitAbilities(unit).Count;
                 var blueStrats = 0;
@@ -253,9 +254,11 @@
                                         <tbody>
                                             @foreach (var w in ranged)
                                             {
+                                                var rEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
+                                                var rSkillBoosted = hitBonus && rEffSkill != w.Skill;
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra">@extraCritRanged</span>}</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra">@extraCritRanged</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraRangedKw)))
@@ -280,9 +283,11 @@
                                         <tbody>
                                             @foreach (var w in melee)
                                             {
+                                                var mEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
+                                                var mSkillBoosted = hitBonus && mEffSkill != w.Skill;
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@w.Skill@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra">@extraCritMelee</span>}</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra">@extraCritMelee</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraMeleeKw)))
@@ -486,6 +491,16 @@
                                         <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Charge" @bind:after="SaveStratagemConfigs" /> Chg</label>
                                         <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Fight" @bind:after="SaveStratagemConfigs" /> Fgt</label>
                                     </div>
+                                    @if (sCfg.Command || sCfg.Move || sCfg.Shoot || sCfg.Charge || sCfg.Fight)
+                                    {
+                                        <div class="setup-checks-row">
+                                            @if (sCfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyCommand" @bind:after="SaveStratagemConfigs" /> eCmd</label>}
+                                            @if (sCfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyMove" @bind:after="SaveStratagemConfigs" /> eMov</label>}
+                                            @if (sCfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyShoot" @bind:after="SaveStratagemConfigs" /> eSht</label>}
+                                            @if (sCfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyCharge" @bind:after="SaveStratagemConfigs" /> eChg</label>}
+                                            @if (sCfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyFight" @bind:after="SaveStratagemConfigs" /> eFgt</label>}
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         }
@@ -809,7 +824,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.14</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.15</div>
 
     @if (showChangelog)
     {
@@ -820,6 +835,15 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.15</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Detachment hit bonus — Awakened Dynasty "+1 to Hit roll" automatically improves BS/WS on weapon rows (e.g. 4+ → 3+, min 2+) in orange when a CHARACTER leads the unit</li>
+                        <li class="cl-new">Hit bonus auto-reverts when the CHARACTER leader is killed or detached</li>
+                        <li class="cl-new">Enemy-only phase checkboxes (eSht, eFgt, etc.) — mark individual phases as enemy-turn-only so they don't appear when filtering by My Turn</li>
+                        <li class="cl-new">Auto-detected from stratagem data — e.g. Protocol of the Undying Legions auto-sets eSht since Shooting is enemy-only</li>
+                        <li class="cl-changed">Enemy-only row only appears when at least one phase is checked</li>
+                    </ul>
 
                     <div class="changelog-version">v1.14</div>
                     <ul class="changelog-list">
@@ -1878,6 +1902,11 @@
         public bool Shoot     { get; set; }
         public bool Charge    { get; set; }
         public bool Fight     { get; set; }
+        public bool EnemyCommand { get; set; }
+        public bool EnemyMove    { get; set; }
+        public bool EnemyShoot   { get; set; }
+        public bool EnemyCharge  { get; set; }
+        public bool EnemyFight   { get; set; }
         public bool Disabled  { get; set; }
     }
 
@@ -1895,6 +1924,20 @@
     {
         bool myTurn = s.TurnColor is StratagemTurn.Green or StratagemTurn.Blue;
         bool enemyTurn = s.TurnColor is StratagemTurn.Green or StratagemTurn.Red;
+
+        // Detect per-phase enemy-only: phase is in EnemyTurnPhases but NOT in MyTurnPhases
+        bool eCmd = false, eMov = false, eSht = false, eChg = false, eFgt = false;
+        if (s.MyTurnPhases.HasValue && s.EnemyTurnPhases.HasValue)
+        {
+            var my = s.MyTurnPhases.Value;
+            var en = s.EnemyTurnPhases.Value;
+            eCmd = en.HasFlag(GamePhase.Command) && !my.HasFlag(GamePhase.Command);
+            eMov = en.HasFlag(GamePhase.Move)    && !my.HasFlag(GamePhase.Move);
+            eSht = en.HasFlag(GamePhase.Shoot)   && !my.HasFlag(GamePhase.Shoot);
+            eChg = en.HasFlag(GamePhase.Charge)  && !my.HasFlag(GamePhase.Charge);
+            eFgt = en.HasFlag(GamePhase.Fight)    && !my.HasFlag(GamePhase.Fight);
+        }
+
         return new StratagemSetupEntry
         {
             MyTurn    = myTurn,
@@ -1904,6 +1947,11 @@
             Shoot     = s.Phases.HasFlag(GamePhase.Shoot),
             Charge    = s.Phases.HasFlag(GamePhase.Charge),
             Fight     = s.Phases.HasFlag(GamePhase.Fight),
+            EnemyCommand = eCmd,
+            EnemyMove    = eMov,
+            EnemyShoot   = eSht,
+            EnemyCharge  = eChg,
+            EnemyFight   = eFgt,
             Disabled  = false
         };
     }
@@ -1935,7 +1983,7 @@
     {
         if (!stratagemConfigs.TryGetValue(s.Name, out var c))
             return true;
-        return phase switch
+        bool enabled = phase switch
         {
             GamePhase.Command => c.Command,
             GamePhase.Move    => c.Move,
@@ -1944,6 +1992,23 @@
             GamePhase.Fight   => c.Fight,
             _                 => true
         };
+        if (!enabled) return false;
+
+        // If My Turn is active and this phase is marked enemy-only, hide it
+        if (activeTurn == TurnFilter.MyTurn)
+        {
+            bool enemyOnly = phase switch
+            {
+                GamePhase.Command => c.EnemyCommand,
+                GamePhase.Move    => c.EnemyMove,
+                GamePhase.Shoot   => c.EnemyShoot,
+                GamePhase.Charge  => c.EnemyCharge,
+                GamePhase.Fight   => c.EnemyFight,
+                _                 => false
+            };
+            if (enemyOnly) return false;
+        }
+        return true;
     }
 
     private static string GetStratDotClass(Stratagem strat) => strat.TurnColor switch
@@ -2118,6 +2183,41 @@
             }
         }
         return "";
+    }
+
+    private bool UnitHasDetachmentHitBonus(UnitEntry unit)
+    {
+        if (army is null) return false;
+
+        bool ruleApplies = false;
+
+        // Match by detachment name
+        if (!string.IsNullOrEmpty(army.Detachment) &&
+            army.Detachment.Contains("Awakened Dynasty", StringComparison.OrdinalIgnoreCase))
+            ruleApplies = true;
+
+        // Match by rule text (flexible: "add 1 to the Hit roll" / "add 1 to Hit rolls" etc.)
+        if (!ruleApplies && !string.IsNullOrEmpty(army.DetachmentRule) &&
+            army.DetachmentRule.Contains("add 1 to", StringComparison.OrdinalIgnoreCase) &&
+            army.DetachmentRule.Contains("hit roll", StringComparison.OrdinalIgnoreCase) &&
+            army.DetachmentRule.Contains("character", StringComparison.OrdinalIgnoreCase))
+            ruleApplies = true;
+
+        if (!ruleApplies) return false;
+
+        return unit.AttachedLeaders.Any(l =>
+            !IsKilled(l) &&
+            l.Keywords.Any(k => k.Equals("Character", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static string ImproveSkill(string skill)
+    {
+        if (string.IsNullOrEmpty(skill)) return skill;
+        var match = System.Text.RegularExpressions.Regex.Match(skill, @"^(\d)\+$");
+        if (!match.Success) return skill;
+        var value = int.Parse(match.Groups[1].Value);
+        var improved = Math.Max(2, value - 1);
+        return $"{improved}+";
     }
 
     private static string? ParseLeaderUnitKeyword(AbilityEntry a)
