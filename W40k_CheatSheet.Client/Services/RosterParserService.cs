@@ -68,6 +68,9 @@ public partial class RosterParserService
         foreach (var profile in selection.Profiles)
             ProcessProfile(profile, unit);
 
+        foreach (var rule in selection.Rules)
+            ProcessRule(rule, unit);
+
         foreach (var sub in selection.Selections)
             ProcessSubSelection(sub, unit);
 
@@ -193,8 +196,20 @@ public partial class RosterParserService
         foreach (var profile in sub.Profiles)
             ProcessProfile(profile, unit);
 
+        foreach (var rule in sub.Rules)
+            ProcessRule(rule, unit);
+
         foreach (var nested in sub.Selections)
             ProcessSubSelection(nested, unit);
+    }
+
+    private static void ProcessRule(Rule rule, UnitEntry unit)
+    {
+        if (!IsPreGameProfileName(rule.Name))
+            return;
+
+        var desc = SanitizeText(rule.Description);
+        unit.Abilities.Add(new AbilityEntry { Name = rule.Name, Description = desc, Phases = GamePhase.Move });
     }
 
     private static int GetTotalPoints(Selection selection)
@@ -293,6 +308,11 @@ public partial class RosterParserService
         var m = FnpExplicitRegex().Match(desc);
         return m.Success ? m : FnpWoundRegex().Match(desc);
     }
+
+    private static bool IsPreGameProfileName(string name) =>
+        name.StartsWith("Scout", StringComparison.OrdinalIgnoreCase) ||
+        name.StartsWith("Infiltrator", StringComparison.OrdinalIgnoreCase) ||
+        name.StartsWith("Deep Strike", StringComparison.OrdinalIgnoreCase);
 
     private static string BetterValue(string current, string candidate)
     {

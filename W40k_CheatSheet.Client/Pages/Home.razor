@@ -68,6 +68,31 @@
             }
         </div>
 
+        @if (playMode && !preGameDismissed)
+        {
+            var preGame = PreGameReminders;
+            if (preGame.Count > 0)
+            {
+                <div class="pregame-banner">
+                    <div class="pregame-banner-header">
+                        <span>🏁 Pre-Game Reminders</span>
+                        <button class="pregame-dismiss" @onclick="() => preGameDismissed = true">✓ Done</button>
+                    </div>
+                    @foreach (var (unit, label, desc) in preGame)
+                    {
+                        <div class="pregame-item">
+                            <span class="pregame-unit">@unit.Name</span>
+                            <span class="pregame-ability">@label</span>
+                            @if (!string.IsNullOrEmpty(desc))
+                            {
+                                <span class="pregame-desc">@desc</span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+
         <div id="nav-top" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
@@ -258,7 +283,7 @@
                                                 var rSkillBoosted = hitBonus && rEffSkill != w.Skill;
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra">@extraCritRanged</span>}</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra">(@extraCritRanged)</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraRangedKw)))
@@ -287,7 +312,7 @@
                                                 var mSkillBoosted = hitBonus && mEffSkill != w.Skill;
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "zoomed" : "") @(focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra">@extraCritMelee</span>}</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra">(@extraCritMelee)</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraMeleeKw)))
@@ -824,7 +849,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.15</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.16</div>
 
     @if (showChangelog)
     {
@@ -835,6 +860,15 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.16</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Pre-Game Reminders banner — when entering Play mode, a pulsing orange banner lists all pre-game abilities (Scouts, Infiltrators, Deep Strike) with unit names and descriptions</li>
+                        <li class="cl-new">Auto-dismiss — banner disappears when any turn or phase button is tapped (battle has started)</li>
+                        <li class="cl-new">Manual dismiss via ✓ Done button</li>
+                        <li class="cl-new">Core ability rule parsing — Scouts, Infiltrators and Deep Strike are now extracted from BattleScribe rules data (not just profiles)</li>
+                        <li class="cl-changed">Banner resets each time Play mode is toggled</li>
+                    </ul>
 
                     <div class="changelog-version">v1.15</div>
                     <ul class="changelog-list">
@@ -1050,6 +1084,7 @@
     private bool armyIsSaved;
     private string? saveToast;
     private CancellationTokenSource? toastCts;
+    private bool preGameDismissed;
 
     private string FactionClass => army?.Faction switch
     {
@@ -1191,6 +1226,7 @@
         playMode = !playMode;
         if (!playMode)
             killedUnits.Clear();
+        preGameDismissed = false;
     }
 
     private void KillUnit(UnitEntry unit)
@@ -1373,6 +1409,7 @@
     private void TogglePhase(GamePhase phase)
     {
         activePhase = activePhase == phase ? null : phase;
+        preGameDismissed = true;
     }
 
     private enum TurnFilter { MyTurn, EnemyTurn }
@@ -1380,6 +1417,7 @@
     private void ToggleTurn(TurnFilter turn)
     {
         activeTurn = activeTurn == turn ? null : turn;
+        preGameDismissed = true;
     }
 
     private void ToggleFocusAbility(AbilityEntry ability)
@@ -1517,6 +1555,43 @@
         var name = ability.Name;
         return name.Equals("Leader", StringComparison.OrdinalIgnoreCase) ||
                name.Contains("Retinue", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsPreGameAbility(AbilityEntry ability)
+    {
+        var name = ability.Name;
+        return name.StartsWith("Scout", StringComparison.OrdinalIgnoreCase) ||
+               name.StartsWith("Infiltrator", StringComparison.OrdinalIgnoreCase) ||
+               name.StartsWith("Deep Strike", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsPreGameKeyword(string kw) =>
+        kw.StartsWith("Scout", StringComparison.OrdinalIgnoreCase) ||
+        kw.StartsWith("Infiltrator", StringComparison.OrdinalIgnoreCase) ||
+        kw.StartsWith("Deep Strike", StringComparison.OrdinalIgnoreCase);
+
+    private List<(UnitEntry Unit, string Label, string Description)> PreGameReminders
+    {
+        get
+        {
+            if (army is null) return [];
+            var results = new List<(UnitEntry, string, string)>();
+            var seen = new HashSet<(string, string)>();
+            foreach (var unit in AliveUnits)
+            {
+                foreach (var a in GetAllAbilities(unit).Where(IsPreGameAbility))
+                {
+                    if (seen.Add((unit.Name, a.Name)))
+                        results.Add((unit, a.Name, a.Description));
+                }
+                foreach (var kw in GetAllKeywords(unit).Where(IsPreGameKeyword))
+                {
+                    if (seen.Add((unit.Name, kw)))
+                        results.Add((unit, kw, ""));
+                }
+            }
+            return results;
+        }
     }
 
     private static bool HasFnpInStats(UnitEntry unit)
