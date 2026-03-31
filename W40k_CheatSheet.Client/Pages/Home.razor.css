@@ -870,12 +870,11 @@
     color: rgba(255, 255, 255, 0.85);
 }
 
-.strat-phases {
-    font-size: 0.5rem;
+.strat-category-inline {
+    font-size: 0.55rem;
     font-weight: 400;
-    opacity: 0.55;
+    color: #888;
     margin-left: 0.3rem;
-    letter-spacing: 0.3px;
 }
 
 .strat-name {
@@ -1541,6 +1540,99 @@
     color: #7da87f;
 }
 
+.unit-counts {
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s ease;
+}
+
+.unit-counts:hover,
+.unit-counts.expanded {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.strat-expand {
+    padding: 0.15rem 0.4rem 0.25rem;
+    font-size: 0.52rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.strat-expand-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+}
+
+.strat-expand-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.strat-cell-blue {
+    color: #6a9bc5;
+}
+
+.strat-cell-red {
+    color: #b8707e;
+}
+
+.strat-cell-ability {
+    color: #c8944a;
+}
+
+.strat-cell-green {
+    color: #7da87f;
+}
+
+.strat-expand-entry {
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.strat-expand-entry.expanded {
+    background: rgba(255, 152, 0, 0.08);
+    border-left: 2px solid #ff9800;
+    padding-left: 0.3rem;
+    margin-left: -0.1rem;
+}
+
+.strat-expand-entry.expanded-blue {
+    background: rgba(106, 155, 197, 0.10);
+    border-left: 2px solid #6a9bc5;
+    padding-left: 0.3rem;
+    margin-left: -0.1rem;
+}
+
+.strat-expand-entry.expanded-red {
+    background: rgba(184, 112, 126, 0.10);
+    border-left: 2px solid #b8707e;
+    padding-left: 0.3rem;
+    margin-left: -0.1rem;
+}
+
+.strat-expand-entry.expanded-green {
+    background: rgba(125, 168, 127, 0.10);
+    border-left: 2px solid #7da87f;
+    padding-left: 0.3rem;
+    margin-left: -0.1rem;
+}
+
+.strat-expand-desc {
+    font-size: 0.52rem;
+    font-weight: 400;
+    color: #bbb;
+    line-height: 1.5;
+    margin-top: 0.1rem;
+    white-space: normal;
+}
+
+.strat-expand-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 0.15rem 0;
+}
+
 .header-right {
     display: flex;
     align-items: center;
@@ -1566,10 +1658,56 @@
 .attached-leader {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding: 0.15rem 0;
     color: #bb86fc;
     font-size: 0.7rem;
+}
+
+.attached-leader-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.attached-leader-abilities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem;
+    padding-left: 0.4rem;
+}
+
+.attached-leader-ability {
+    font-size: 0.48rem;
+    font-weight: 600;
+    color: #c8944a;
+    background: rgba(200, 148, 74, 0.08);
+    padding: 0.05rem 0.25rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.attached-leader-ability:hover {
+    background: rgba(200, 148, 74, 0.15);
+}
+
+.attached-leader-ability.expanded {
+    background: rgba(255, 152, 0, 0.15);
+    color: #ff9800;
+}
+
+.attached-leader-ability-desc {
+    font-size: 0.5rem;
+    color: #bbb;
+    line-height: 1.5;
+    padding: 0.15rem 0.4rem 0.2rem;
+    background: rgba(255, 152, 0, 0.06);
+    border-left: 2px solid #ff9800;
+    margin-left: 0.4rem;
 }
 
 .detach-btn {
@@ -1752,14 +1890,6 @@
     text-decoration-color: #555;
 }
 
-/* Keyword highlighting on click */
-::deep .kw-hl {
-    color: #00b4d8;
-    font-weight: 700;
-    padding: 0.05rem 0.2rem;
-    border-radius: 2px;
-}
-
 /* In-card stratagems */
 .card-stratagems {
     display: flex;
@@ -1818,10 +1948,10 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
-.card-strat-phases {
+.card-strat-category {
     font-size: 0.45rem;
     font-weight: 400;
-    opacity: 0.5;
+    color: rgba(255, 255, 255, 0.55);
     margin-left: 0.2rem;
 }
 
@@ -1886,6 +2016,11 @@
     margin: 0.3rem 0;
 }
 
+.unit-keywords-inline {
+    padding: 0.25rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .keyword {
     background: rgba(255, 255, 255, 0.06);
     padding: 0.1rem 0.35rem;
@@ -1900,6 +2035,10 @@
     margin: 0.3rem 0;
 }
 
+.enhancement-entry {
+    display: inline-block;
+}
+
 .enhancement {
     display: inline-block;
     background: rgba(255, 152, 0, 0.12);
@@ -1908,6 +2047,29 @@
     border-radius: 3px;
     font-size: 0.65rem;
     font-weight: 600;
+}
+
+.enhancement.clickable {
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.enhancement.clickable:hover {
+    background: rgba(255, 152, 0, 0.2);
+}
+
+.enhancement.expanded {
+    background: rgba(255, 152, 0, 0.2);
+}
+
+.enhancement-desc {
+    font-size: 0.5rem;
+    color: #bbb;
+    line-height: 1.5;
+    padding: 0.15rem 0.4rem 0.2rem;
+    background: rgba(255, 152, 0, 0.06);
+    border-left: 2px solid #ff9800;
+    margin: 0.1rem 0 0.15rem;
 }
 
 /* Attach link button on leader cards */
@@ -2017,10 +2179,18 @@
     opacity: 0.3;
 }
 
+.weapon-kw-row.zoomed {
+    box-shadow: inset 0 1px 0 rgba(76, 175, 80, 0.45), inset 0 -1px 0 rgba(76, 175, 80, 0.45);
+}
+
 .weapon-kw-row.zoomed td {
-    background: transparent;
-    font-size: 0.65rem;
+    background: rgba(76, 175, 80, 0.12);
+    border-bottom-color: transparent;
+}
+
+.weapon-kw-row.zoomed .kw-cell {
     color: #ff9800;
+    font-weight: 700;
 }
 
 .stat-saves {
@@ -2061,22 +2231,13 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
+.stat-row.focused {
+    box-shadow: inset 0 1px 0 rgba(76, 175, 80, 0.45), inset 0 -1px 0 rgba(76, 175, 80, 0.45);
+}
+
 .stat-row.focused td {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.4rem;
-    background: transparent;
-    color: #00b4d8;
+    background: rgba(76, 175, 80, 0.12);
     font-weight: 700;
-}
-
-.stat-row.focused td.name-cell {
-    color: #00b4d8;
-    font-size: 0.95rem;
-    font-weight: 400;
-}
-
-.stat-row.focused td.name-cell .stat-saves {
-    font-size: 0.75rem;
 }
 
 /* Weapon row zoom */
@@ -2085,23 +2246,22 @@
     transition: all 0.2s ease;
 }
 
+.weapon-row.zoomed {
+    box-shadow: inset 0 1px 0 rgba(76, 175, 80, 0.45), inset 0 -1px 0 rgba(76, 175, 80, 0.45);
+}
+
+.weapon-row.zoomed + .weapon-kw-row.zoomed {
+    box-shadow: inset 0 -1px 0 rgba(76, 175, 80, 0.45);
+}
+
+.weapon-row.zoomed:has(+ .weapon-kw-row.zoomed) {
+    box-shadow: inset 0 1px 0 rgba(76, 175, 80, 0.45);
+}
+
 .weapon-row.zoomed td {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.4rem;
-    background: transparent;
-    color: #00b4d8;
+    background: rgba(76, 175, 80, 0.12);
+    border-bottom-color: transparent;
     font-weight: 700;
-}
-
-.weapon-row.zoomed td.name-cell {
-    color: #00b4d8;
-    font-size: 0.95rem;
-    font-weight: 400;
-}
-
-.weapon-row.zoomed td.kw-cell {
-    font-size: 0.7rem;
-    color: #999;
 }
 
 /* Dimmed state (stat-row filter) */
@@ -2333,15 +2493,21 @@
 .roster-app.faction-dark-angels .play-btn:hover { border-color: #2da145; color: #2da145; background: rgba(45, 161, 69, 0.1); }
 .roster-app.faction-dark-angels .play-btn.active { background: rgba(45, 161, 69, 0.2); border-color: #2da145; color: #2da145; }
 
-/* Faction-themed weapon highlight colors */
-.roster-app.faction-necrons .weapon-row.zoomed td { background: transparent; color: #2da145; }
-.roster-app.faction-necrons .weapon-row.zoomed td.name-cell { color: #2da145; }
-.roster-app.faction-necrons .weapon-kw-row.zoomed td { background: transparent; color: #ff9800; }
-.roster-app.faction-necrons .stat-row.focused td { background: transparent; color: #2da145; }
-.roster-app.faction-necrons .stat-row.focused td.name-cell { color: #2da145; }
+/* Faction-themed row highlight colors */
+.roster-app.faction-necrons .weapon-row.zoomed,
+.roster-app.faction-necrons .weapon-kw-row.zoomed,
+.roster-app.faction-necrons .stat-row.focused { box-shadow: inset 0 1px 0 rgba(45, 161, 69, 0.5), inset 0 -1px 0 rgba(45, 161, 69, 0.5); }
+.roster-app.faction-necrons .weapon-row.zoomed + .weapon-kw-row.zoomed { box-shadow: inset 0 -1px 0 rgba(45, 161, 69, 0.5); }
+.roster-app.faction-necrons .weapon-row.zoomed:has(+ .weapon-kw-row.zoomed) { box-shadow: inset 0 1px 0 rgba(45, 161, 69, 0.5); }
+.roster-app.faction-necrons .weapon-row.zoomed td,
+.roster-app.faction-necrons .weapon-kw-row.zoomed td,
+.roster-app.faction-necrons .stat-row.focused td { background: rgba(45, 161, 69, 0.15); }
 
-.roster-app.faction-dark-angels .weapon-row.zoomed td { background: transparent; color: #2da145; }
-.roster-app.faction-dark-angels .weapon-row.zoomed td.name-cell { color: #2da145; }
-.roster-app.faction-dark-angels .weapon-kw-row.zoomed td { background: transparent; color: #ff9800; }
-.roster-app.faction-dark-angels .stat-row.focused td { background: transparent; color: #2da145; }
-.roster-app.faction-dark-angels .stat-row.focused td.name-cell { color: #2da145; }
+.roster-app.faction-dark-angels .weapon-row.zoomed,
+.roster-app.faction-dark-angels .weapon-kw-row.zoomed,
+.roster-app.faction-dark-angels .stat-row.focused { box-shadow: inset 0 1px 0 rgba(45, 161, 69, 0.5), inset 0 -1px 0 rgba(45, 161, 69, 0.5); }
+.roster-app.faction-dark-angels .weapon-row.zoomed + .weapon-kw-row.zoomed { box-shadow: inset 0 -1px 0 rgba(45, 161, 69, 0.5); }
+.roster-app.faction-dark-angels .weapon-row.zoomed:has(+ .weapon-kw-row.zoomed) { box-shadow: inset 0 1px 0 rgba(45, 161, 69, 0.5); }
+.roster-app.faction-dark-angels .weapon-row.zoomed td,
+.roster-app.faction-dark-angels .weapon-kw-row.zoomed td,
+.roster-app.faction-dark-angels .stat-row.focused td { background: rgba(45, 161, 69, 0.15); }

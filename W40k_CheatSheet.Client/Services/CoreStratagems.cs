@@ -10,21 +10,21 @@ public static class CoreStratagems
         {
             Name = "Command Re-roll",
             Cost = "1CP",
-            Category = "Core – Battle Tactic",
+            Category = "Core – Battle Tactic Stratagem",
             Phases = GamePhase.All,
             TurnColor = StratagemTurn.Green,
             When = "Any phase — after any roll, test, or save.",
-            Target = "That unit/model.",
-            Effect = "Re-roll that roll, test, or save.",
-            FullWhen = "Any phase, just after you have made a Hit roll, a Wound roll, a Damage roll, a saving throw, a Feel No Pain roll, an Advance roll, a Charge roll, a Desperate Escape roll, a Hazardous roll, or just after you have rolled the dice to determine the number of attacks made with a weapon, for an attack, model or unit from your army.",
-            FullTarget = "That attack, model or unit.",
-            FullEffect = "Re-roll that roll, saving throw or test."
+            Target = "That unit or model.",
+            Effect = "Re-roll that roll, test or saving throw.",
+            FullWhen = "Any phase, just after you make an Advance roll, a Charge roll, a Desperate Escape test or a Hazardous test for a unit from your army, or a Hit roll, a Wound roll, a Damage roll or a saving throw for a model in that unit, or a roll to determine the number of attacks made with a weapon equipped by a model in that unit. If you are using fast dice rolling, this Stratagem can still be used after rolling multiple rolls or saving throws at once.",
+            FullTarget = "That unit or model from your army.",
+            FullEffect = "You re-roll that roll, test or saving throw. If you are using fast dice rolling, select one of those rolls or saving throws to re-roll."
         },
         new()
         {
             Name = "Insane Bravery",
             Cost = "1CP",
-            Category = "Core – Epic Deed",
+            Category = "Core – Epic Deed Stratagem",
             Phases = GamePhase.Command,
             TurnColor = StratagemTurn.Blue,
             When = "Battle-shock step — before a Battle-shock test.",
@@ -40,21 +40,51 @@ public static class CoreStratagems
         {
             Name = "New Orders",
             Cost = "1CP",
-            Category = "Core – Strategic Ploy",
+            Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Command,
             TurnColor = StratagemTurn.Blue,
             When = "End of your Command phase.",
             Target = "1 active Secondary Mission card.",
-            Effect = "Discard → draw a new Secondary Mission card.",
+            Effect = "Discard it and draw one new Secondary Mission card.",
             FullWhen = "End of your Command phase.",
             FullTarget = "One of your active Secondary Mission cards.",
-            FullEffect = "Discard that Secondary Mission card and draw a new Secondary Mission card."
+            FullEffect = "Discard it and draw one new Secondary Mission card."
+        },
+        new()
+        {
+            Name = "Tank Shock",
+            Cost = "1CP",
+            Category = "Core – Strategic Ploy Stratagem",
+            Phases = GamePhase.Charge,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Vehicle"],
+            When = "Your Charge phase — after a VEHICLE ends a Charge move.",
+            Target = "That VEHICLE unit.",
+            Effect = "Pick 1 enemy in ER → roll D6 = VEHICLE's T. Each 5+ = 1 MW (max 6).",
+            FullWhen = "Your Charge phase, just after a VEHICLE unit from your army ends a Charge move.",
+            FullTarget = "That VEHICLE unit.",
+            FullEffect = "Select one enemy unit within Engagement Range of your unit, and select one VEHICLE model in your unit that is within Engagement Range of that enemy unit. Roll a number of D6 equal to the Toughness characteristic of the selected VEHICLE model. For each 5+, that enemy unit suffers 1 mortal wound (to a maximum of 6 mortal wounds)."
+        },
+        new()
+        {
+            Name = "Grenade",
+            Cost = "1CP",
+            Category = "Core – Wargear Stratagem",
+            Phases = GamePhase.Shoot,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Grenades"],
+            When = "Your Shooting phase.",
+            Target = "1 GRENADES unit (didn't Advance/Fall Back/shoot), not in ER.",
+            Effect = "Pick 1 GRENADES model → 1 enemy not in ER, ≤8\" & visible. Roll 6D6: each 4+ = 1 MW.",
+            FullWhen = "Your Shooting phase.",
+            FullTarget = "One GRENADES unit from your army (excluding units that Advanced, Fell Back or have shot this turn) that is not within Engagement Range of one or more enemy units.",
+            FullEffect = "Select one GRENADES model in your unit and one enemy unit that is not within Engagement Range of any units from your army and is within 8\" of and visible to your GRENADES model. Roll six D6: for each 4+, that enemy unit suffers 1 mortal wound."
         },
         new()
         {
             Name = "Heroic Intervention",
             Cost = "1CP",
-            Category = "Core – Strategic Ploy",
+            Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Charge,
             TurnColor = StratagemTurn.Red,
             When = "Enemy Charge phase — after an enemy ends a Charge move.",
@@ -64,87 +94,29 @@ public static class CoreStratagems
             FullWhen = "Your opponent's Charge phase, just after an enemy unit ends a Charge move.",
             FullTarget = "One unit from your army that is within 6\" of that enemy unit and would be eligible to declare a charge against that enemy unit if it were your Charge phase.",
             FullEffect = "Your unit now declares a charge that targets only that enemy unit, and you resolve that charge as if it were your Charge phase.",
-            FullRestriction = "You cannot select a Vehicle unit unless it has the Walker keyword. You cannot select a unit that is within Engagement Range of one or more enemy units. The charging unit does not receive any Charge bonus this turn."
+            FullRestriction = "You can only select a VEHICLE unit from your army if it is a WALKER. Note that even if this charge is successful, your unit does not receive any Charge bonus this turn."
         },
         new()
         {
-            Name = "Counter-Offensive",
-            Cost = "2CP",
-            Category = "Core – Strategic Ploy",
-            Phases = GamePhase.Fight,
-            TurnColor = StratagemTurn.Green,
-            When = "Fight phase — after an enemy has fought.",
-            Target = "1 unit in ER of 1+ enemies, not yet fought.",
-            Effect = "Your unit fights next.",
-            FullWhen = "Fight phase, just after an enemy unit has fought.",
-            FullTarget = "One unit from your army that is within Engagement Range of one or more enemy units and that has not already been selected to fight this phase.",
-            FullEffect = "Your unit fights next."
-        },
-        new()
-        {
-            Name = "Smokescreen",
+            Name = "Fire Overwatch",
             Cost = "1CP",
-            Category = "Core – Wargear",
-            Phases = GamePhase.Shoot,
+            Category = "Core – Strategic Ploy Stratagem",
+            Phases = GamePhase.Move | GamePhase.Charge,
             TurnColor = StratagemTurn.Red,
-            RequiredKeywords = ["Smoke"],
-            When = "Enemy Shooting phase — after an enemy selects targets.",
-            Target = "1 SMOKE unit targeted by the attacker.",
-            Effect = "Til phase end → Cover + Stealth.",
-            FullWhen = "Your opponent's Shooting phase, just after an enemy unit has selected its targets.",
-            FullTarget = "One unit from your army that was selected as the target of one or more of the attacking unit's attacks and has the Smoke keyword.",
-            FullEffect = "Until the end of the phase, your unit has the Benefit of Cover and the Stealth ability."
-        },
-        new()
-        {
-            Name = "Epic Challenge",
-            Cost = "1CP",
-            Category = "Core – Epic Deed",
-            Phases = GamePhase.Fight,
-            TurnColor = StratagemTurn.Green,
-            RequiredKeywords = ["Character"],
-            When = "Fight phase — when a CHARACTER in ER of 1+ Attached units is selected to fight.",
-            Target = "1 CHARACTER model in your unit.",
-            Effect = "Til phase end → melee attacks gain [PRECISION].",
-            FullWhen = "Fight phase, when a unit from your army that contains a Character model that is within Engagement Range of one or more Attached units is selected to fight.",
-            FullTarget = "One Character model in your unit.",
-            FullEffect = "Until the end of the phase, melee weapons equipped by that model have the [Precision] ability."
-        },
-        new()
-        {
-            Name = "Grenade",
-            Cost = "1CP",
-            Category = "Core – Wargear",
-            Phases = GamePhase.Shoot,
-            TurnColor = StratagemTurn.Blue,
-            RequiredKeywords = ["Grenades"],
-            When = "Your Shooting phase.",
-            Target = "1 GRENADES unit (didn't Advance/Fall Back/shoot), not in ER.",
-            Effect = "Pick 1 GRENADES model → 1 enemy not in ER, ≤8\" & visible. Roll 6D6: each 4+ = 1 MW.",
-            FullWhen = "Your Shooting phase.",
-            FullTarget = "One unit from your army that has the Grenades keyword, has not been selected to shoot this phase, and is not within Engagement Range of one or more enemy units. That unit is not eligible to shoot this phase.",
-            FullEffect = "Select one model in your unit; that model makes a ranged attack against one enemy unit that is not within Engagement Range of one or more units from your army and is within 8\" of and visible to that model. When resolving that attack, do not make a Hit roll or a Wound roll: instead roll six D6, and for each 4+ the target suffers 1 mortal wound."
-        },
-        new()
-        {
-            Name = "Tank Shock",
-            Cost = "1CP",
-            Category = "Core – Strategic Ploy",
-            Phases = GamePhase.Charge,
-            TurnColor = StratagemTurn.Blue,
-            RequiredKeywords = ["Vehicle"],
-            When = "Your Charge phase — after a VEHICLE ends a Charge move.",
-            Target = "That VEHICLE unit.",
-            Effect = "Pick 1 enemy in ER → roll D6 = your VEHICLE's T. Each 5+ = 1 MW (max 6).",
-            FullWhen = "Your Charge phase, just after a Vehicle unit from your army ends a Charge move.",
-            FullTarget = "That Vehicle unit.",
-            FullEffect = "Select one enemy unit within Engagement Range of your unit and roll a number of D6 equal to the Toughness characteristic of your unit. For each 5+, that enemy unit suffers 1 mortal wound (to a maximum of 6 mortal wounds)."
+            When = "Enemy Move/Charge phase — after enemy set up, move, or charge.",
+            Target = "1 unit ≤24\" of that enemy, eligible to shoot.",
+            Effect = "If visible → shoot that enemy unit.",
+            Restriction = "Not TITANIC. Nat 6 to hit only. Once per turn.",
+            FullWhen = "Your opponent's Movement or Charge phase, just after an enemy unit is set up or when an enemy unit starts or ends a Normal, Advance or Fall Back move, or declares a charge.",
+            FullTarget = "One unit from your army that is within 24\" of that enemy unit and that would be eligible to shoot if it were your Shooting phase.",
+            FullEffect = "If that enemy unit is visible to your unit, your unit can shoot that enemy unit as if it were your Shooting phase.",
+            FullRestriction = "You cannot target a TITANIC unit with this Stratagem. Until the end of the phase, each time a model in your unit makes a ranged attack, an unmodified Hit roll of 6 is required to score a hit, irrespective of the attacking weapon's Ballistic Skill or any modifiers. You can only use this Stratagem once per turn."
         },
         new()
         {
             Name = "Rapid Ingress",
             Cost = "1CP",
-            Category = "Core – Strategic Ploy",
+            Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Move,
             TurnColor = StratagemTurn.Red,
             When = "End of enemy Movement phase.",
@@ -153,30 +125,14 @@ public static class CoreStratagems
             Restriction = "Normal battle round arrival restrictions apply.",
             FullWhen = "End of your opponent's Movement phase.",
             FullTarget = "One unit from your army that is in Reserves.",
-            FullEffect = "Set up your unit anywhere on the battlefield that is more than 9\" horizontally away from all enemy models. If your unit has the Deep Strike ability, you can set it up as described in that ability instead.",
-            FullRestriction = "A unit cannot be set up on the battlefield using this Stratagem during a battle round in which it was placed into Reserves."
-        },
-        new()
-        {
-            Name = "Fire Overwatch",
-            Cost = "1CP",
-            Category = "Core – Strategic Ploy",
-            Phases = GamePhase.Move | GamePhase.Charge,
-            TurnColor = StratagemTurn.Red,
-            When = "Enemy Move/Charge phase — after enemy set up, starts/ends a move, or declares a Charge.",
-            Target = "1 non-TITANIC unit ≤24\" of that enemy, eligible to shoot.",
-            Effect = "If visible → shoot that enemy unit.",
-            Restriction = "Nat 6 to hit only. Once per turn.",
-            FullWhen = "Your opponent's Movement or Charge phase, just after an enemy unit is set up or when an enemy unit starts or ends a Normal, Advance, Fall Back, or Charge move, or just after an enemy unit declares a charge.",
-            FullTarget = "One unit from your army that is within 24\" of that enemy unit and that would be eligible to shoot if it were your Shooting phase, excluding Titanic units.",
-            FullEffect = "Your unit can shoot that enemy unit as if it were your Shooting phase. When resolving those attacks, your unit can only target that enemy unit, and can only do so if that enemy unit is an eligible target. In addition, unmodified Hit rolls of 1–5 automatically fail, irrespective of any abilities that say otherwise.",
-            FullRestriction = "You can only use this Stratagem once per turn."
+            FullEffect = "Your unit can arrive on the battlefield as if it were the Reinforcements step of your Movement phase, and if every model in that unit has the Deep Strike ability, you can set that unit up as described in the Deep Strike ability (even though it is not your Movement phase).",
+            FullRestriction = "You cannot use this Stratagem to enable a unit to arrive on the battlefield during a battle round it would not normally be able to do so in."
         },
         new()
         {
             Name = "Go To Ground",
             Cost = "1CP",
-            Category = "Core – Battle Tactic",
+            Category = "Core – Battle Tactic Stratagem",
             Phases = GamePhase.Shoot,
             TurnColor = StratagemTurn.Red,
             RequiredKeywords = ["Infantry"],
@@ -184,8 +140,52 @@ public static class CoreStratagems
             Target = "1 INFANTRY unit targeted by the attacker.",
             Effect = "Til phase end → 6+ invuln + Cover.",
             FullWhen = "Your opponent's Shooting phase, just after an enemy unit has selected its targets.",
-            FullTarget = "One Infantry unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullTarget = "One INFANTRY unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
             FullEffect = "Until the end of the phase, all models in your unit have a 6+ invulnerable save and have the Benefit of Cover."
+        },
+        new()
+        {
+            Name = "Smokescreen",
+            Cost = "1CP",
+            Category = "Core – Wargear Stratagem",
+            Phases = GamePhase.Shoot,
+            TurnColor = StratagemTurn.Red,
+            RequiredKeywords = ["Smoke"],
+            When = "Enemy Shooting phase — after an enemy selects targets.",
+            Target = "1 SMOKE unit targeted by the attacker.",
+            Effect = "Til phase end → Cover + Stealth.",
+            FullWhen = "Your opponent's Shooting phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One SMOKE unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the end of the phase, all models in your unit have the Benefit of Cover and the Stealth ability."
+        },
+        new()
+        {
+            Name = "Epic Challenge",
+            Cost = "1CP",
+            Category = "Core – Epic Deed Stratagem",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Character"],
+            When = "Fight phase — when a CHARACTER in ER of Attached units is selected to fight.",
+            Target = "1 CHARACTER model in your unit.",
+            Effect = "Til phase end → melee attacks gain [PRECISION].",
+            FullWhen = "Fight phase, when a CHARACTER unit from your army that is within Engagement Range of one or more Attached units is selected to fight.",
+            FullTarget = "One CHARACTER model in your unit.",
+            FullEffect = "Until the end of the phase, all melee attacks made by that model have the [PRECISION] ability."
+        },
+        new()
+        {
+            Name = "Counter-Offensive",
+            Cost = "2CP",
+            Category = "Core – Strategic Ploy Stratagem",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            When = "Fight phase — after an enemy has fought.",
+            Target = "1 unit in ER of 1+ enemies, not yet fought.",
+            Effect = "Your unit fights next.",
+            FullWhen = "Fight phase, just after an enemy unit has fought.",
+            FullTarget = "One unit from your army that is within Engagement Range of one or more enemy units and that has not already been selected to fight this phase.",
+            FullEffect = "Your unit fights next."
         },
 
         // ── Awakened Dynasty ──
