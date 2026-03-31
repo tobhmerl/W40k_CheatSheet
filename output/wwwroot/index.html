@@ -23,6 +23,12 @@
         <span class="dismiss">🗙</span>
     </div>
 
+    <script>
+        window.scrollToElement = function (id) {
+            var el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+    </script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 
