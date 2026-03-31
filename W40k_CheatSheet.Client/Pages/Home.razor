@@ -1327,6 +1327,8 @@
         playMode = !playMode;
         if (!playMode)
             killedUnits.Clear();
+        expandedUnits.Clear();
+        stratHiddenUnits.Clear();
         preGameDismissed = false;
     }
 
@@ -1892,6 +1894,7 @@
         draggedUnit = null;
         dragOverUnit = null;
         expandedUnits.Clear();
+        stratHiddenUnits.Clear();
         try
         {
             var file = e.File;
@@ -1926,6 +1929,7 @@
         errorMessage = null;
         selectedLeader = null;
         expandedUnits.Clear();
+        stratHiddenUnits.Clear();
         abilityConfigs.Clear();
         stratagemConfigs.Clear();
         setupConfirmed = false;
@@ -2005,6 +2009,8 @@
             }
             InitStratagemConfigs();
             InitAbilityConfigs();
+            expandedUnits.Clear();
+            stratHiddenUnits.Clear();
             armyIsSaved = army is not null && savedArmies.Any(s => s.Name == army.Name);
         }
         catch { /* corrupt data or storage unavailable */ }
@@ -2747,6 +2753,7 @@
             setupConfirmed = true;
             stratagemSetupConfirmed = true;
             expandedUnits.Clear();
+            stratHiddenUnits.Clear();
             killedUnits.Clear();
             playMode = false;
             errorMessage = null;
