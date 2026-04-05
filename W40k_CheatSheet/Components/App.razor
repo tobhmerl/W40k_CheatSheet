@@ -19,6 +19,15 @@
             var el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
+        window.copyToClipboard = function (text) {
+            return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
+        };
+        window.getUrlFragment = function () {
+            return window.location.hash || '';
+        };
+        window.clearUrlFragment = function () {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        };
     </script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>

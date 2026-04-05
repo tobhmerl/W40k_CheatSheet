@@ -3,6 +3,7 @@
 @using W40k_CheatSheet.Client.Services
 @using System.Text.Json
 @inject IJSRuntime JS
+@inject NavigationManager Nav
 
 <PageTitle>W40k Roster</PageTitle>
 
@@ -91,6 +92,11 @@
                     }
                 </div>
             }
+        }
+
+        @if (isSharedView)
+        {
+            <div class="shared-banner">📎 Shared Army — Read Only</div>
         }
 
         <div id="nav-top" class="unit-jump-buttons">
@@ -190,16 +196,19 @@
                             }
                         </div>
                         <div class="header-right">
-                            <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
+                            @if (!isSharedView)
+                            {
+                                <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
+                            }
                             @if (!playMode)
                             {
                                 <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
                             }
-                            @if (playMode && !IsKilled(unit))
+                            @if (playMode && !IsKilled(unit) && !isSharedView)
                             {
                                 <button class="kill-btn" @onclick="() => KillUnit(unit)" @onclick:stopPropagation="true">☠</button>
                             }
-                            @if (playMode && IsKilled(unit))
+                            @if (playMode && IsKilled(unit) && !isSharedView)
                             {
                                 <button class="revive-btn" @onclick="() => ReviveUnit(unit)" @onclick:stopPropagation="true">↩</button>
                             }
@@ -306,11 +315,11 @@
                                     </div>
                                 }
                             </div>
-                            @if (playMode && !IsKilled(leader))
+                            @if (playMode && !IsKilled(leader) && !isSharedView)
                             {
                                 <button class="kill-btn" @onclick="() => KillAttachedUnit(unit, leader)" @onclick:stopPropagation="true">☠</button>
                             }
-                            else if (!playMode)
+                            else if (!playMode && !isSharedView)
                             {
                                 <button class="detach-btn" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
                             }
@@ -859,6 +868,8 @@
 
         <hr class="footer-divider" />
 
+        @if (!isSharedView)
+        {
         <div class="score-tracker">
             <div class="score-total-row">
                 <span class="score-total">@(defenderPrimary + defenderSecondary)</span>
@@ -908,12 +919,16 @@
                 </div>
             </div>
         </div>
+        }
 
         <div class="roster-footer">
             <hr class="footer-divider" />
             <div class="roster-actions">
-                <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Setup" : "⚔️ Play")</button>
-                @if (!playMode)
+                @if (!isSharedView)
+                {
+                    <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Setup" : "⚔️ Play")</button>
+                }
+                @if (!playMode && !isSharedView)
                 {
                     <button class="setup-btn @(armyIsSaved ? "saved" : "")" @onclick="SaveCurrentArmy">💾 Save</button>
                     @if (saveToast is not null)
@@ -921,6 +936,11 @@
                         <span class="save-toast">@saveToast</span>
                     }
                     <button class="clear-btn" @onclick="ClearRoster">🗑️ Clear</button>
+                }
+                <button class="share-btn" @onclick="ShareArmy">📤 Share</button>
+                @if (shareToast is not null)
+                {
+                    <span class="share-toast">@shareToast</span>
                 }
             </div>
             <div class="roster-meta">
@@ -936,7 +956,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.17</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.18</div>
 
     @if (showChangelog)
     {
@@ -947,6 +967,13 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.18</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">📤 Share button — compresses army + setup into a URL, copies to clipboard for sharing via WhatsApp, iMessage, etc.</li>
+                        <li class="cl-new">Shared link opens army in read-only play mode — viewer can expand cards, click abilities &amp; stratagems, use turn/phase filters</li>
+                        <li class="cl-new">Read-only banner shown on shared view — kill/revive, reorder, save/clear hidden</li>
+                    </ul>
 
                     <div class="changelog-version">v1.17</div>
                     <ul class="changelog-list">
@@ -1186,6 +1213,8 @@
     private string? saveToast;
     private CancellationTokenSource? toastCts;
     private bool preGameDismissed;
+    private bool isSharedView;
+    private string? shareToast;
 
     private string FactionClass => army?.Faction switch
     {
@@ -1202,7 +1231,18 @@
                 "window.scrollToElement=window.scrollToElement||function(id){" +
                 "var el=document.getElementById(id);" +
                 "if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}");
-            await LoadFromStorage();
+
+            var hash = await JS.InvokeAsync<string>("getUrlFragment");
+            if (!string.IsNullOrEmpty(hash) && hash.StartsWith("#share="))
+            {
+                LoadShareData(hash[7..]);
+                await JS.InvokeVoidAsync("clearUrlFragment");
+            }
+            else
+            {
+                await LoadFromStorage();
+            }
+
             await LoadSavedArmiesIndex();
             loaded = true;
             StateHasChanged();
@@ -2771,5 +2811,101 @@
         savedArmies.RemoveAll(a => a.Name == name);
         await JS.InvokeVoidAsync("localStorage.removeItem", $"saved-army:{name}");
         await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
+    }
+
+    // ── Share ────────────────────────────────────────────────────────────────
+
+    private class SharePayload
+    {
+        public ArmyRoster? Army { get; set; }
+        public Dictionary<string, AbilitySetupEntry>? Abilities { get; set; }
+        public Dictionary<string, StratagemSetupEntry>? Stratagems { get; set; }
+        public RosterState? State { get; set; }
+    }
+
+    private async Task ShareArmy()
+    {
+        if (army is null) return;
+
+        var state = new RosterState
+        {
+            UnitOrder = army.Units.Select(u => u.Name).ToList(),
+            Attachments = army.Units
+                .SelectMany(u => u.AttachedLeaders.Select(l => new AttachmentInfo { Leader = l.Name, Host = u.Name }))
+                .ToList()
+        };
+
+        var payload = new SharePayload
+        {
+            Army = army,
+            Abilities = new Dictionary<string, AbilitySetupEntry>(abilityConfigs),
+            Stratagems = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs),
+            State = state
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        var compressed = ShareService.Compress(json);
+        var url = Nav.BaseUri.TrimEnd('/') + "/#share=" + compressed;
+
+        try
+        {
+            await JS.InvokeVoidAsync("copyToClipboard", url);
+            shareToast = "✅ Link copied!";
+        }
+        catch
+        {
+            shareToast = "❌ Copy failed";
+        }
+        StateHasChanged();
+        _ = HideShareToast();
+    }
+
+    private async Task HideShareToast()
+    {
+        await Task.Delay(2500);
+        shareToast = null;
+        StateHasChanged();
+    }
+
+    private void LoadShareData(string encoded)
+    {
+        var json = ShareService.Decompress(encoded);
+        if (json is null) return;
+
+        try
+        {
+            var payload = JsonSerializer.Deserialize<SharePayload>(json);
+            if (payload?.Army is null) return;
+
+            army = payload.Army;
+
+            abilityConfigs.Clear();
+            if (payload.Abilities is not null)
+            {
+                foreach (var (k, v) in payload.Abilities)
+                    abilityConfigs[k] = v;
+            }
+
+            stratagemConfigs.Clear();
+            if (payload.Stratagems is not null)
+            {
+                foreach (var (k, v) in payload.Stratagems)
+                    stratagemConfigs[k] = v;
+            }
+
+            if (payload.State is not null)
+                ApplyState(payload.State);
+
+            InitAbilityConfigs();
+            InitStratagemConfigs();
+
+            isSharedView = true;
+            playMode = true;
+            expandedUnits.Clear();
+            stratHiddenUnits.Clear();
+            setupConfirmed = true;
+            stratagemSetupConfirmed = true;
+        }
+        catch { }
     }
 }
