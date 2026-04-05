@@ -19,11 +19,9 @@
             var el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
-        window.buildAndCopyShare = function (dotNetHelper) {
-            var url = dotNetHelper.invokeMethod('BuildShareUrl');
-            if (!url) return false;
+        window.copyText = function (text) {
             var ta = document.createElement('textarea');
-            ta.value = url;
+            ta.value = text;
             ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
             document.body.appendChild(ta);
             ta.focus();
@@ -36,7 +34,8 @@
             } catch (e) {}
             document.body.removeChild(ta);
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                return navigator.clipboard.writeText(url).then(function () { return true; }, function () { return false; });
+                navigator.clipboard.writeText(text).catch(function () {});
+                return true;
             }
             return false;
         };

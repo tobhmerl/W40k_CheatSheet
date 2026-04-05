@@ -328,6 +328,23 @@
     animation: toast-fade 2.5s ease-out forwards;
 }
 
+/* Share fallback input — shown when clipboard copy fails */
+.share-fallback-input {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    margin: 0.3rem auto 0;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.6rem;
+    font-family: monospace;
+    color: #ccc;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #333;
+    border-radius: 4px;
+    text-overflow: ellipsis;
+    cursor: text;
+}
+
 /* Light mode */
 .roster-app.light .setup-unit {
     background: #fff;

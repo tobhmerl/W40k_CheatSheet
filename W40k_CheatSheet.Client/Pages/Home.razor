@@ -942,6 +942,12 @@
                 {
                     <span class="share-toast">@shareToast</span>
                 }
+                @if (shareFallbackUrl is not null)
+                {
+                    <span class="share-toast">📋 Long-press to copy link</span>
+                    <input class="share-fallback-input" type="text" readonly value="@shareFallbackUrl"
+                           @onfocus="ShareFallbackSelect" />
+                }
             </div>
             <div class="roster-meta">
                 @if (!string.IsNullOrEmpty(army.Faction))
@@ -1215,6 +1221,7 @@
     private bool preGameDismissed;
     private bool isSharedView;
     private string? shareToast;
+    private string? shareFallbackUrl;
 
     private string FactionClass => army?.Faction switch
     {
@@ -2837,8 +2844,7 @@
         public RosterState? State { get; set; }
     }
 
-    [JSInvokable]
-    public string? BuildShareUrl()
+    private string? BuildShareUrl()
     {
         try
         {
@@ -2870,21 +2876,33 @@
         }
     }
 
-    private async Task ShareArmy()
+    private void ShareArmy()
     {
         if (army is null) return;
+        shareFallbackUrl = null;
 
-        using var dotNetRef = DotNetObjectReference.Create(this);
-        try
-        {
-            var ok = await JS.InvokeAsync<bool>("buildAndCopyShare", dotNetRef);
-            shareToast = ok ? "✅ Link copied!" : "❌ Copy failed";
-        }
-        catch
+        var url = BuildShareUrl();
+        if (url is null)
         {
             shareToast = "❌ Copy failed";
+            StateHasChanged();
+            return;
         }
-        StateHasChanged();
+
+        // Synchronous JS call — stays within user activation window
+        bool ok;
+        try { ok = ((IJSInProcessRuntime)JS).Invoke<bool>("copyText", url); }
+        catch { ok = false; }
+
+        if (ok)
+        {
+            shareToast = "✅ Link copied!";
+        }
+        else
+        {
+            shareFallbackUrl = url;
+            shareToast = null;
+        }
         _ = HideShareToast();
     }
 
@@ -2893,6 +2911,18 @@
         await Task.Delay(2500);
         shareToast = null;
         StateHasChanged();
+        if (shareFallbackUrl is not null)
+        {
+            await Task.Delay(10_000);
+            shareFallbackUrl = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ShareFallbackSelect(FocusEventArgs e)
+    {
+        // Select all text in the input so the user can copy it easily
+        await JS.InvokeVoidAsync("eval", "document.querySelector('.share-fallback-input')?.select()");
     }
 
     private void LoadShareData(string encoded)
