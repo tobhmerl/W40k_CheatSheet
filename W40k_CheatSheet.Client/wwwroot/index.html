@@ -28,10 +28,13 @@
             var el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
-        window.copyToClipboard = function (text) {
-            // Synchronous execCommand first — must run inside user activation window
+        window.buildAndCopyShare = function (dotNetHelper) {
+            // Call back into .NET synchronously (WASM is single-threaded)
+            // so the heavy serialize+compress runs inside the user activation window.
+            var url = dotNetHelper.invokeMethod('BuildShareUrl');
+            if (!url) return false;
             var ta = document.createElement('textarea');
-            ta.value = text;
+            ta.value = url;
             ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
             document.body.appendChild(ta);
             ta.focus();
@@ -43,9 +46,8 @@
                 }
             } catch (e) {}
             document.body.removeChild(ta);
-            // Async Clipboard API fallback
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
+                return navigator.clipboard.writeText(url).then(function () { return true; }, function () { return false; });
             }
             return false;
         };

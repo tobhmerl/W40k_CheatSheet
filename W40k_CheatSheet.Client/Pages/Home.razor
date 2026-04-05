@@ -2837,33 +2837,47 @@
         public RosterState? State { get; set; }
     }
 
+    [JSInvokable]
+    public string? BuildShareUrl()
+    {
+        try
+        {
+            if (army is null) return null;
+
+            var state = new RosterState
+            {
+                UnitOrder = army.Units.Select(u => u.Name).ToList(),
+                Attachments = army.Units
+                    .SelectMany(u => u.AttachedLeaders.Select(l => new AttachmentInfo { Leader = l.Name, Host = u.Name }))
+                    .ToList()
+            };
+
+            var payload = new SharePayload
+            {
+                Army = army,
+                Abilities = new Dictionary<string, AbilitySetupEntry>(abilityConfigs),
+                Stratagems = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs),
+                State = state
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var compressed = ShareService.Compress(json);
+            return Nav.BaseUri.TrimEnd('/') + "/#share=" + compressed;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private async Task ShareArmy()
     {
         if (army is null) return;
 
-        var state = new RosterState
-        {
-            UnitOrder = army.Units.Select(u => u.Name).ToList(),
-            Attachments = army.Units
-                .SelectMany(u => u.AttachedLeaders.Select(l => new AttachmentInfo { Leader = l.Name, Host = u.Name }))
-                .ToList()
-        };
-
-        var payload = new SharePayload
-        {
-            Army = army,
-            Abilities = new Dictionary<string, AbilitySetupEntry>(abilityConfigs),
-            Stratagems = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs),
-            State = state
-        };
-
-        var json = JsonSerializer.Serialize(payload);
-        var compressed = ShareService.Compress(json);
-        var url = Nav.BaseUri.TrimEnd('/') + "/#share=" + compressed;
-
+        using var dotNetRef = DotNetObjectReference.Create(this);
         try
         {
-            var ok = await JS.InvokeAsync<bool>("copyToClipboard", url);
+            var ok = await JS.InvokeAsync<bool>("buildAndCopyShare", dotNetRef);
             shareToast = ok ? "✅ Link copied!" : "❌ Copy failed";
         }
         catch

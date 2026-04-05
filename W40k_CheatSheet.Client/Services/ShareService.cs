@@ -9,7 +9,7 @@ public static class ShareService
     {
         var bytes = Encoding.UTF8.GetBytes(json);
         using var output = new MemoryStream();
-        using (var deflate = new DeflateStream(output, CompressionLevel.SmallestSize))
+        using (var deflate = new DeflateStream(output, CompressionLevel.Fastest))
         {
             deflate.Write(bytes);
         }
