@@ -2863,8 +2863,8 @@
 
         try
         {
-            await JS.InvokeVoidAsync("copyToClipboard", url);
-            shareToast = "✅ Link copied!";
+            var ok = await JS.InvokeAsync<bool>("copyToClipboard", url);
+            shareToast = ok ? "✅ Link copied!" : "❌ Copy failed";
         }
         catch
         {

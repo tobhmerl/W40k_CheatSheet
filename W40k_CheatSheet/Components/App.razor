@@ -20,10 +20,21 @@
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
         window.copyToClipboard = function (text) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
+            function fallback() {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); return true; }
+                catch (e) { return false; }
+                finally { document.body.removeChild(ta); }
             }
-            return Promise.resolve(false);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return fallback(); });
+            }
+            return Promise.resolve(fallback());
         };
         window.getUrlFragment = function () {
             return window.location.hash || '';
