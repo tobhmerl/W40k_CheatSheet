@@ -29,21 +29,25 @@
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
         window.copyToClipboard = function (text) {
-            function fallback() {
-                var ta = document.createElement('textarea');
-                ta.value = text;
-                ta.style.position = 'fixed';
-                ta.style.left = '-9999px';
-                document.body.appendChild(ta);
-                ta.select();
-                try { document.execCommand('copy'); return true; }
-                catch (e) { return false; }
-                finally { document.body.removeChild(ta); }
-            }
+            // Synchronous execCommand first — must run inside user activation window
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                if (document.execCommand('copy')) {
+                    document.body.removeChild(ta);
+                    return true;
+                }
+            } catch (e) {}
+            document.body.removeChild(ta);
+            // Async Clipboard API fallback
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return fallback(); });
+                return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
             }
-            return Promise.resolve(fallback());
+            return false;
         };
         window.getUrlFragment = function () {
             return window.location.hash || '';
