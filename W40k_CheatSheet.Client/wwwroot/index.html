@@ -29,7 +29,10 @@
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
         window.copyToClipboard = function (text) {
-            return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
+            }
+            return Promise.resolve(false);
         };
         window.getUrlFragment = function () {
             return window.location.hash || '';

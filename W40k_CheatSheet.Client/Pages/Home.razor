@@ -1227,25 +1227,39 @@
     {
         if (firstRender)
         {
-            await JS.InvokeVoidAsync("eval",
-                "window.scrollToElement=window.scrollToElement||function(id){" +
-                "var el=document.getElementById(id);" +
-                "if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}");
-
-            var hash = await JS.InvokeAsync<string>("getUrlFragment");
-            if (!string.IsNullOrEmpty(hash) && hash.StartsWith("#share="))
+            try
             {
-                LoadShareData(hash[7..]);
-                await JS.InvokeVoidAsync("clearUrlFragment");
-            }
-            else
-            {
-                await LoadFromStorage();
-            }
+                await JS.InvokeVoidAsync("eval",
+                    "window.scrollToElement=window.scrollToElement||function(id){" +
+                    "var el=document.getElementById(id);" +
+                    "if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}");
 
-            await LoadSavedArmiesIndex();
-            loaded = true;
-            StateHasChanged();
+                try
+                {
+                    var hash = await JS.InvokeAsync<string>("getUrlFragment");
+                    if (!string.IsNullOrEmpty(hash) && hash.StartsWith("#share="))
+                    {
+                        LoadShareData(hash[7..]);
+                        await JS.InvokeVoidAsync("clearUrlFragment");
+                    }
+                    else
+                    {
+                        await LoadFromStorage();
+                    }
+                }
+                catch
+                {
+                    await LoadFromStorage();
+                }
+
+                await LoadSavedArmiesIndex();
+            }
+            catch { }
+            finally
+            {
+                loaded = true;
+                StateHasChanged();
+            }
         }
     }
 
