@@ -2927,15 +2927,39 @@
 
     private void LoadShareData(string encoded)
     {
+        if (string.IsNullOrWhiteSpace(encoded))
+        {
+            errorMessage = "Share link is empty.";
+            return;
+        }
+
         var json = ShareService.Decompress(encoded);
-        if (json is null) return;
+        if (json is null)
+        {
+            errorMessage = "Could not decode share link — the link may be incomplete.";
+            return;
+        }
 
         try
         {
             var payload = JsonSerializer.Deserialize<SharePayload>(json);
-            if (payload?.Army is null) return;
+            if (payload?.Army is null)
+            {
+                errorMessage = "Share link did not contain valid army data.";
+                return;
+            }
 
             army = payload.Army;
+
+            // Set shared-view flags IMMEDIATELY after army is assigned,
+            // before any code that could throw — so we never show
+            // a loaded army without read-only restrictions.
+            isSharedView = true;
+            playMode = true;
+            setupConfirmed = true;
+            stratagemSetupConfirmed = true;
+            expandedUnits.Clear();
+            stratHiddenUnits.Clear();
 
             abilityConfigs.Clear();
             if (payload.Abilities is not null)
@@ -2956,14 +2980,10 @@
 
             InitAbilityConfigs();
             InitStratagemConfigs();
-
-            isSharedView = true;
-            playMode = true;
-            expandedUnits.Clear();
-            stratHiddenUnits.Clear();
-            setupConfirmed = true;
-            stratagemSetupConfirmed = true;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load shared army: {ex.Message}";
+        }
     }
 }
