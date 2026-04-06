@@ -214,8 +214,8 @@
                                 <div class="strat-expand-list">
                                     @foreach (var a in GetCardAbilities(unit))
                                     {
-                                        var aUsed = usedAbilities.Contains(a);
-                                        <div class="strat-expand-entry @(focusedAbility == a ? "expanded" : "") @(aUsed ? "once-used" : "")">
+                                        if (usedAbilities.Contains(a)) { continue; }
+                                        <div class="strat-expand-entry @(focusedAbility == a ? "expanded" : "")">
                                             <span class="strat-expand-item strat-cell-ability" @onclick="() => ToggleFocusAbility(a)"
                                                   @onpointerdown="() => OnceAbilityPointerDown(a)"
                                                   @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -240,8 +240,8 @@
                                 <div class="strat-expand-list">
                                     @foreach (var s in blueRedStrats)
                                     {
-                                        var sUsed = usedStratagems.Contains(s);
-                                        <div class="strat-expand-entry @(focusedStratagem == s && focusedStratagemUnit == unit ? (s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "expanded-blue" : "expanded-red") : "") @(sUsed ? "once-used" : "")">
+                                        if (usedStratagems.Contains(s)) { continue; }
+                                        <div class="strat-expand-entry @(focusedStratagem == s && focusedStratagemUnit == unit ? (s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "expanded-blue" : "expanded-red") : "")">
                                             <span class="strat-expand-item @(s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "strat-cell-blue" : "strat-cell-red")" @onclick="() => ToggleCardStratagem(s, unit)"
                                                   @onpointerdown="() => OnceStratagemPointerDown(s)"
                                                   @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -272,8 +272,8 @@
                                 <div class="strat-expand-list">
                                     @foreach (var g in greenStrats)
                                     {
-                                        var gUsed = usedStratagems.Contains(g);
-                                        <div class="strat-expand-entry @(focusedStratagem == g && focusedStratagemUnit == unit ? "expanded-green" : "") @(gUsed ? "once-used" : "")">
+                                        if (usedStratagems.Contains(g)) { continue; }
+                                        <div class="strat-expand-entry @(focusedStratagem == g && focusedStratagemUnit == unit ? "expanded-green" : "")">
                                             <span class="strat-expand-item strat-cell-green" @onclick="() => ToggleCardStratagem(g, unit)"
                                                   @onpointerdown="() => OnceStratagemPointerDown(g)"
                                                   @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -634,10 +634,10 @@
                     {
                     @foreach (var strat in FilteredStratagems)
                     {
-                        if (usedStratagems.Contains(strat)) { continue; }
                         var canUse = CanFocusedUnitUse(strat);
                         if (HasUnitFocus && !canUse) { continue; }
-                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "")"
+                        var stUsed = usedStratagems.Contains(strat);
+                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "") @(stUsed ? "once-used" : "")"
                              @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true"
                              @onpointerdown="() => OnceStratagemPointerDown(strat)"
                              @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -734,7 +734,7 @@
                                              (focusedUnit is not null && focusedUnit != entry.Unit);
                         if (isOtherFocused) { continue; }
 
-                        var phaseAbilities = entry.Abilities.Where(a => HasPhasesConfigured(a) && !IsAlwaysActive(a) && !usedAbilities.Contains(a));
+                        var phaseAbilities = entry.Abilities.Where(a => HasPhasesConfigured(a) && !IsAlwaysActive(a));
                         if (!showAllAbilities)
                         {
                             phaseAbilities = phaseAbilities.Where(a => !IsHiddenAbility(a));
@@ -751,7 +751,8 @@
                             <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
                             @foreach (var ability in phaseList)
                             {
-                                <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                var pUsed = usedAbilities.Contains(ability);
+                                <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "") @(pUsed ? "once-used" : "")"
                                      @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true"
                                      @onpointerdown="() => OnceAbilityPointerDown(ability)"
                                      @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -768,7 +769,7 @@
                     {
                         if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
                             (focusedUnit is not null && focusedUnit != e.Unit)) return false;
-                        var aa = e.Abilities.Where(a => IsAlwaysActive(a) && !usedAbilities.Contains(a));
+                        var aa = e.Abilities.Where(a => IsAlwaysActive(a));
                         if (!showAllAbilities)
                         {
                             aa = aa.Where(a => !IsHiddenAbility(a));
@@ -788,7 +789,7 @@
                                                   (focusedUnit is not null && focusedUnit != entry.Unit);
                             if (isOtherFocused3) { continue; }
 
-                            var aaAbilities = entry.Abilities.Where(a => IsAlwaysActive(a) && !usedAbilities.Contains(a));
+                            var aaAbilities = entry.Abilities.Where(a => IsAlwaysActive(a));
                             if (!showAllAbilities)
                             {
                                 aaAbilities = aaAbilities.Where(a => !IsHiddenAbility(a));
@@ -803,7 +804,8 @@
                                 <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
                                 @foreach (var ability in aaList)
                                 {
-                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                    var aaUsed = usedAbilities.Contains(ability);
+                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "") @(aaUsed ? "once-used" : "")"
                                          @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true"
                                          @onpointerdown="() => OnceAbilityPointerDown(ability)"
                                          @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -821,7 +823,7 @@
                     {
                         if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
                             (focusedUnit is not null && focusedUnit != e.Unit)) return false;
-                        var g = e.Abilities.Where(a => !HasPhasesConfigured(a) && !usedAbilities.Contains(a));
+                        var g = e.Abilities.Where(a => !HasPhasesConfigured(a));
                         if (!showAllAbilities)
                         {
                             g = g.Where(a => !IsHiddenAbility(a));
@@ -841,7 +843,7 @@
                                                   (focusedUnit is not null && focusedUnit != entry.Unit);
                             if (isOtherFocused2) { continue; }
 
-                            var genAbilities = entry.Abilities.Where(a => !HasPhasesConfigured(a) && !usedAbilities.Contains(a));
+                            var genAbilities = entry.Abilities.Where(a => !HasPhasesConfigured(a));
                             if (!showAllAbilities)
                             {
                                 genAbilities = genAbilities.Where(a => !IsHiddenAbility(a));
@@ -857,7 +859,8 @@
                                 <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
                                 @foreach (var ability in genList)
                                 {
-                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "")"
+                                    var gUsed = usedAbilities.Contains(ability);
+                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "") @(gUsed ? "once-used" : "")"
                                          @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true"
                                          @onpointerdown="() => OnceAbilityPointerDown(ability)"
                                          @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -976,9 +979,8 @@
                     <div class="changelog-version">v1.18</div>
                     <ul class="changelog-list">
                         <li class="cl-new">Once per battle — long-press (1.5 s) on any ability or stratagem containing "once per battle" to mark it as used</li>
-                        <li class="cl-new">Used abilities &amp; stratagems disappear from top overview panels</li>
-                        <li class="cl-new">Used abilities &amp; stratagems stay visible on unit cards with strikethrough styling</li>
-                        <li class="cl-changed">Long-press to undo — hold again on a strikethrough item to restore it</li>
+                        <li class="cl-new">Used abilities &amp; stratagems hidden from unit card headers</li>
+                        <li class="cl-new">Used abilities &amp; stratagems shown strikethrough in overview panels — long-press again to restore</li>
                     </ul>
 
                     <div class="changelog-version">v1.17</div>

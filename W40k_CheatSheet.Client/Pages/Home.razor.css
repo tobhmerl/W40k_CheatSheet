@@ -1624,6 +1624,22 @@
     opacity: 0.45;
 }
 
+.abilities-panel-item.once-used {
+    opacity: 0.45;
+}
+
+.abilities-panel-item.once-used .ability-name {
+    text-decoration: line-through;
+}
+
+.strat-item.once-used {
+    opacity: 0.45;
+}
+
+.strat-item.once-used .strat-name {
+    text-decoration: line-through;
+}
+
 .strat-expand-desc {
     font-size: 0.52rem;
     font-weight: 400;
