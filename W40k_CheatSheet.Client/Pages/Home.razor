@@ -139,6 +139,7 @@
                 var hitBonus = UnitHasDetachmentHitBonus(unit);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var abilityCount = GetCardAbilities(unit).Count;
+                var alwaysActiveAbilities = playMode ? GetCardAlwaysActiveAbilities(unit) : new List<AbilityEntry>();
                 List<Stratagem> headerStrats = playMode ? GetCardStratagems(unit) : [];
                 var collapsed = IsCollapsed(unit);
 
@@ -179,6 +180,7 @@
                                 if (blueStrats.Count > 0) visibleCounts.Add((blueStrats.Count.ToString(), "cnt-blue"));
                                 if (redStrats.Count > 0) visibleCounts.Add((redStrats.Count.ToString(), "cnt-red"));
                                 if (greenStrats.Count > 0) visibleCounts.Add((greenStrats.Count.ToString(), "cnt-green"));
+                                if (alwaysActiveAbilities.Count > 0) visibleCounts.Add((alwaysActiveAbilities.Count.ToString(), "cnt-always"));
                             }
                             @if (visibleCounts.Count > 0)
                             {
@@ -206,7 +208,7 @@
                         </div>
                     </div>
 
-                    @if (!stratHiddenUnits.Contains(unit) && (abilityCount > 0 || headerStrats.Count > 0))
+                    @if (!stratHiddenUnits.Contains(unit) && (abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0))
                     {
                         <div class="strat-expand" @onclick:stopPropagation="true">
                             @if (abilityCount > 0)
@@ -285,20 +287,43 @@
                                                     <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(g.FullWhen) ? g.FullWhen : g.When)</div>
                                                     <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(g.FullTarget) ? g.FullTarget : g.Target)</div>
                                                     <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(g.FullEffect) ? g.FullEffect : g.Effect)</div>
-                                                    @if (!string.IsNullOrEmpty(g.FullRestriction) || !string.IsNullOrEmpty(g.Restriction))
-                                                    {
-                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(g.FullRestriction) ? g.FullRestriction : g.Restriction)</div>
+                                                                                     @if (!string.IsNullOrEmpty(g.FullRestriction) || !string.IsNullOrEmpty(g.Restriction))
+                                                                                    {
+                                                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(g.FullRestriction) ? g.FullRestriction : g.Restriction)</div>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                            @if (alwaysActiveAbilities.Count > 0)
+                                                            {
+                                                                @if (abilityCount > 0 || blueRedStrats.Count > 0 || greenStrats.Count > 0)
+                                                                {
+                                                                    <div class="strat-expand-divider"></div>
+                                                                }
+                                                                <div class="strat-expand-list">
+                                                                    @foreach (var aa in alwaysActiveAbilities)
+                                                                    {
+                                                                        if (usedAbilities.Contains(aa)) { continue; }
+                                                                        <div class="strat-expand-entry @(focusedAbility == aa ? "expanded-always" : "")">
+                                                                            <span class="strat-expand-item strat-cell-always" @onclick="() => ToggleFocusAbility(aa)"
+                                                                                  @onpointerdown="() => OnceAbilityPointerDown(aa)"
+                                                                                  @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
+                                                                                  @oncontextmenu:preventDefault>@aa.Name</span>
+                                                                            @if (focusedAbility == aa)
+                                                                            {
+                                                                                <div class="strat-expand-desc">@aa.Description</div>
+                                                                            }
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
                                                     }
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    }
 
-                    @foreach (var leader in unit.AttachedLeaders)
+                                                    @foreach (var leader in unit.AttachedLeaders)
                     {
                         var leaderKeywordAbilities = leader.Abilities
                             .Where(a => IsAddedToUnit(a) && IsAddedToUnitVisible(a))
@@ -964,7 +989,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.18</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v1.19</div>
 
     @if (showChangelog)
     {
@@ -975,6 +1000,13 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v1.19</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Always Active section — abilities with "Unit" checked now appear as a separate purple section on unit cards, below phase-specific abilities &amp; stratagems</li>
+                        <li class="cl-new">Always-active abilities are not affected by turn/phase filters — they stay visible in every phase</li>
+                        <li class="cl-new">Purple count badge in unit header shows always-active ability count</li>
+                    </ul>
 
                     <div class="changelog-version">v1.18</div>
                     <ul class="changelog-list">
@@ -1323,6 +1355,15 @@
             all = all.Where(a => IsAlwaysActive(a) || IsConfiguredForPhase(a, activePhase.Value)).ToList();
 
         return all;
+    }
+
+    private List<AbilityEntry> GetCardAlwaysActiveAbilities(UnitEntry unit)
+    {
+        return GetAllAbilities(unit)
+            .Where(a => !IsSetupOnlyAbility(a))
+            .Where(a => IsAddedToUnit(a))
+            .Where(a => !IsHiddenAbility(a))
+            .ToList();
     }
 
     private List<Stratagem> GetCardStratagems(UnitEntry unit)

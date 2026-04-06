@@ -1540,6 +1540,10 @@
     color: #7da87f;
 }
 
+.unit-counts .cnt-always {
+    color: #a88bc5;
+}
+
 .unit-counts {
     cursor: pointer;
     border-radius: 3px;
@@ -1586,6 +1590,10 @@
     color: #7da87f;
 }
 
+.strat-cell-always {
+    color: #a88bc5;
+}
+
 .strat-expand-entry {
     cursor: pointer;
     transition: all 0.15s ease;
@@ -1615,6 +1623,13 @@
 .strat-expand-entry.expanded-green {
     background: rgba(125, 168, 127, 0.10);
     border-left: 2px solid #7da87f;
+    padding-left: 0.3rem;
+    margin-left: -0.1rem;
+}
+
+.strat-expand-entry.expanded-always {
+    background: rgba(168, 139, 197, 0.08);
+    border-left: 2px solid #a88bc5;
     padding-left: 0.3rem;
     margin-left: -0.1rem;
 }
