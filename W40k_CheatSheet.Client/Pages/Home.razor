@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using W40k_CheatSheet.Client.Models
 @using W40k_CheatSheet.Client.Services
 @using System.Text.Json
@@ -211,6 +211,7 @@
                     @if (!stratHiddenUnits.Contains(unit) && (abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0))
                     {
                         <div class="strat-expand" @onclick:stopPropagation="true">
+                            <div class="strat-expand-main">
                             @if (abilityCount > 0)
                             {
                                 <div class="strat-expand-list">
@@ -287,43 +288,40 @@
                                                     <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(g.FullWhen) ? g.FullWhen : g.When)</div>
                                                     <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(g.FullTarget) ? g.FullTarget : g.Target)</div>
                                                     <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(g.FullEffect) ? g.FullEffect : g.Effect)</div>
-                                                                                     @if (!string.IsNullOrEmpty(g.FullRestriction) || !string.IsNullOrEmpty(g.Restriction))
-                                                                                    {
-                                                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(g.FullRestriction) ? g.FullRestriction : g.Restriction)</div>
-                                                                                    }
-                                                                                </div>
-                                                                            }
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                            @if (alwaysActiveAbilities.Count > 0)
-                                                            {
-                                                                @if (abilityCount > 0 || blueRedStrats.Count > 0 || greenStrats.Count > 0)
-                                                                {
-                                                                    <div class="strat-expand-divider"></div>
-                                                                }
-                                                                <div class="strat-expand-list">
-                                                                    @foreach (var aa in alwaysActiveAbilities)
-                                                                    {
-                                                                        if (usedAbilities.Contains(aa)) { continue; }
-                                                                        <div class="strat-expand-entry @(focusedAbility == aa ? "expanded-always" : "")">
-                                                                            <span class="strat-expand-item strat-cell-always" @onclick="() => ToggleFocusAbility(aa)"
-                                                                                  @onpointerdown="() => OnceAbilityPointerDown(aa)"
-                                                                                  @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                                                  @oncontextmenu:preventDefault>@aa.Name</span>
-                                                                            @if (focusedAbility == aa)
-                                                                            {
-                                                                                <div class="strat-expand-desc">@aa.Description</div>
-                                                                            }
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                        </div>
+                                                    @if (!string.IsNullOrEmpty(g.FullRestriction) || !string.IsNullOrEmpty(g.Restriction))
+                                                    {
+                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(g.FullRestriction) ? g.FullRestriction : g.Restriction)</div>
                                                     }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            </div>
+                            @if (alwaysActiveAbilities.Count > 0)
+                            {
+                                <div class="strat-expand-always">
+                                    @foreach (var aa in alwaysActiveAbilities)
+                                    {
+                                        if (usedAbilities.Contains(aa)) { continue; }
+                                        <div class="strat-expand-entry @(focusedAbility == aa ? "expanded-always" : "")">
+                                            <span class="strat-expand-item strat-cell-always" @onclick="() => ToggleFocusAbility(aa)"
+                                                  @onpointerdown="() => OnceAbilityPointerDown(aa)"
+                                                  @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
+                                                  @oncontextmenu:preventDefault>@aa.Name</span>
+                                            @if (focusedAbility == aa)
+                                            {
+                                                <div class="strat-expand-desc">@aa.Description</div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
 
-                                                    @foreach (var leader in unit.AttachedLeaders)
+                    @foreach (var leader in unit.AttachedLeaders)
                     {
                         var leaderKeywordAbilities = leader.Abilities
                             .Where(a => IsAddedToUnit(a) && IsAddedToUnitVisible(a))

@@ -1556,10 +1556,26 @@
 }
 
 .strat-expand {
+    display: flex;
+    gap: 0.4rem;
     padding: 0.15rem 0.4rem 0.25rem;
     font-size: 0.52rem;
     font-weight: 600;
     line-height: 1.5;
+}
+
+.strat-expand-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.strat-expand-always {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    border-left: 1px solid rgba(168, 139, 197, 0.3);
+    padding-left: 0.4rem;
+    flex-shrink: 0;
 }
 
 .strat-expand-list {
