@@ -1513,46 +1513,20 @@
     margin-left: 0.25rem;
 }
 
-.unit-counts {
-    font-size: 0.65rem;
-    font-weight: 500;
+.strat-toggle {
+    font-size: 0.7rem;
     color: #888;
-    margin-left: 0.3rem;
-}
-
-.unit-header.expanded .unit-counts {
-    font-size: 0.75rem;
-}
-
-.unit-counts .cnt-ability {
-    color: #c8944a;
-}
-
-.unit-counts .cnt-blue {
-    color: #6a9bc5;
-}
-
-.unit-counts .cnt-red {
-    color: #b8707e;
-}
-
-.unit-counts .cnt-green {
-    color: #7da87f;
-}
-
-.unit-counts .cnt-always {
-    color: #a88bc5;
-}
-
-.unit-counts {
+    margin-left: 0.35rem;
     cursor: pointer;
+    padding: 0 0.15rem;
     border-radius: 3px;
-    transition: background 0.15s ease;
+    transition: color 0.15s ease;
+    user-select: none;
 }
 
-.unit-counts:hover,
-.unit-counts.expanded {
-    background: rgba(255, 255, 255, 0.08);
+.strat-toggle:hover,
+.strat-toggle.expanded {
+    color: #ccc;
 }
 
 .strat-expand {

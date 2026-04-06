@@ -176,21 +176,11 @@
                                 var blueStrats = headerStrats.Where(s => s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed).ToList();
                                 var redStrats = headerStrats.Where(s => s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue).ToList();
                                 var greenStrats = headerStrats.Where(s => s.TurnColor is StratagemTurn.Green).ToList();
-                                var visibleCounts = new List<(string value, string cssClass)>();
-                                if (abilityCount > 0) visibleCounts.Add((abilityCount.ToString(), "cnt-ability"));
-                                if (blueStrats.Count > 0) visibleCounts.Add((blueStrats.Count.ToString(), "cnt-blue"));
-                                if (redStrats.Count > 0) visibleCounts.Add((redStrats.Count.ToString(), "cnt-red"));
-                                if (greenStrats.Count > 0) visibleCounts.Add((greenStrats.Count.ToString(), "cnt-green"));
-                                var alwaysActiveTotal = alwaysActiveAbilities.Count + alwaysActiveStrats.Count;
-                                if (alwaysActiveTotal > 0) visibleCounts.Add((alwaysActiveTotal.ToString(), "cnt-always"));
+                                var hasStrats = abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0;
                             }
-                            @if (visibleCounts.Count > 0)
+                            @if (hasStrats)
                             {
-                                <span class="unit-counts @(!stratHiddenUnits.Contains(unit) ? "expanded" : "")" @onclick="() => ToggleStratDots(unit)" @onclick:stopPropagation="true">(@for (var ci = 0; ci < visibleCounts.Count; ci++)
-                                    {
-                                        @if (ci > 0){<text>, </text>}
-                                        <span class="@visibleCounts[ci].cssClass">@visibleCounts[ci].value</span>
-                                    })</span>
+                                <span class="strat-toggle @(!stratHiddenUnits.Contains(unit) ? "expanded" : "")" @onclick="() => ToggleStratDots(unit)" @onclick:stopPropagation="true">@(!stratHiddenUnits.Contains(unit) ? "▾" : "▸")</span>
                             }
                         </div>
                         <div class="header-right">
