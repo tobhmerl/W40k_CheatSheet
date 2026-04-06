@@ -1619,6 +1619,11 @@
     margin-left: -0.1rem;
 }
 
+.strat-expand-entry.once-used .strat-expand-item {
+    text-decoration: line-through;
+    opacity: 0.45;
+}
+
 .strat-expand-desc {
     font-size: 0.52rem;
     font-weight: 400;
