@@ -1053,7 +1053,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v1.20</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v2.0-beta</div>
 
     @if (showChangelog)
     {
@@ -1064,6 +1064,15 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v2.0-beta 🎉</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Always-active column — abilities &amp; stratagems active every turn/phase now displayed in a dedicated right-side column on unit cards</li>
+                        <li class="cl-new">Color-coded right column — purple abilities, blue/red stratagems, green stratagems with dividers</li>
+                        <li class="cl-changed">Streamlined unit headers — removed colored number counters, replaced with a simple ▸/▾ expand/collapse toggle for abilities &amp; stratagems</li>
+                        <li class="cl-changed">Aligned always-active column — fixed-width right column ensures consistent alignment across all unit cards</li>
+                        <li class="cl-changed">Left column shows only phase-filtered items (always-active items moved to right column)</li>
+                    </ul>
 
                     <div class="changelog-version">v1.20</div>
                     <ul class="changelog-list">
