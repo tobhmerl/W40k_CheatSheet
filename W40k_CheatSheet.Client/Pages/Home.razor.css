@@ -290,61 +290,6 @@
     100%    { opacity: 0; }
 }
 
-/* Shared view banner */
-.shared-banner {
-    background: rgba(0, 180, 216, 0.08);
-    border: 1px solid rgba(0, 180, 216, 0.35);
-    border-radius: 8px;
-    padding: 0.4rem 0.6rem;
-    margin-bottom: 0.6rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #00b4d8;
-    text-align: center;
-}
-
-/* Share button */
-.share-btn {
-    background: rgba(0, 180, 216, 0.1);
-    border: 1px solid #00b4d8;
-    color: #00b4d8;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.share-btn:hover {
-    background: rgba(0, 180, 216, 0.25);
-}
-
-/* Share toast */
-.share-toast {
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: #00b4d8;
-    animation: toast-fade 2.5s ease-out forwards;
-}
-
-/* Share fallback input — shown when clipboard copy fails */
-.share-fallback-input {
-    display: block;
-    width: 100%;
-    max-width: 280px;
-    margin: 0.3rem auto 0;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.6rem;
-    font-family: monospace;
-    color: #ccc;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid #333;
-    border-radius: 4px;
-    text-overflow: ellipsis;
-    cursor: text;
-}
-
 /* Light mode */
 .roster-app.light .setup-unit {
     background: #fff;

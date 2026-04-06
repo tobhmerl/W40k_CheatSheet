@@ -19,32 +19,6 @@
             var el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
-        window.copyText = function (text) {
-            var ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
-            try {
-                if (document.execCommand('copy')) {
-                    document.body.removeChild(ta);
-                    return true;
-                }
-            } catch (e) {}
-            document.body.removeChild(ta);
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).catch(function () {});
-                return true;
-            }
-            return false;
-        };
-        window.getUrlFragment = function () {
-            return window.location.hash || '';
-        };
-        window.clearUrlFragment = function () {
-            history.replaceState(null, '', window.location.pathname + window.location.search);
-        };
     </script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
