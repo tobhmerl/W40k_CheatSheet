@@ -2210,6 +2210,56 @@
     font-weight: 700;
 }
 
+.buff-source-trigger {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+}
+
+.buff-source-popup {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #1a1a1a;
+    border: 1px solid #ff9800;
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    margin: 0 0.5rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    animation: buff-popup-in 0.15s ease-out;
+}
+
+@keyframes buff-popup-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.buff-source-label {
+    color: #ff9800;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.buff-source-from {
+    color: #aaa;
+    font-size: 0.7rem;
+}
+
+.buff-source-kw-desc {
+    color: #ccc;
+    font-size: 0.65rem;
+    margin-top: 0.2rem;
+    padding-top: 0.2rem;
+    border-top: 1px solid rgba(255, 152, 0, 0.2);
+    line-height: 1.3;
+    white-space: pre-wrap;
+}
+
 .weapon-kw-row td {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }

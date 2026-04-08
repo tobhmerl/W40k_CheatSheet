@@ -121,6 +121,18 @@
             </div>
         }
 
+        @if (buffSourcePopup is var (bsLabel, bsSource, bsKwDesc) && bsLabel is not null)
+        {
+            <div class="buff-source-popup" @onclick="() => buffSourcePopup = null">
+                <span class="buff-source-label">@bsLabel</span>
+                <span class="buff-source-from">from @bsSource</span>
+                @if (!string.IsNullOrEmpty(bsKwDesc))
+                {
+                    <div class="buff-source-kw-desc">@bsKwDesc</div>
+                }
+            </div>
+        }
+
         <div class="unit-grid">
             @{
                 bool killedDividerInserted = false;
@@ -143,6 +155,12 @@
                 var extraCritRanged = GetExtraCritModifier(unit, false);
                 var extraCritMelee = GetExtraCritModifier(unit, true);
                 var hitBonus = UnitHasDetachmentHitBonus(unit);
+                var srcRangedKw = GetExtraWeaponKeywordsSource(unit, false);
+                var srcMeleeKw = GetExtraWeaponKeywordsSource(unit, true);
+                var srcCritRanged = GetExtraCritSource(unit, false);
+                var srcCritMelee = GetExtraCritSource(unit, true);
+                var srcHitBonus = GetHitBonusSource(unit);
+                var srcDef = GetExtraDefensiveAuraSources(unit);
                 var isWarlord = unit.IsWarlord || unit.AttachedLeaders.Any(l => l.IsWarlord);
                 var abilityCount = GetCardAbilities(unit).Count;
                 var alwaysActiveAbilities = playMode ? GetCardAlwaysActiveAbilities(unit) : new List<AbilityEntry>();
@@ -472,8 +490,33 @@
                                                 var invulnIsExtra = !string.IsNullOrEmpty(extraDef.ExtraInvuln) && effectiveInvuln == extraDef.ExtraInvuln && string.IsNullOrEmpty(s.InvulnSave);
                                                 var fnpIsExtra = !string.IsNullOrEmpty(extraDef.ExtraFnp) && effectiveFnp == extraDef.ExtraFnp && string.IsNullOrEmpty(s.FeelNoPain);
                                                 <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "") @(focusedWeapon is not null ? "dimmed" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner, unit)" @onclick:stopPropagation="true">
-                                                    <td class="name-cell"><span class="stat-name-text">@ShortStatName(s.Stat.Name)</span>@if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
-                                                        {<span class="stat-saves">(<span class="@(invulnIsExtra ? "invuln-extra" : "invuln")">@effectiveInvuln</span>@if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp)){<text>, </text>}@if (!string.IsNullOrEmpty(effectiveFnp)){<span class="@(fnpIsExtra ? "fnp-extra" : "fnp")">@(effectiveFnp.Replace("+", "++"))</span>})</span>}
+                                                    <td class="name-cell">
+                                                        <span class="stat-name-text">@ShortStatName(s.Stat.Name)</span>
+                                                        @if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
+                                                        {
+                                                            <span class="stat-saves">(
+                                                                @if (invulnIsExtra)
+                                                                {
+                                                                    <span class="invuln-extra buff-source-trigger" @onclick="() => ShowBuffSource(effectiveInvuln, srcDef.InvulnSource, string.Empty)" @onclick:stopPropagation="true">@effectiveInvuln</span>
+                                                                }
+                                                                else if (!string.IsNullOrEmpty(effectiveInvuln))
+                                                                {
+                                                                    <span class="invuln">@effectiveInvuln</span>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp))
+                                                                {
+                                                                    <text>, </text>
+                                                                }
+                                                                @if (fnpIsExtra)
+                                                                {
+                                                                    <span class="fnp-extra buff-source-trigger" @onclick="() => ShowBuffSource(effectiveFnp, srcDef.FnpSource, string.Empty)" @onclick:stopPropagation="true">@(effectiveFnp.Replace("+", "++"))</span>
+                                                                }
+                                                                else if (!string.IsNullOrEmpty(effectiveFnp))
+                                                                {
+                                                                    <span class="fnp">@(effectiveFnp.Replace("+", "++"))</span>
+                                                                }
+                                                            )</span>
+                                                        }
                                                     </td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
@@ -498,13 +541,13 @@
                                                 var rSkillBoosted = hitBonus && rEffSkill != w.Skill;
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "zoomed" : "") @((focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true))) || (focusedWeapon is not null && focusedWeapon != w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra">(@extraCritRanged)</span>}</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(rEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritRanged, srcCritRanged, string.Empty)" @onclick:stopPropagation="true">(@extraCritRanged)</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraRangedKw)))
                                                 {
                                                     <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true)) ? "zoomed" : "") @((focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true))) || (focusedWeapon is not null && focusedWeapon != w) ? "dimmed" : "")">
-                                                        <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraRangedKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraRangedKw)){<span class="kw-extra">@extraRangedKw</span>}</td>
+                                                        <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraRangedKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraRangedKw)){<span class="kw-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraRangedKw, srcRangedKw.Source, srcRangedKw.KeywordDesc)" @onclick:stopPropagation="true">@extraRangedKw</span>}</td>
                                                     </tr>
                                                 }
                                             }
@@ -527,13 +570,13 @@
                                                 var mSkillBoosted = hitBonus && mEffSkill != w.Skill;
                                                 <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "zoomed" : "") @((focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false))) || (focusedWeapon is not null && focusedWeapon != w) ? "dimmed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                     <td class="name-cell">@w.Name</td>
-                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra">(@extraCritMelee)</span>}</td>
+                                                    <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(mEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritMelee, srcCritMelee, string.Empty)" @onclick:stopPropagation="true">(@extraCritMelee)</span>}</td>
                                                     <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                 </tr>
                                                 @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraMeleeKw)))
                                                 {
                                                     <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false)) ? "zoomed" : "") @((focusedCard == unit && focusedStatOwner is not null && !(IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false))) || (focusedWeapon is not null && focusedWeapon != w) ? "dimmed" : "")">
-                                                        <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraMeleeKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraMeleeKw)){<span class="kw-extra">@extraMeleeKw</span>}</td>
+                                                        <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraMeleeKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraMeleeKw)){<span class="kw-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraMeleeKw, srcMeleeKw.Source, srcMeleeKw.KeywordDesc)" @onclick:stopPropagation="true">@extraMeleeKw</span>}</td>
                                                     </tr>
                                                 }
                                             }
@@ -1350,6 +1393,7 @@
     private readonly HashSet<Stratagem> usedStratagems = [];
     private CancellationTokenSource? onceCts;
     private bool onceTriggered;
+    private (string Label, string Source, string KeywordDesc)? buffSourcePopup;
 
     private string FactionClass => army?.Faction switch
     {
@@ -2804,6 +2848,105 @@
             }
         }
         return extras.Count > 0 ? string.Join(", ", extras) : "";
+    }
+
+    private void ShowBuffSource(string label, string source, string keywordDesc)
+    {
+        if (buffSourcePopup is var (l, _, _) && l == label)
+            buffSourcePopup = null;
+        else
+            buffSourcePopup = (label, source, keywordDesc);
+    }
+
+    private (string Source, string KeywordDesc) GetExtraWeaponKeywordsSource(UnitEntry unit, bool isMelee)
+    {
+        var sources = new List<string>();
+        var kwDescs = new List<string>();
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
+                var parsed = ParseLeaderWeaponAbility(ability);
+                if (parsed is null) continue;
+                var (kw, target) = parsed.Value;
+                if (target == WeaponTarget.Both ||
+                    (target == WeaponTarget.Melee && isMelee) ||
+                    (target == WeaponTarget.Ranged && !isMelee))
+                {
+                    sources.Add($"{leader.Name} — {ability.Name}");
+                    var kwDesc = LookupKeywordDescription(kw);
+                    if (!string.IsNullOrEmpty(kwDesc))
+                        kwDescs.Add($"{kw}: {kwDesc}");
+                }
+            }
+        }
+        return (string.Join(", ", sources), string.Join("\n", kwDescs));
+    }
+
+    private string GetExtraCritSource(UnitEntry unit, bool isMelee)
+    {
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
+                var parsed = ParseLeaderCritModifier(ability);
+                if (parsed is null) continue;
+                var (_, target) = parsed.Value;
+                if (target == WeaponTarget.Both ||
+                    (target == WeaponTarget.Melee && isMelee) ||
+                    (target == WeaponTarget.Ranged && !isMelee))
+                    return $"{leader.Name} — {ability.Name}";
+            }
+        }
+        return "";
+    }
+
+    private string GetHitBonusSource(UnitEntry unit)
+    {
+        if (army is not null && UnitHasDetachmentHitBonus(unit))
+            return army.Detachment ?? "Detachment";
+        return "";
+    }
+
+    private (string InvulnSource, string FnpSource) GetExtraDefensiveAuraSources(UnitEntry unit)
+    {
+        string invulnSrc = "";
+        string fnpSrc = "";
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            foreach (var ability in leader.Abilities)
+            {
+                if (!IsAddedToUnit(ability)) continue;
+                if (!IsAddedToUnitVisible(ability)) continue;
+                var parsed = ParseLeaderDefensiveAura(ability);
+                if (parsed is null) continue;
+                var (type, _) = parsed.Value;
+                if (type == DefensiveAuraType.Invulnerable && string.IsNullOrEmpty(invulnSrc))
+                    invulnSrc = $"{leader.Name} — {ability.Name}";
+                else if (type == DefensiveAuraType.FeelNoPain && string.IsNullOrEmpty(fnpSrc))
+                    fnpSrc = $"{leader.Name} — {ability.Name}";
+            }
+        }
+        return (invulnSrc, fnpSrc);
+    }
+
+    private static string LookupKeywordDescription(string keyword)
+    {
+        if (WeaponKeywordDescriptions.TryGetValue(keyword, out var exact))
+            return exact;
+        foreach (var (key, value) in WeaponKeywordDescriptions)
+        {
+            if (keyword.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+                return value;
+        }
+        return "";
     }
 
     private static string CombineKeywords(string baseKw, string extra)
