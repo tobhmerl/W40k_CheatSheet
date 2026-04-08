@@ -60,7 +60,7 @@
                 <button class="phase-btn @(activePhase == GamePhase.Charge ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Charge)">Charge</button>
                 <button class="phase-btn @(activePhase == GamePhase.Fight ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Fight)">Fight</button>
             </div>
-            @if (!string.IsNullOrEmpty(army.DetachmentRule))
+            @if (!string.IsNullOrEmpty(army.DetachmentRule) && !IsDetachmentRuleReflectedInStats)
             {
                 <div class="detachment-rule">
                     <strong>@army.Detachment:</strong> @army.DetachmentRule
@@ -2628,6 +2628,38 @@
             }
         }
         return "";
+    }
+
+    private bool IsDetachmentRuleReflectedInStats
+    {
+        get
+        {
+            if (army is null || string.IsNullOrEmpty(army.DetachmentRule)) return false;
+
+            // Hit bonus detachments (e.g., Awakened Dynasty)
+            if (!string.IsNullOrEmpty(army.Detachment) &&
+                army.Detachment.Contains("Awakened Dynasty", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            var rule = army.DetachmentRule;
+
+            // Generic hit-roll bonus pattern
+            if (rule.Contains("add 1 to", StringComparison.OrdinalIgnoreCase) &&
+                rule.Contains("hit roll", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // Wound-roll bonus pattern
+            if (rule.Contains("add 1 to", StringComparison.OrdinalIgnoreCase) &&
+                rule.Contains("wound roll", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // Keyword-granting pattern (e.g., "have the [KEYWORD] ability")
+            if (rule.Contains("have the", StringComparison.OrdinalIgnoreCase) &&
+                rule.Contains("ability", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
+        }
     }
 
     private bool UnitHasDetachmentHitBonus(UnitEntry unit)
