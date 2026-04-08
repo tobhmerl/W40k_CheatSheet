@@ -96,7 +96,8 @@
         <div id="nav-top" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
-                <button class="unit-jump-btn" @onclick="() => JumpToUnit(u.Name)">@u.Name</button>
+                var btnUnit = u;
+                <button class="unit-jump-btn @(playMode && visiblePlayUnits.Contains(btnUnit) ? "active" : "")" @onclick="() => HandleUnitButton(btnUnit)">@btnUnit.Name</button>
             }
         </div>
 
@@ -122,6 +123,7 @@
             }
             @foreach (var unit in DisplayUnits)
             {
+                if (playMode && !IsKilled(unit) && !visiblePlayUnits.Contains(unit)) { continue; }
                 var stats = GetAllStatLines(unit);
                 var ranged = GetAllRangedWeapons(unit);
                 var melee = GetAllMeleeWeapons(unit);
@@ -970,7 +972,8 @@
         <div id="nav-bottom" class="unit-jump-buttons">
             @foreach (var u in AliveUnits)
             {
-                <button class="unit-jump-btn" @onclick="() => JumpToUnit(u.Name)">@u.Name</button>
+                var btnUnit2 = u;
+                <button class="unit-jump-btn @(playMode && visiblePlayUnits.Contains(btnUnit2) ? "active" : "")" @onclick="() => HandleUnitButton(btnUnit2)">@btnUnit2.Name</button>
             }
         </div>
 
@@ -1330,6 +1333,7 @@
     private string? activeJumpUnit;
     private UnitEntry? extraKwExpandedUnit;
     private readonly HashSet<UnitEntry> stratHiddenUnits = [];
+    private readonly HashSet<UnitEntry> visiblePlayUnits = [];
     private bool armyIsSaved;
     private string? saveToast;
     private CancellationTokenSource? toastCts;
@@ -1515,11 +1519,18 @@
     private void TogglePlayMode()
     {
         playMode = !playMode;
-        if (!playMode)
+        if (playMode)
+        {
+            visiblePlayUnits.Clear();
+            foreach (var u in AliveUnits)
+                visiblePlayUnits.Add(u);
+        }
+        else
         {
             killedUnits.Clear();
             usedAbilities.Clear();
             usedStratagems.Clear();
+            visiblePlayUnits.Clear();
         }
         expandedUnits.Clear();
         stratHiddenUnits.Clear();
@@ -2095,9 +2106,17 @@
         catch (JSException) { }  // function may not be registered yet
     }
 
-    private async Task JumpToUnit(string unitName)
+    private async Task HandleUnitButton(UnitEntry unit)
     {
-        await ScrollToAsync(UnitAnchorId(unitName));
+        if (playMode)
+        {
+            if (!visiblePlayUnits.Remove(unit))
+                visiblePlayUnits.Add(unit);
+        }
+        else
+        {
+            await ScrollToAsync(UnitAnchorId(unit.Name));
+        }
     }
 
     private List<UnitEntry> AliveUnits =>

@@ -1239,9 +1239,9 @@
 
 .unit-jump-btn.active {
     font-weight: 700;
-    background: rgba(0, 180, 216, 0.15);
-    border-color: #00b4d8;
-    color: #ccc;
+    background: rgba(76, 175, 80, 0.15);
+    border-color: #4caf50;
+    color: #4caf50;
 }
 
 /* Card nav buttons (A / S anchors) */
