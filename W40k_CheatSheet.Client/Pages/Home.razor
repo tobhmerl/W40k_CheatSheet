@@ -94,6 +94,10 @@
         }
 
         <div id="nav-top" class="unit-jump-buttons">
+            @if (playMode)
+            {
+                <button class="unit-jump-btn toggle-all" @onclick="ToggleAllUnits">@(visiblePlayUnits.Count == AliveUnits.Count ? "⊘" : "✦")</button>
+            }
             @foreach (var u in AliveUnits)
             {
                 var btnUnit = u;
@@ -970,6 +974,10 @@
         </div>
 
         <div id="nav-bottom" class="unit-jump-buttons">
+            @if (playMode)
+            {
+                <button class="unit-jump-btn toggle-all" @onclick="ToggleAllUnits">@(visiblePlayUnits.Count == AliveUnits.Count ? "⊘" : "✦")</button>
+            }
             @foreach (var u in AliveUnits)
             {
                 var btnUnit2 = u;
@@ -2116,6 +2124,18 @@
         else
         {
             await ScrollToAsync(UnitAnchorId(unit.Name));
+        }
+    }
+
+    private void ToggleAllUnits()
+    {
+        if (visiblePlayUnits.Count == AliveUnits.Count)
+            visiblePlayUnits.Clear();
+        else
+        {
+            visiblePlayUnits.Clear();
+            foreach (var u in AliveUnits)
+                visiblePlayUnits.Add(u);
         }
     }
 

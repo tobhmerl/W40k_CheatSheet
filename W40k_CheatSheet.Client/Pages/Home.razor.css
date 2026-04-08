@@ -1244,6 +1244,19 @@
     color: #4caf50;
 }
 
+.unit-jump-btn.toggle-all {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    border-color: #555;
+    color: #aaa;
+}
+
+.unit-jump-btn.toggle-all:hover {
+    border-color: #4caf50;
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
 /* Card nav buttons (A / S anchors) */
 .card-footer-row {
     display: flex;
