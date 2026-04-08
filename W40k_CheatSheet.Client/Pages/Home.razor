@@ -329,11 +329,11 @@
                                             @foreach (var aa in alwaysActiveAbilities)
                                             {
                                                 if (usedAbilities.Contains(aa)) { continue; }
-                                                <div class="strat-expand-entry @(focusedAbility == aa ? "expanded-always" : "")">
-                                                    <span class="strat-expand-item strat-cell-always" @onclick="() => ToggleFocusAbility(aa)"
+                                                <div class="strat-expand-entry @(focusedAbility == aa ? "expanded" : "")">
+                                                    <span class="strat-expand-item strat-cell-ability" @onclick="() => ToggleFocusAbility(aa)"
                                                           @onpointerdown="() => OnceAbilityPointerDown(aa)"
                                                           @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                          @oncontextmenu:preventDefault>@aa.Name</span>
+                                                          @oncontextmenu:preventDefault>[@aa.Name]</span>
                                                     @if (focusedAbility == aa)
                                                     {
                                                         <div class="strat-expand-desc">@aa.Description</div>
@@ -344,10 +344,6 @@
                                     }
                                     @if (alwaysBlueRed.Count > 0)
                                     {
-                                        @if (alwaysActiveAbilities.Count > 0)
-                                        {
-                                            <div class="strat-expand-divider"></div>
-                                        }
                                         <div class="strat-expand-list">
                                             @foreach (var s in alwaysBlueRed)
                                             {
@@ -376,10 +372,6 @@
                                     }
                                     @if (alwaysGreen.Count > 0)
                                     {
-                                        @if (alwaysActiveAbilities.Count > 0 || alwaysBlueRed.Count > 0)
-                                        {
-                                            <div class="strat-expand-divider"></div>
-                                        }
                                         <div class="strat-expand-list">
                                             @foreach (var g in alwaysGreen)
                                             {
