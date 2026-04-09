@@ -421,6 +421,27 @@
                         }
                     }
 
+                    @if (unit.AttachedLeaders.Count > 0)
+                    {
+                        <div class="attached-leader">
+                            <div class="attached-leader-info">
+                                <span>+ @unit.Name</span>
+                            </div>
+                            @if (playMode && !IsKilled(unit) && unit.ModelCount > 1)
+                            {
+                                <span class="model-counter" @onclick:stopPropagation="true">
+                                    <button class="model-btn" @onclick="() => AdjustModelCount(unit, -1)">−</button>
+                                    <span class="model-count @(GetModelCount(unit) < unit.ModelCount ? "model-reduced" : "")">@GetModelCount(unit)</span>
+                                    <button class="model-btn" @onclick="() => AdjustModelCount(unit, 1)">+</button>
+                                </span>
+                            }
+                            else if (playMode && !IsKilled(unit))
+                            {
+                                <button class="model-kill-btn" @onclick="() => AdjustModelCount(unit, -1)" @onclick:stopPropagation="true">☠</button>
+                            }
+                        </div>
+                    }
+
                     @if (!collapsed)
                     {
                         <div class="unit-body">
