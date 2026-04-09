@@ -1573,12 +1573,14 @@
         playMode = !playMode;
         if (playMode)
         {
+            activePhase = GamePhase.Command;
             visiblePlayUnits.Clear();
             foreach (var u in AliveUnits)
                 visiblePlayUnits.Add(u);
         }
         else
         {
+            activePhase = null;
             killedUnits.Clear();
             usedAbilities.Clear();
             usedStratagems.Clear();
