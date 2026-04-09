@@ -68,6 +68,15 @@
             }
         </div>
 
+        <div class="roster-actions roster-actions-top">
+            <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Setup" : "⚔️ Play")</button>
+            @if (!playMode)
+            {
+                <button class="setup-btn @(armyIsSaved ? "saved" : "")" @onclick="SaveCurrentArmy">💾 Save</button>
+                <button class="clear-btn" @onclick="ClearRoster">🏠 Home</button>
+            }
+        </div>
+
         @if (playMode && !preGameDismissed)
         {
             var preGame = PreGameReminders;
@@ -321,29 +330,6 @@
                             @if (hasRightContent)
                             {
                                 <div class="strat-expand-always">
-                                    @if (alwaysActiveAbilities.Count > 0)
-                                    {
-                                        <div class="strat-expand-list">
-                                            @foreach (var aa in alwaysActiveAbilities)
-                                            {
-                                                if (usedAbilities.Contains(aa)) { continue; }
-                                                <div class="strat-expand-entry @(focusedAbility == aa ? "expanded" : "")">
-                                                    <span class="strat-expand-item strat-cell-ability" @onclick="() => ToggleFocusAbility(aa)"
-                                                          @onpointerdown="() => OnceAbilityPointerDown(aa)"
-                                                          @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                          @oncontextmenu:preventDefault>[@aa.Name]</span>
-                                                    @if (focusedAbility == aa)
-                                                    {
-                                                        <div class="strat-expand-desc">@aa.Description</div>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                    @if (alwaysActiveAbilities.Count > 0 && alwaysActiveStrats.Count > 0)
-                                    {
-                                        <div class="strat-expand-divider"></div>
-                                    }
                                     @if (alwaysActiveStrats.Count > 0)
                                     {
                                         <div class="strat-expand-list">
@@ -362,7 +348,7 @@
                                                     <span class="strat-expand-item @sColor" @onclick="() => ToggleCardStratagem(s, unit)"
                                                           @onpointerdown="() => OnceStratagemPointerDown(s)"
                                                           @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                          @oncontextmenu:preventDefault>@s.Name <span class="strat-cost-inline">(@s.Cost)</span></span>
+                                                          @oncontextmenu:preventDefault>[@s.Name <span class="strat-cost-inline">(@s.Cost)</span>]</span>
                                                     @if (focusedStratagem == s && focusedStratagemUnit == unit)
                                                     {
                                                         <div class="strat-expand-desc">
@@ -375,6 +361,29 @@
                                                                 <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(s.FullRestriction) ? s.FullRestriction : s.Restriction)</div>
                                                             }
                                                         </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    @if (alwaysActiveStrats.Count > 0 && alwaysActiveAbilities.Count > 0)
+                                    {
+                                        <div class="strat-expand-divider"></div>
+                                    }
+                                    @if (alwaysActiveAbilities.Count > 0)
+                                    {
+                                        <div class="strat-expand-list">
+                                            @foreach (var aa in alwaysActiveAbilities)
+                                            {
+                                                if (usedAbilities.Contains(aa)) { continue; }
+                                                <div class="strat-expand-entry @(focusedAbility == aa ? "expanded" : "")">
+                                                    <span class="strat-expand-item strat-cell-ability" @onclick="() => ToggleFocusAbility(aa)"
+                                                          @onpointerdown="() => OnceAbilityPointerDown(aa)"
+                                                          @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
+                                                          @oncontextmenu:preventDefault>[@aa.Name]</span>
+                                                    @if (focusedAbility == aa)
+                                                    {
+                                                        <div class="strat-expand-desc">@aa.Description</div>
                                                     }
                                                 </div>
                                             }
@@ -1026,6 +1035,8 @@
             }
         </div>
 
+        @if (playMode)
+        {
         <hr class="footer-divider" />
 
         <div class="score-tracker">
@@ -1077,6 +1088,7 @@
                 </div>
             </div>
         </div>
+        }
 
         <div class="roster-footer">
             <hr class="footer-divider" />
@@ -1483,13 +1495,14 @@
     {
         var all = GetFilteredAbilities(unit)
             .Where(a => !IsHiddenAbility(a))
+            .Where(a => !IsAlwaysActive(a))
             .ToList();
 
         if (activeTurn is not null)
             all = all.Where(a => IsConfiguredForTurn(a, activeTurn.Value)).ToList();
 
         if (activePhase is not null)
-            all = all.Where(a => IsAlwaysActive(a) || IsConfiguredForPhase(a, activePhase.Value)).ToList();
+            all = all.Where(a => IsConfiguredForPhase(a, activePhase.Value)).ToList();
 
         return all;
     }
@@ -1498,9 +1511,9 @@
     {
         return GetAllAbilities(unit)
             .Where(a => !IsSetupOnlyAbility(a))
-            .Where(a => IsAddedToUnit(a))
+            .Where(a => IsAlwaysActive(a))
             .Where(a => !IsHiddenAbility(a))
-            .Where(a => !CanAddToUnit(a))
+            .Where(a => !(IsAddedToUnit(a) && CanAddToUnit(a)))
             .ToList();
     }
 
