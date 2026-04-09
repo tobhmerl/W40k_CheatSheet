@@ -2006,7 +2006,8 @@
             return true;
 
         bool isInvuln = name.Contains("Invulnerable", StringComparison.OrdinalIgnoreCase) ||
-                        desc.Contains("invulnerable save", StringComparison.OrdinalIgnoreCase);
+                        desc.Contains("invulnerable", StringComparison.OrdinalIgnoreCase) ||
+                        System.Text.RegularExpressions.Regex.IsMatch(desc, @"\d\+\s*invuln", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         if (isInvuln && HasInvulnInStats(unit))
             return true;
 
