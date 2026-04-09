@@ -654,7 +654,7 @@
                                                     <div class="setup-checks-row">
                                                         <label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyTurn" @bind:after="SaveAbilityConfigs" /> My</label>
                                                         <label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyTurn" @bind:after="SaveAbilityConfigs" /> Enem</label>
-                                                        <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="aCfg.AddToUnit" @bind:after="SaveAbilityConfigs" /> Unit</label>
+                                                        <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="aCfg.AddToUnit" @bind:after="() => OnAddToUnitChanged(aCfg)" /> Unit</label>
                                                     </div>
                                                     <div class="setup-checks-row">
                                                         <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Command" @bind:after="SaveAbilityConfigs" /> Cmd</label>
@@ -842,7 +842,7 @@
                                                 <div class="setup-checks-row">
                                                     <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" @bind:after="SaveAbilityConfigs" /> My</label>
                                                     <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" @bind:after="SaveAbilityConfigs" /> Enem</label>
-                                                    <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="cfg.AddToUnit" @bind:after="SaveAbilityConfigs" /> Unit</label>
+                                                    <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="cfg.AddToUnit" @bind:after="() => OnAddToUnitChanged(cfg)" /> Unit</label>
                                                 </div>
                                                 <div class="setup-checks-row">
                                                     <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" @bind:after="SaveAbilityConfigs" /> Cmd</label>
@@ -2456,38 +2456,7 @@
 
     private static StratagemSetupEntry BuildDefaultStratConfig(Stratagem s)
     {
-        bool myTurn = s.TurnColor is StratagemTurn.Green or StratagemTurn.Blue;
-        bool enemyTurn = s.TurnColor is StratagemTurn.Green or StratagemTurn.Red;
-
-        // Detect per-phase enemy-only: phase is in EnemyTurnPhases but NOT in MyTurnPhases
-        bool eCmd = false, eMov = false, eSht = false, eChg = false, eFgt = false;
-        if (s.MyTurnPhases.HasValue && s.EnemyTurnPhases.HasValue)
-        {
-            var my = s.MyTurnPhases.Value;
-            var en = s.EnemyTurnPhases.Value;
-            eCmd = en.HasFlag(GamePhase.Command) && !my.HasFlag(GamePhase.Command);
-            eMov = en.HasFlag(GamePhase.Move)    && !my.HasFlag(GamePhase.Move);
-            eSht = en.HasFlag(GamePhase.Shoot)   && !my.HasFlag(GamePhase.Shoot);
-            eChg = en.HasFlag(GamePhase.Charge)  && !my.HasFlag(GamePhase.Charge);
-            eFgt = en.HasFlag(GamePhase.Fight)    && !my.HasFlag(GamePhase.Fight);
-        }
-
-        return new StratagemSetupEntry
-        {
-            MyTurn    = myTurn,
-            EnemyTurn = enemyTurn,
-            Command   = s.Phases.HasFlag(GamePhase.Command),
-            Move      = s.Phases.HasFlag(GamePhase.Move),
-            Shoot     = s.Phases.HasFlag(GamePhase.Shoot),
-            Charge    = s.Phases.HasFlag(GamePhase.Charge),
-            Fight     = s.Phases.HasFlag(GamePhase.Fight),
-            EnemyCommand = eCmd,
-            EnemyMove    = eMov,
-            EnemyShoot   = eSht,
-            EnemyCharge  = eChg,
-            EnemyFight   = eFgt,
-            Disabled  = false
-        };
+        return new StratagemSetupEntry();
     }
 
     private void InitStratagemConfigs()
@@ -2570,6 +2539,21 @@
     }
 
     private static string AbilityKey(AbilityEntry a) => a.Name;
+
+    private async Task OnAddToUnitChanged(AbilitySetupEntry cfg)
+    {
+        if (cfg.AddToUnit)
+        {
+            cfg.MyTurn    = true;
+            cfg.EnemyTurn = true;
+            cfg.Command   = true;
+            cfg.Move      = true;
+            cfg.Shoot     = true;
+            cfg.Charge    = true;
+            cfg.Fight     = true;
+        }
+        await SaveAbilityConfigs();
+    }
 
     private AbilitySetupEntry GetOrCreateConfig(AbilityEntry a)
     {
@@ -3115,21 +3099,7 @@
             {
                 var key = AbilityKey(ability);
                 if (abilityConfigs.ContainsKey(key)) continue;
-
-                bool opponentActing = ability.Description.Contains("your opponent", StringComparison.OrdinalIgnoreCase);
-                bool isStatReflected = IsStatReflectedAbility(ability, unit);
-                bool isSetupOnly = IsSetupOnlyAbility(ability);
-
-                abilityConfigs[key] = new AbilitySetupEntry
-                {
-                    MyTurn    = !isStatReflected && !isSetupOnly && !opponentActing,
-                    EnemyTurn = !isStatReflected && !isSetupOnly && opponentActing,
-                    Command   = ability.Phases.HasFlag(GamePhase.Command),
-                    Move      = ability.Phases.HasFlag(GamePhase.Move),
-                    Shoot     = ability.Phases.HasFlag(GamePhase.Shoot),
-                    Charge    = ability.Phases.HasFlag(GamePhase.Charge),
-                    Fight     = ability.Phases.HasFlag(GamePhase.Fight),
-                };
+                abilityConfigs[key] = new AbilitySetupEntry();
             }
         }
     }
