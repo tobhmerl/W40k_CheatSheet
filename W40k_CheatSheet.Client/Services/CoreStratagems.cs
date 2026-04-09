@@ -580,6 +580,105 @@ public static class CoreStratagems
             FullWhen = "Your opponent's Shooting phase or the Fight phase, just after an enemy unit has selected its targets.",
             FullTarget = "One Necrons Vehicle or Necrons Mounted unit (excluding Titanic units) from your army that was selected as the target of one or more of the attacking unit's attacks.",
             FullEffect = "Until the end of the phase, each time an attack targets a model in your unit, if the Strength characteristic of that attack is greater than the Toughness characteristic of that unit, subtract 1 from the Wound roll."
+        },
+
+        // ── Obeisance Phalanx ──
+
+        new()
+        {
+            Name = "Territorial Obsession",
+            Cost = "1CP",
+            Category = "Obeisance Phalanx – Strategic Ploy",
+            Detachment = "Obeisance Phalanx",
+            Phases = GamePhase.Command,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Lychguard", "Triarch"],
+            When = "Your Command phase.",
+            Target = "1 LYCHGUARD or TRIARCH unit.",
+            Effect = "Til next Command phase → +1 OC. VEHICLE: +3 OC instead.",
+            FullWhen = "Your Command phase.",
+            FullTarget = "One Lychguard or Triarch unit from your army.",
+            FullEffect = "Until the start of your next Command phase, add 1 to the Objective Control characteristic of models in your unit. If your unit has the VEHICLE keyword, add 3 to the Objective Control characteristic instead."
+        },
+        new()
+        {
+            Name = "Your Time Is Nigh",
+            Cost = "1CP",
+            Category = "Obeisance Phalanx – Epic Deed",
+            Detachment = "Obeisance Phalanx",
+            Phases = GamePhase.All,
+            TurnColor = StratagemTurn.Green,
+            When = "Any phase — after opponent's WARLORD is destroyed.",
+            Target = "Your NECRONS WARLORD.",
+            Effect = "Til end of battle → enemy Battle-shock and Leadership tests get −1.",
+            FullWhen = "Any phase, just after your opponent's WARLORD is destroyed.",
+            FullTarget = "Your NECRONS WARLORD.",
+            FullEffect = "Until the end of the battle, each time an enemy unit takes a Battle-shock or Leadership test, subtract 1 from the result."
+        },
+        new()
+        {
+            Name = "Suffer No Rival",
+            Cost = "1CP",
+            Category = "Obeisance Phalanx – Battle Tactic",
+            Detachment = "Obeisance Phalanx",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Lychguard", "Triarch"],
+            When = "Fight phase.",
+            Target = "1 LYCHGUARD or TRIARCH unit, not yet fought.",
+            Effect = "Til phase end → melee weapons gain [PRECISION].",
+            FullWhen = "Fight phase.",
+            FullTarget = "One LYCHGUARD or TRIARCH unit from your army that has not been selected to fight this phase.",
+            FullEffect = "Until the end of the phase, melee weapons equipped by models in your unit have the [PRECISION] ability."
+        },
+        new()
+        {
+            Name = "Sentinels of Eternity",
+            Cost = "1CP",
+            Category = "Obeisance Phalanx – Epic Deed",
+            Detachment = "Obeisance Phalanx",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Lychguard", "Triarch Praetorians"],
+            When = "Fight phase — after an enemy selects targets.",
+            Target = "1 LYCHGUARD or TRIARCH PRAETORIANS unit targeted by the attacker.",
+            Effect = "Til phase end → destroyed models that haven't fought: 4+ to stay, fight, then removed.",
+            FullWhen = "Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One LYCHGUARD or TRIARCH PRAETORIANS unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the end of the phase, each time a model in your unit is destroyed, if that model has not fought this phase, roll one D6: on a 4+, do not remove it from play. The destroyed model can fight after the attacking model's unit has finished making attacks, and is then removed from play."
+        },
+        new()
+        {
+            Name = "Nanoassembly Protocols",
+            Cost = "1CP",
+            Category = "Obeisance Phalanx – Battle Tactic",
+            Detachment = "Obeisance Phalanx",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            MyTurnPhases = GamePhase.Fight,
+            EnemyTurnPhases = GamePhase.Shoot | GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Vehicle"],
+            When = "Enemy Shooting phase or Fight phase — after an enemy selects targets.",
+            Target = "1 NECRONS VEHICLE unit targeted by the attacker.",
+            Effect = "Til phase end → −1 Damage to attacks allocated to your unit.",
+            FullWhen = "Your opponent's Shooting phase or the Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One NECRONS VEHICLE unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the end of the phase, each time an attack is allocated to a model in your unit, subtract 1 from the Damage characteristic of that attack."
+        },
+        new()
+        {
+            Name = "Enslaved Artifice",
+            Cost = "1CP",
+            Category = "Obeisance Phalanx – Battle Tactic",
+            Detachment = "Obeisance Phalanx",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            TurnColor = StratagemTurn.Blue,
+            When = "Your Shooting phase or Fight phase.",
+            Target = "1 NECRONS unit (excl. TITANIC), not yet shot or fought.",
+            Effect = "Til phase end → unmodified 5+ to hit = Critical Hit.",
+            FullWhen = "Your Shooting phase or the Fight phase.",
+            FullTarget = "One NECRONS unit from your army (excluding TITANIC units) that has not been selected to shoot or fight this phase.",
+            FullEffect = "Until the end of the phase, each time a model in your unit makes an attack, an unmodified Hit roll of 5+ scores a Critical Hit."
         }
     ];
 }
