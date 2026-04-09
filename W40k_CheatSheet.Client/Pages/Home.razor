@@ -398,13 +398,17 @@
                                     </div>
                                 }
                             </div>
-                            @if (playMode && !IsKilled(leader))
+                            @if (playMode && !IsKilled(leader) && leader.ModelCount > 1)
                             {
                                 <span class="model-counter" @onclick:stopPropagation="true">
                                     <button class="model-btn" @onclick="() => AdjustModelCount(leader, -1)">−</button>
                                     <span class="model-count @(GetModelCount(leader) < leader.ModelCount ? "model-reduced" : "")">@GetModelCount(leader)</span>
                                     <button class="model-btn" @onclick="() => AdjustModelCount(leader, 1)">+</button>
                                 </span>
+                            }
+                            else if (playMode && !IsKilled(leader))
+                            {
+                                <button class="model-kill-btn" @onclick="() => AdjustModelCount(leader, -1)" @onclick:stopPropagation="true">☠</button>
                             }
                             else if (!playMode)
                             {
@@ -488,13 +492,17 @@
                                                                 }
                                                                      )</span>
                                                                 }
-                                                                @if (playMode)
+                                                                @if (playMode && s.Owner.ModelCount > 1)
                                                                 {
                                                                     <span class="model-counter" @onclick:stopPropagation="true">
                                                                         <button class="model-btn" @onclick="() => AdjustModelCount(s.Owner, -1)">−</button>
                                                                         <span class="model-count @(GetModelCount(s.Owner) < s.Owner.ModelCount ? "model-reduced" : "")">@GetModelCount(s.Owner)</span>
                                                                         <button class="model-btn" @onclick="() => AdjustModelCount(s.Owner, 1)">+</button>
                                                                     </span>
+                                                                }
+                                                                else if (playMode)
+                                                                {
+                                                                    <button class="model-kill-btn" @onclick="() => AdjustModelCount(s.Owner, -1)" @onclick:stopPropagation="true">☠</button>
                                                                 }
                                                             </td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>

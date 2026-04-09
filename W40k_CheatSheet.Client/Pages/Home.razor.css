@@ -2340,10 +2340,10 @@
 }
 
 .model-counter {
-    margin-left: 0.3rem;
+    margin-left: 0.25rem;
     display: inline-flex;
     align-items: center;
-    gap: 0.1rem;
+    gap: 0.05rem;
     flex-shrink: 0;
 }
 
@@ -2351,9 +2351,9 @@
     background: transparent;
     border: 1px solid #555;
     color: #aaa;
-    font-size: 0.45rem;
-    width: 0.75rem;
-    height: 0.75rem;
+    font-size: 0.4rem;
+    width: 0.65rem;
+    height: 0.65rem;
     padding: 0;
     line-height: 1;
     border-radius: 2px;
@@ -2369,15 +2369,32 @@
 }
 
 .model-count {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     font-weight: 700;
     color: #ccc;
-    min-width: 0.7rem;
+    min-width: 0.6rem;
     text-align: center;
 }
 
 .model-reduced {
     color: #ff6b6b;
+}
+
+.model-kill-btn {
+    background: none;
+    border: none;
+    color: #e94560;
+    cursor: pointer;
+    font-size: 0.5rem;
+    padding: 0 0.15rem;
+    margin-left: 0.2rem;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.model-kill-btn:hover {
+    opacity: 1;
 }
 
 .weapon-total-attacks {
