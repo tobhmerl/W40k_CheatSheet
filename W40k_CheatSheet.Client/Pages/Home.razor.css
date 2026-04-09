@@ -2155,6 +2155,23 @@
     text-transform: uppercase;
 }
 
+/* Collapsible weapon section headers */
+.weapon-section-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.weapon-section-header:hover th {
+    background: #222;
+}
+
+.weapon-collapse-icon {
+    font-size: 0.5rem;
+    color: #666;
+    margin-left: 0.2rem;
+    vertical-align: middle;
+}
+
 .stats-table th:first-child,
 .weapons-table th:first-child {
     width: 40%;
