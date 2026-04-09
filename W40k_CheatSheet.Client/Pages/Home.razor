@@ -1518,7 +1518,7 @@
             .Where(s => !IsDisabledStratagem(s))
             .Where(s => s.RequiredKeywords.Count == 0 ||
                         s.RequiredKeywords.Any(rk =>
-                            unitKeywords.Any(uk => string.Equals(uk, rk, StringComparison.OrdinalIgnoreCase))))
+                            unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
             .Where(s => IsStratAlwaysActive(s))
             .OrderBy(s => TurnColorOrder(s.TurnColor))
             .ThenBy(s => s.Name)
@@ -1536,7 +1536,7 @@
             .Where(s => !IsDisabledStratagem(s))
             .Where(s => s.RequiredKeywords.Count == 0 ||
                         s.RequiredKeywords.Any(rk =>
-                            unitKeywords.Any(uk => string.Equals(uk, rk, StringComparison.OrdinalIgnoreCase))))
+                            unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
             .Where(s => !IsStratAlwaysActive(s));
 
         if (activeTurn is not null)
@@ -1563,7 +1563,7 @@
                         s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
             .Where(s => s.RequiredKeywords.Count == 0 ||
                         s.RequiredKeywords.Any(rk =>
-                            unitKeywords.Any(uk => string.Equals(uk, rk, StringComparison.OrdinalIgnoreCase))))
+                            unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
             .OrderBy(s => LowestPhaseOrder(s))
             .ThenBy(s => TurnColorOrder(s.TurnColor))
             .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
@@ -2091,7 +2091,7 @@
                 : focusedStatOwner!.Keywords;
 
         return strat.RequiredKeywords.Any(rk =>
-            unitKeywords.Any(uk => string.Equals(uk, rk, StringComparison.OrdinalIgnoreCase)));
+            unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase)));
     }
 
     private void ToggleFocusWeapon(WeaponProfile weapon)
