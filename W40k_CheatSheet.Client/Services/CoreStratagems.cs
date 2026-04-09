@@ -672,7 +672,7 @@ public static class CoreStratagems
             Category = "Obeisance Phalanx – Battle Tactic",
             Detachment = "Obeisance Phalanx",
             Phases = GamePhase.Shoot | GamePhase.Fight,
-            TurnColor = StratagemTurn.Blue,
+            TurnColor = StratagemTurn.Green,
             When = "Your Shooting phase or Fight phase.",
             Target = "1 NECRONS unit (excl. TITANIC), not yet shot or fought.",
             Effect = "Til phase end → unmodified 5+ to hit = Critical Hit.",
