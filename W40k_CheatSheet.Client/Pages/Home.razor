@@ -47,6 +47,15 @@
     }
     else
     {
+        @if (!playMode)
+        {
+            <div class="roster-actions roster-actions-top">
+                <button class="play-btn" @onclick="TogglePlayMode">⚔️ Play</button>
+                <button class="setup-btn @(armyIsSaved ? "saved" : "")" @onclick="SaveCurrentArmy">💾 Save</button>
+                <button class="clear-btn" @onclick="ClearRoster">🏠 Home</button>
+            </div>
+        }
+
         <div id="roster-top" class="roster-header">
             <h1>@army.Name</h1>
             <div class="turn-buttons">
@@ -65,15 +74,6 @@
                 <div class="detachment-rule">
                     <strong>@army.Detachment:</strong> @army.DetachmentRule
                 </div>
-            }
-        </div>
-
-        <div class="roster-actions roster-actions-top">
-            <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Setup" : "⚔️ Play")</button>
-            @if (!playMode)
-            {
-                <button class="setup-btn @(armyIsSaved ? "saved" : "")" @onclick="SaveCurrentArmy">💾 Save</button>
-                <button class="clear-btn" @onclick="ClearRoster">🏠 Home</button>
             }
         </div>
 
