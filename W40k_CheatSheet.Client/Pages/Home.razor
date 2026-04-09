@@ -222,10 +222,6 @@
                             {
                                 <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
                             }
-                            @if (playMode && !IsKilled(unit))
-                            {
-                                <button class="kill-btn" @onclick="() => KillUnit(unit)" @onclick:stopPropagation="true">☠</button>
-                            }
                             @if (playMode && IsKilled(unit))
                             {
                                 <button class="revive-btn" @onclick="() => ReviveUnit(unit)" @onclick:stopPropagation="true">↩</button>
@@ -404,7 +400,11 @@
                             </div>
                             @if (playMode && !IsKilled(leader))
                             {
-                                <button class="kill-btn" @onclick="() => KillAttachedUnit(unit, leader)" @onclick:stopPropagation="true">☠</button>
+                                <span class="model-counter" @onclick:stopPropagation="true">
+                                    <button class="model-btn" @onclick="() => AdjustModelCount(leader, -1)">−</button>
+                                    <span class="model-count @(GetModelCount(leader) < leader.ModelCount ? "model-reduced" : "")">@GetModelCount(leader)</span>
+                                    <button class="model-btn" @onclick="() => AdjustModelCount(leader, 1)">+</button>
+                                </span>
                             }
                             else if (!playMode)
                             {
@@ -488,7 +488,7 @@
                                                                 }
                                                                      )</span>
                                                                 }
-                                                                @if (playMode && s.Owner.ModelCount > 1)
+                                                                @if (playMode)
                                                                 {
                                                                     <span class="model-counter" @onclick:stopPropagation="true">
                                                                         <button class="model-btn" @onclick="() => AdjustModelCount(s.Owner, -1)">−</button>
@@ -1679,6 +1679,7 @@
     private void ReviveUnit(UnitEntry unit)
     {
         killedUnits.Remove(unit);
+        modelCounts[unit] = unit.ModelCount;
     }
 
     private void ToggleCollapse(UnitEntry unit)
@@ -2203,6 +2204,16 @@
         var current = GetModelCount(owner);
         var next = Math.Clamp(current + delta, 0, owner.ModelCount);
         modelCounts[owner] = next;
+        if (next == 0 && !IsKilled(owner))
+        {
+            var host = army?.Units
+                .Where(u => u.AttachedLeaders.Contains(owner))
+                .FirstOrDefault();
+            if (host is not null)
+                KillAttachedUnit(host, owner);
+            else
+                KillUnit(owner);
+        }
     }
 
     private int GetWeaponEffectiveModels(UnitEntry cardUnit, WeaponProfile weapon)
