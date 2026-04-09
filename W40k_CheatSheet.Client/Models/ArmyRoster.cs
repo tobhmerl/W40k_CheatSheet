@@ -28,6 +28,7 @@ public class UnitEntry
     public bool IsLeader { get; set; }
     public List<string> Enhancements { get; set; } = [];
     public List<UnitEntry> AttachedLeaders { get; set; } = [];
+    public int ModelCount { get; set; } = 1;
 }
 
 public class StatLine

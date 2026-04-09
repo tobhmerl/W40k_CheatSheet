@@ -2339,6 +2339,47 @@
     font-weight: 700;
 }
 
+.model-counter {
+    margin-left: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    flex-shrink: 0;
+}
+
+.model-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    font-size: 0.55rem;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    line-height: 1;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.model-btn:hover {
+    border-color: #888;
+    color: #fff;
+}
+
+.model-count {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #ccc;
+    min-width: 1rem;
+    text-align: center;
+}
+
+.model-reduced {
+    color: #ff6b6b;
+}
+
 /* Stat row — clickable to highlight owned weapons */
 .stat-row {
     cursor: pointer;

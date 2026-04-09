@@ -85,7 +85,21 @@ public partial class RosterParserService
 
         unit.Abilities.RemoveAll(a => a.Name == "Leader");
 
+        unit.ModelCount = CountModels(selection);
+
         return unit;
+    }
+
+    private static int CountModels(Selection selection)
+    {
+        // Sub-selections with type "model" represent individual models in the unit
+        var modelSubs = selection.Selections
+            .Where(s => s.Type.Equals("model", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (modelSubs.Count > 0)
+            return modelSubs.Sum(s => s.Number);
+        // Fallback: if the selection itself is a single model (e.g. Character)
+        return selection.Number > 0 ? selection.Number : 1;
     }
 
     private static void ProcessProfile(Profile profile, UnitEntry unit)

@@ -486,9 +486,17 @@
                                                                 {
                                                                     <span class="fnp">@(effectiveFnp.Replace("+", "++"))</span>
                                                                 }
-                                                            )</span>
-                                                        }
-                                                    </td>
+                                                                     )</span>
+                                                                }
+                                                                @if (playMode && s.Owner.ModelCount > 1)
+                                                                {
+                                                                    <span class="model-counter" @onclick:stopPropagation="true">
+                                                                        <button class="model-btn" @onclick="() => AdjustModelCount(s.Owner, -1)">−</button>
+                                                                        <span class="model-count @(GetModelCount(s.Owner) < s.Owner.ModelCount ? "model-reduced" : "")">@GetModelCount(s.Owner)</span>
+                                                                        <button class="model-btn" @onclick="() => AdjustModelCount(s.Owner, 1)">+</button>
+                                                                    </span>
+                                                                }
+                                                            </td>
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
                                                 </tr>
@@ -1394,6 +1402,7 @@
     private (string Label, string Source, string KeywordDesc)? buffSourcePopup;
     private readonly HashSet<UnitEntry> rangedExpandedUnits = [];
     private readonly HashSet<UnitEntry> meleeExpandedUnits = [];
+    private readonly Dictionary<UnitEntry, int> modelCounts = [];
 
     private string FactionClass => army?.Faction switch
     {
@@ -1593,6 +1602,7 @@
         stratHiddenUnits.Clear();
         rangedExpandedUnits.Clear();
         meleeExpandedUnits.Clear();
+        modelCounts.Clear();
         preGameDismissed = false;
     }
 
@@ -2174,6 +2184,23 @@
         if (words.Length >= 3)
             s = string.Concat(words.Select(w => char.ToUpperInvariant(w[0])));
         return s;
+    }
+
+    private int GetModelCount(UnitEntry owner)
+    {
+        if (!modelCounts.TryGetValue(owner, out var count))
+        {
+            count = owner.ModelCount;
+            modelCounts[owner] = count;
+        }
+        return count;
+    }
+
+    private void AdjustModelCount(UnitEntry owner, int delta)
+    {
+        var current = GetModelCount(owner);
+        var next = Math.Clamp(current + delta, 0, owner.ModelCount);
+        modelCounts[owner] = next;
     }
 
     private static string UnitAnchorId(string name) =>
