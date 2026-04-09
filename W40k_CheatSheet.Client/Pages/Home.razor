@@ -572,6 +572,7 @@
                                                     var rEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
                                                     var rSkillBoosted = hitBonus && rEffSkill != w.Skill;
                                                     var rModels = GetWeaponEffectiveModels(unit, w);
+                                                    if (playMode && rModels <= 0) { continue; }
                                                     <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && rOwned && rPhaseOk) ? "zoomed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                         <td class="name-cell">@w.Name@if (playMode && rModels > 1){<span class="weapon-total-attacks @(rModels < w.ModelsEquipped ? "reduced" : "")">(@FormatTotalAttacks(rModels, w.A))</span>}</td>
                                                         <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(rEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritRanged, srcCritRanged, string.Empty)" @onclick:stopPropagation="true">(@extraCritRanged)</span>}</td>
@@ -614,6 +615,7 @@
                                                     var mEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
                                                     var mSkillBoosted = hitBonus && mEffSkill != w.Skill;
                                                     var mModels = GetWeaponEffectiveModels(unit, w);
+                                                    if (playMode && mModels <= 0) { continue; }
                                                     <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && mOwned && mPhaseOk) ? "zoomed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
                                                         <td class="name-cell">@w.Name@if (playMode && mModels > 1){<span class="weapon-total-attacks @(mModels < w.ModelsEquipped ? "reduced" : "")">(@FormatTotalAttacks(mModels, w.A))</span>}</td>
                                                         <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(mEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritMelee, srcCritMelee, string.Empty)" @onclick:stopPropagation="true">(@extraCritMelee)</span>}</td>
