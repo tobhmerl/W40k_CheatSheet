@@ -2244,8 +2244,9 @@
     padding: 0.5rem 0.7rem;
     margin: 0 0.5rem 0.5rem;
     display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15rem 0.4rem;
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
     animation: buff-popup-in 0.15s ease-out;
@@ -2268,6 +2269,7 @@
 }
 
 .buff-source-kw-desc {
+    width: 100%;
     color: #ccc;
     font-size: 0.65rem;
     margin-top: 0.2rem;
