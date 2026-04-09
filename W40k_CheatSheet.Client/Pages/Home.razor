@@ -2000,15 +2000,18 @@
         var name = ability.Name;
         var desc = ability.Description;
 
+        // Skip leader auras — handled by the "add to unit" mechanism
+        if (IsLeaderAuraDescription(desc))
+            return false;
+
         bool isFnp = name.Contains("Feel No Pain", StringComparison.OrdinalIgnoreCase) ||
-                     desc.Contains("Feel No Pain", StringComparison.OrdinalIgnoreCase);
-        if (isFnp && HasFnpInStats(unit))
+                     System.Text.RegularExpressions.Regex.IsMatch(desc, @"feel\s+no\s+pain\s+\d\+", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (isFnp)
             return true;
 
         bool isInvuln = name.Contains("Invulnerable", StringComparison.OrdinalIgnoreCase) ||
-                        desc.Contains("invulnerable", StringComparison.OrdinalIgnoreCase) ||
-                        System.Text.RegularExpressions.Regex.IsMatch(desc, @"\d\+\s*invuln", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        if (isInvuln && HasInvulnInStats(unit))
+                        System.Text.RegularExpressions.Regex.IsMatch(desc, @"\d\+\s*invulnerable", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (isInvuln)
             return true;
 
         return false;

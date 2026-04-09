@@ -135,9 +135,12 @@ public partial class RosterParserService
                     }
 
                     var invulnMatch = InvulnRegex().Match(desc);
-                    if (invulnMatch.Success && isLeaderAura)
+                    if (invulnMatch.Success)
                     {
-                        unit.InvulnerableSaveAura = BetterValue(unit.InvulnerableSaveAura, invulnMatch.Groups[1].Value);
+                        if (isLeaderAura)
+                            unit.InvulnerableSaveAura = BetterValue(unit.InvulnerableSaveAura, invulnMatch.Groups[1].Value);
+                        else
+                            unit.InvulnerableSave = BetterValue(unit.InvulnerableSave, invulnMatch.Groups[1].Value);
                     }
 
                     unit.Abilities.Add(new AbilityEntry { Name = profile.Name, Description = desc, Phases = ClassifyPhase(desc) });
