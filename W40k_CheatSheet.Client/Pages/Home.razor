@@ -1484,6 +1484,7 @@
         var all = GetFilteredAbilities(unit)
             .Where(a => !IsHiddenAbility(a))
             .Where(a => !IsAlwaysActive(a))
+            .Where(a => !IsStatReflectedAbility(a, unit))
             .ToList();
 
         if (activeTurn is not null)
@@ -1502,6 +1503,7 @@
             .Where(a => IsAlwaysActive(a))
             .Where(a => !IsHiddenAbility(a))
             .Where(a => !(IsAddedToUnit(a) && CanAddToUnit(a)))
+            .Where(a => !IsStatReflectedAbility(a, unit))
             .ToList();
     }
 
