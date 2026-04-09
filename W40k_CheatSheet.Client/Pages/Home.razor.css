@@ -1593,6 +1593,11 @@
     color: #7da87f;
 }
 
+.strat-cost-inline {
+    opacity: 0.5;
+    font-size: 0.85em;
+}
+
 .strat-cell-always {
     color: #a88bc5;
 }
