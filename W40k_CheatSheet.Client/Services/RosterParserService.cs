@@ -75,8 +75,14 @@ public partial class RosterParserService
             ProcessSubSelection(sub, unit);
 
         unit.Abilities = unit.Abilities.DistinctBy(a => a.Name).ToList();
-        unit.RangedWeapons = unit.RangedWeapons.DistinctBy(w => w.Name).ToList();
-        unit.MeleeWeapons = unit.MeleeWeapons.DistinctBy(w => w.Name).ToList();
+        unit.RangedWeapons = unit.RangedWeapons
+            .GroupBy(w => w.Name)
+            .Select(g => { var w = g.First(); w.ModelsEquipped = g.Sum(x => x.ModelsEquipped); return w; })
+            .ToList();
+        unit.MeleeWeapons = unit.MeleeWeapons
+            .GroupBy(w => w.Name)
+            .Select(g => { var w = g.First(); w.ModelsEquipped = g.Sum(x => x.ModelsEquipped); return w; })
+            .ToList();
         unit.StatLines = unit.StatLines.DistinctBy(s => s.Name).ToList();
 
         unit.IsLeader = (unit.Keywords.Contains("Character")
@@ -102,7 +108,7 @@ public partial class RosterParserService
         return selection.Number > 0 ? selection.Number : 1;
     }
 
-    private static void ProcessProfile(Profile profile, UnitEntry unit)
+    private static void ProcessProfile(Profile profile, UnitEntry unit, int modelsEquipped = 0)
     {
         if (profile.Hidden)
             return;
@@ -162,11 +168,15 @@ public partial class RosterParserService
                 break;
 
             case "Ranged Weapons":
-                unit.RangedWeapons.Add(ParseWeapon(profile));
+                var rw = ParseWeapon(profile);
+                if (modelsEquipped > 0) rw.ModelsEquipped = modelsEquipped;
+                unit.RangedWeapons.Add(rw);
                 break;
 
             case "Melee Weapons":
-                unit.MeleeWeapons.Add(ParseWeapon(profile));
+                var mw = ParseWeapon(profile);
+                if (modelsEquipped > 0) mw.ModelsEquipped = modelsEquipped;
+                unit.MeleeWeapons.Add(mw);
                 break;
         }
     }
@@ -190,13 +200,16 @@ public partial class RosterParserService
         return weapon;
     }
 
-    private static void ProcessSubSelection(Selection sub, UnitEntry unit)
+    private static void ProcessSubSelection(Selection sub, UnitEntry unit, int modelsEquipped = 0)
     {
         if (sub.Name == "Warlord")
         {
             unit.IsWarlord = true;
             return;
         }
+
+        if (sub.Type.Equals("model", StringComparison.OrdinalIgnoreCase) && sub.Number > 0)
+            modelsEquipped = sub.Number;
 
         if (sub.Group == "Enhancements")
         {
@@ -211,13 +224,13 @@ public partial class RosterParserService
         }
 
         foreach (var profile in sub.Profiles)
-            ProcessProfile(profile, unit);
+            ProcessProfile(profile, unit, modelsEquipped);
 
         foreach (var rule in sub.Rules)
             ProcessRule(rule, unit);
 
         foreach (var nested in sub.Selections)
-            ProcessSubSelection(nested, unit);
+            ProcessSubSelection(nested, unit, modelsEquipped);
     }
 
     private static void ProcessRule(Rule rule, UnitEntry unit)

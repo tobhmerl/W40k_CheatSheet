@@ -528,8 +528,9 @@
                                                     if (rHidden) { continue; }
                                                     var rEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
                                                     var rSkillBoosted = hitBonus && rEffSkill != w.Skill;
+                                                    var rModels = GetWeaponEffectiveModels(unit, w);
                                                     <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && rOwned && rPhaseOk) ? "zoomed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
-                                                        <td class="name-cell">@w.Name</td>
+                                                        <td class="name-cell">@w.Name@if (playMode && rModels > 1){<span class="weapon-total-attacks @(rModels < w.ModelsEquipped ? "reduced" : "")">(@FormatTotalAttacks(rModels, w.A))</span>}</td>
                                                         <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(rEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritRanged, srcCritRanged, string.Empty)" @onclick:stopPropagation="true">(@extraCritRanged)</span>}</td>
                                                         <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                     </tr>
@@ -569,8 +570,9 @@
                                                     if (mHidden) { continue; }
                                                     var mEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
                                                     var mSkillBoosted = hitBonus && mEffSkill != w.Skill;
+                                                    var mModels = GetWeaponEffectiveModels(unit, w);
                                                     <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && mOwned && mPhaseOk) ? "zoomed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
-                                                        <td class="name-cell">@w.Name</td>
+                                                        <td class="name-cell">@w.Name@if (playMode && mModels > 1){<span class="weapon-total-attacks @(mModels < w.ModelsEquipped ? "reduced" : "")">(@FormatTotalAttacks(mModels, w.A))</span>}</td>
                                                         <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(mEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritMelee, srcCritMelee, string.Empty)" @onclick:stopPropagation="true">(@extraCritMelee)</span>}</td>
                                                         <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
                                                     </tr>
@@ -2201,6 +2203,34 @@
         var current = GetModelCount(owner);
         var next = Math.Clamp(current + delta, 0, owner.ModelCount);
         modelCounts[owner] = next;
+    }
+
+    private int GetWeaponEffectiveModels(UnitEntry cardUnit, WeaponProfile weapon)
+    {
+        UnitEntry? owner = null;
+        if (cardUnit.RangedWeapons.Any(w => ReferenceEquals(w, weapon)) ||
+            cardUnit.MeleeWeapons.Any(w => ReferenceEquals(w, weapon)))
+            owner = cardUnit;
+        else
+        {
+            foreach (var leader in cardUnit.AttachedLeaders)
+            {
+                if (leader.RangedWeapons.Any(w => ReferenceEquals(w, weapon)) ||
+                    leader.MeleeWeapons.Any(w => ReferenceEquals(w, weapon)))
+                { owner = leader; break; }
+            }
+        }
+        if (owner is null) return weapon.ModelsEquipped;
+        if (owner.ModelCount > 1 && weapon.ModelsEquipped >= owner.ModelCount)
+            return GetModelCount(owner);
+        return weapon.ModelsEquipped;
+    }
+
+    private static string FormatTotalAttacks(int models, string attacks)
+    {
+        if (int.TryParse(attacks, out var a))
+            return (models * a).ToString();
+        return $"{models}×{attacks}";
     }
 
     private static string UnitAnchorId(string name) =>

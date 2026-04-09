@@ -52,6 +52,7 @@ public class WeaponProfile
     public string AP { get; set; } = "";
     public string D { get; set; } = "";
     public string Keywords { get; set; } = "";
+    public int ModelsEquipped { get; set; } = 1;
 }
 
 [Flags]
