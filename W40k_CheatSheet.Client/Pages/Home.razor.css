@@ -2697,3 +2697,55 @@
 .roster-app.faction-dark-angels .weapon-row.zoomed td,
 .roster-app.faction-dark-angels .weapon-kw-row.zoomed td,
 .roster-app.faction-dark-angels .stat-row.focused td { background: rgba(45, 161, 69, 0.15); }
+
+/* Weapon remove popup */
+.weapon-remove-popup {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #1a1a1a;
+    border: 1px solid #e94560;
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    margin: 0 0.5rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    animation: buff-popup-in 0.15s ease-out;
+}
+
+.weapon-remove-title {
+    color: #e94560;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.weapon-remove-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+    color: #ccc;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.weapon-remove-option:hover {
+    background: rgba(233, 69, 96, 0.15);
+    border-color: #e94560;
+    color: #fff;
+}
+
+.weapon-remove-cancel {
+    color: #777;
+    font-size: 0.65rem;
+    text-align: center;
+    cursor: pointer;
+    padding: 0.2rem;
+}
+
+.weapon-remove-cancel:hover {
+    color: #aaa;
+}

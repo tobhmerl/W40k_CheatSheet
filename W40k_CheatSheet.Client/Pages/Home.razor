@@ -142,6 +142,20 @@
             </div>
         }
 
+        @if (weaponRemovePopup is { } wrp)
+        {
+            var wrWeapons = GetMixedLoadoutWeapons(wrp.Unit, wrp.Delta);
+            <div class="weapon-remove-popup" @onclick:stopPropagation="true">
+                <div class="weapon-remove-title">@(wrp.Delta < 0 ? "Which model to remove?" : "Which model to restore?")</div>
+                @foreach (var wrW in wrWeapons)
+                {
+                    var capturedW = wrW;
+                    <div class="weapon-remove-option" @onclick="() => ConfirmWeaponModelRemoval(capturedW)">@capturedW.Name</div>
+                }
+                <div class="weapon-remove-cancel" @onclick="() => weaponRemovePopup = null">Cancel</div>
+            </div>
+        }
+
         <div class="unit-grid">
             @{
                 bool killedDividerInserted = false;
@@ -1434,6 +1448,8 @@
     private readonly HashSet<UnitEntry> rangedExpandedUnits = [];
     private readonly HashSet<UnitEntry> meleeExpandedUnits = [];
     private readonly Dictionary<UnitEntry, int> modelCounts = [];
+    private readonly Dictionary<WeaponProfile, int> weaponModelCounts = [];
+    private (UnitEntry Unit, int Delta)? weaponRemovePopup;
 
     private string FactionClass => army?.Faction switch
     {
@@ -1634,6 +1650,8 @@
         rangedExpandedUnits.Clear();
         meleeExpandedUnits.Clear();
         modelCounts.Clear();
+        weaponModelCounts.Clear();
+        weaponRemovePopup = null;
         preGameDismissed = false;
     }
 
@@ -1709,6 +1727,8 @@
     {
         killedUnits.Remove(unit);
         modelCounts[unit] = unit.ModelCount;
+        foreach (var w in unit.RangedWeapons.Concat(unit.MeleeWeapons))
+            weaponModelCounts.Remove(w);
     }
 
     private void ToggleCollapse(UnitEntry unit)
@@ -2232,6 +2252,17 @@
     {
         var current = GetModelCount(owner);
         var next = Math.Clamp(current + delta, 0, owner.ModelCount);
+        if (next != current)
+        {
+            var mixedWeapons = GetMixedLoadoutWeapons(owner, delta);
+            if (mixedWeapons.Count >= 2)
+            {
+                weaponRemovePopup = (owner, delta);
+                return;
+            }
+            if (mixedWeapons.Count == 1)
+                weaponModelCounts[mixedWeapons[0]] = GetEffectiveWeaponModels(mixedWeapons[0]) + delta;
+        }
         modelCounts[owner] = next;
         if (next == 0 && !IsKilled(owner))
         {
@@ -2244,6 +2275,45 @@
                 KillUnit(owner);
         }
     }
+
+    private void ConfirmWeaponModelRemoval(WeaponProfile weapon)
+    {
+        if (weaponRemovePopup is not { } wrp) return;
+        var owner = wrp.Unit;
+        var delta = wrp.Delta;
+
+        weaponModelCounts[weapon] = Math.Clamp(GetEffectiveWeaponModels(weapon) + delta, 0, weapon.ModelsEquipped);
+
+        var current = GetModelCount(owner);
+        var next = Math.Clamp(current + delta, 0, owner.ModelCount);
+        modelCounts[owner] = next;
+        if (next == 0 && !IsKilled(owner))
+        {
+            var host = army?.Units
+                .Where(u => u.AttachedLeaders.Contains(owner))
+                .FirstOrDefault();
+            if (host is not null)
+                KillAttachedUnit(host, owner);
+            else
+                KillUnit(owner);
+        }
+        weaponRemovePopup = null;
+    }
+
+    private List<WeaponProfile> GetMixedLoadoutWeapons(UnitEntry owner, int delta)
+    {
+        var allWeapons = owner.RangedWeapons.Concat(owner.MeleeWeapons);
+        if (delta < 0)
+            return allWeapons
+                .Where(w => w.ModelsEquipped > 0 && w.ModelsEquipped < owner.ModelCount && GetEffectiveWeaponModels(w) > 0)
+                .ToList();
+        return allWeapons
+            .Where(w => w.ModelsEquipped > 0 && w.ModelsEquipped < owner.ModelCount && GetEffectiveWeaponModels(w) < w.ModelsEquipped)
+            .ToList();
+    }
+
+    private int GetEffectiveWeaponModels(WeaponProfile weapon) =>
+        weaponModelCounts.TryGetValue(weapon, out var count) ? count : weapon.ModelsEquipped;
 
     private int GetWeaponEffectiveModels(UnitEntry cardUnit, WeaponProfile weapon)
     {
@@ -2261,6 +2331,8 @@
             }
         }
         if (owner is null) return weapon.ModelsEquipped;
+        if (weaponModelCounts.TryGetValue(weapon, out var wmc))
+            return wmc;
         if (owner.ModelCount > 1 && weapon.ModelsEquipped >= owner.ModelCount)
             return GetModelCount(owner);
         return weapon.ModelsEquipped;
