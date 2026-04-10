@@ -44,23 +44,33 @@
     @if (!loaded)
     {
         <div class="import-section">
-            <h1>There is only war ...</h1>
-            <p>Loading…</p>
+            <div class="welcome-card">
+                <div class="welcome-overlay"></div>
+                <div class="welcome-content">
+                    <h1>There is only war ...</h1>
+                    <p>Accessing libraries…</p>
+                </div>
+            </div>
         </div>
     }
     else if (army is null)
     {
         <div class="import-section">
-            <h1>Segmentum Ultima</h1>
-            <p>Import your army roster JSON to view unit stats.</p>
-            <label class="import-btn">
-                📁 Import Roster JSON
-                <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
-            </label>
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <div class="error-msg">@errorMessage</div>
-            }
+            <div class="welcome-card">
+                <div class="welcome-overlay"></div>
+                <div class="welcome-content">
+                    <h1>Segmentum Ultima</h1>
+                    <p>Import your army roster JSON to view unit stats.</p>
+                    <label class="import-btn">
+                        📁 Import Roster JSON
+                        <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
+                    </label>
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="error-msg">@errorMessage</div>
+                    }
+                </div>
+            </div>
 
             @* ── Cloud Armies (shown when logged in) ── *@
             @if (Cloud.IsLoggedIn && cloudRosters.Count > 0)
