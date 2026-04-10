@@ -290,6 +290,7 @@
     border: 1px solid #2a2a2a;
     border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 
 .setup-unit-name {
@@ -816,6 +817,7 @@
     margin-top: 0.6rem;
     margin-bottom: 0;
     overflow: hidden;
+    position: relative;
 }
 
 .abilities-panel-header {
@@ -984,6 +986,7 @@
     margin-top: 0.6rem;
     margin-bottom: 0;
     overflow: hidden;
+    position: relative;
 }
 
 .stratagems-panel-header {
@@ -1671,6 +1674,7 @@
     cursor: grab;
     transition: border-color 0.15s, opacity 0.15s, box-shadow 0.15s;
     font-size: 0.85rem;
+    position: relative;
 }
 
 .unit-card:active {
@@ -2856,6 +2860,32 @@
 .roster-app.light .abilities-panel-unit-name {
     color: #0096b0;
     border-bottom-color: rgba(0, 150, 176, 0.2);
+}
+
+/* ============================================================
+   Fixed background image through cards (parallax window)
+   ============================================================ */
+.unit-card::before,
+.setup-unit::before,
+.abilities-panel::before,
+.stratagems-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('images/bg.jpg') no-repeat center/cover;
+    background-attachment: fixed;
+    opacity: 0.07;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+}
+
+.unit-card > *,
+.setup-unit > *,
+.abilities-panel > *,
+.stratagems-panel > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* ============================================================
