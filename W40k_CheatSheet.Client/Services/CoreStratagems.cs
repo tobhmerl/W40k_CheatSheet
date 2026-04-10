@@ -9,7 +9,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Command Re-roll",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Battle Tactic Stratagem",
             Phases = GamePhase.All,
             TurnColor = StratagemTurn.Green,
@@ -23,7 +23,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Insane Bravery",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Epic Deed Stratagem",
             Phases = GamePhase.Command,
             TurnColor = StratagemTurn.Blue,
@@ -39,7 +39,7 @@ public static class CoreStratagems
         new()
         {
             Name = "New Orders",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Command,
             TurnColor = StratagemTurn.Blue,
@@ -53,7 +53,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Tank Shock",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Charge,
             TurnColor = StratagemTurn.Blue,
@@ -68,7 +68,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Grenade",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Wargear Stratagem",
             Phases = GamePhase.Shoot,
             TurnColor = StratagemTurn.Blue,
@@ -83,7 +83,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Heroic Intervention",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Charge,
             TurnColor = StratagemTurn.Red,
@@ -99,7 +99,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Fire Overwatch",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Move | GamePhase.Charge,
             TurnColor = StratagemTurn.Red,
@@ -115,7 +115,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Rapid Ingress",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Move,
             TurnColor = StratagemTurn.Red,
@@ -131,7 +131,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Go To Ground",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Battle Tactic Stratagem",
             Phases = GamePhase.Shoot,
             TurnColor = StratagemTurn.Red,
@@ -146,7 +146,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Smokescreen",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Wargear Stratagem",
             Phases = GamePhase.Shoot,
             TurnColor = StratagemTurn.Red,
@@ -161,7 +161,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Epic Challenge",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Core – Epic Deed Stratagem",
             Phases = GamePhase.Fight,
             TurnColor = StratagemTurn.Green,
@@ -176,7 +176,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Counter-Offensive",
-            Cost = "2CP",
+            Cost = "II",
             Category = "Core – Strategic Ploy Stratagem",
             Phases = GamePhase.Fight,
             TurnColor = StratagemTurn.Green,
@@ -192,7 +192,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Protocol of the Conquering Tyrant",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Awakened Dynasty – Battle Tactic",
             Detachment = "Awakened Dynasty",
             Phases = GamePhase.Shoot,
@@ -207,7 +207,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Protocol of the Undying Legions",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Awakened Dynasty – Strategic Ploy",
             Detachment = "Awakened Dynasty",
             Phases = GamePhase.Shoot | GamePhase.Fight,
@@ -224,7 +224,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Protocol of the Eternal Revenant",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Awakened Dynasty – Epic Deed",
             Detachment = "Awakened Dynasty",
             Phases = GamePhase.All,
@@ -242,7 +242,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Protocol of the Hungry Void",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Awakened Dynasty – Battle Tactic",
             Detachment = "Awakened Dynasty",
             Phases = GamePhase.Fight,
@@ -257,7 +257,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Protocol of the Sudden Storm",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Awakened Dynasty – Strategic Ploy",
             Detachment = "Awakened Dynasty",
             Phases = GamePhase.Move,
@@ -272,7 +272,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Protocol of the Vengeful Stars",
-            Cost = "2CP",
+            Cost = "II",
             Category = "Awakened Dynasty – Strategic Ploy",
             Detachment = "Awakened Dynasty",
             Phases = GamePhase.Shoot,
@@ -291,7 +291,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Dimensional Corridor",
-            Cost = "2CP",
+            Cost = "II",
             Category = "Hypercrypt Legion – Strategic Ploy",
             Detachment = "Hypercrypt Legion",
             Phases = GamePhase.Charge,
@@ -306,7 +306,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Reanimation Crypts",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Hypercrypt Legion – Strategic Ploy",
             Detachment = "Hypercrypt Legion",
             Phases = GamePhase.Command,
@@ -321,7 +321,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Cosmic Precision",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Hypercrypt Legion – Strategic Ploy",
             Detachment = "Hypercrypt Legion",
             Phases = GamePhase.Move,
@@ -338,7 +338,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Entropic Damping",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Hypercrypt Legion – Wargear",
             Detachment = "Hypercrypt Legion",
             Phases = GamePhase.Shoot,
@@ -353,7 +353,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Hyperphasic Recall",
-            Cost = "2CP",
+            Cost = "II",
             Category = "Hypercrypt Legion – Strategic Ploy",
             Detachment = "Hypercrypt Legion",
             Phases = GamePhase.Shoot | GamePhase.Fight,
@@ -370,7 +370,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Quantum Deflection",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Hypercrypt Legion – Wargear",
             Detachment = "Hypercrypt Legion",
             Phases = GamePhase.Shoot | GamePhase.Fight,
@@ -390,7 +390,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Tactical Mastery",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Wrath of the Rock – Battle Tactic",
             Detachment = "Wrath of the Rock",
             Phases = GamePhase.Move,
@@ -405,7 +405,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Relics of the Dark Age",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Wrath of the Rock – Strategic Ploy",
             Detachment = "Wrath of the Rock",
             Phases = GamePhase.Shoot,
@@ -421,7 +421,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Leonine Aggression",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Wrath of the Rock – Strategic Ploy",
             Detachment = "Wrath of the Rock",
             Phases = GamePhase.Charge,
@@ -438,7 +438,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Inescapable Justice",
-            Cost = "2CP",
+            Cost = "II",
             Category = "Wrath of the Rock – Battle Tactic",
             Detachment = "Wrath of the Rock",
             Phases = GamePhase.All,
@@ -454,7 +454,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Lion's Will",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Wrath of the Rock – Strategic Ploy",
             Detachment = "Wrath of the Rock",
             Phases = GamePhase.Command,
@@ -469,7 +469,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Armour of Contempt",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Wrath of the Rock – Battle Tactic",
             Detachment = "Wrath of the Rock",
             Phases = GamePhase.Shoot | GamePhase.Fight,
@@ -489,7 +489,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Endless Servitude",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Starshatter Arsenal – Strategic Ploy",
             Detachment = "Starshatter Arsenal",
             Phases = GamePhase.Fight,
@@ -504,7 +504,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Chronoshift",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Starshatter Arsenal – Strategic Ploy",
             Detachment = "Starshatter Arsenal",
             Phases = GamePhase.Move,
@@ -520,7 +520,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Dimensional Tunnel",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Starshatter Arsenal – Strategic Ploy",
             Detachment = "Starshatter Arsenal",
             Phases = GamePhase.Move,
@@ -536,7 +536,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Reactive Reposition",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Starshatter Arsenal – Strategic Ploy",
             Detachment = "Starshatter Arsenal",
             Phases = GamePhase.Shoot,
@@ -551,7 +551,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Merciless Reclamation",
-            Cost = "2CP",
+            Cost = "II",
             Category = "Starshatter Arsenal – Battle Tactic",
             Detachment = "Starshatter Arsenal",
             Phases = GamePhase.Shoot | GamePhase.Fight,
@@ -566,7 +566,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Unyielding Forms",
-            Cost = "2CP",
+            Cost = "II",
             Category = "Starshatter Arsenal – Battle Tactic",
             Detachment = "Starshatter Arsenal",
             Phases = GamePhase.Shoot | GamePhase.Fight,
@@ -587,7 +587,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Territorial Obsession",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Obeisance Phalanx – Strategic Ploy",
             Detachment = "Obeisance Phalanx",
             Phases = GamePhase.Command,
@@ -603,7 +603,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Your Time Is Nigh",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Obeisance Phalanx – Epic Deed",
             Detachment = "Obeisance Phalanx",
             Phases = GamePhase.All,
@@ -618,7 +618,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Suffer No Rival",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Obeisance Phalanx – Battle Tactic",
             Detachment = "Obeisance Phalanx",
             Phases = GamePhase.Fight,
@@ -634,7 +634,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Sentinels of Eternity",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Obeisance Phalanx – Epic Deed",
             Detachment = "Obeisance Phalanx",
             Phases = GamePhase.Fight,
@@ -650,7 +650,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Nanoassembly Protocols",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Obeisance Phalanx – Battle Tactic",
             Detachment = "Obeisance Phalanx",
             Phases = GamePhase.Shoot | GamePhase.Fight,
@@ -668,7 +668,7 @@ public static class CoreStratagems
         new()
         {
             Name = "Enslaved Artifice",
-            Cost = "1CP",
+            Cost = "I",
             Category = "Obeisance Phalanx – Battle Tactic",
             Detachment = "Obeisance Phalanx",
             Phases = GamePhase.Shoot | GamePhase.Fight,
