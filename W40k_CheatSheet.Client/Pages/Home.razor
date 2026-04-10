@@ -164,6 +164,23 @@
                                 <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Charge" @bind:after="SaveDetachmentConfig" /> Chg</label>
                                 <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Fight" @bind:after="SaveDetachmentConfig" /> Fgt</label>
                             </div>
+                            @if (detachmentConfig.Command || detachmentConfig.Move || detachmentConfig.Shoot || detachmentConfig.Charge || detachmentConfig.Fight)
+                            {
+                                <div class="setup-checks-row" style="justify-content:center">
+                                    @if (detachmentConfig.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyCommand" @bind:after="SaveDetachmentConfig" /> eCmd</label>}
+                                    @if (detachmentConfig.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyMove" @bind:after="SaveDetachmentConfig" /> eMov</label>}
+                                    @if (detachmentConfig.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyShoot" @bind:after="SaveDetachmentConfig" /> eSht</label>}
+                                    @if (detachmentConfig.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyCharge" @bind:after="SaveDetachmentConfig" /> eChg</label>}
+                                    @if (detachmentConfig.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyFight" @bind:after="SaveDetachmentConfig" /> eFgt</label>}
+                                </div>
+                                <div class="setup-checks-row" style="justify-content:center">
+                                    @if (detachmentConfig.Command){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyCommand" @bind:after="SaveDetachmentConfig" /> myCmd</label>}
+                                    @if (detachmentConfig.Move){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyMove" @bind:after="SaveDetachmentConfig" /> myMov</label>}
+                                    @if (detachmentConfig.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyShooting" @bind:after="SaveDetachmentConfig" /> mySht</label>}
+                                    @if (detachmentConfig.Charge){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyCharge" @bind:after="SaveDetachmentConfig" /> myChg</label>}
+                                    @if (detachmentConfig.Fight){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyFight" @bind:after="SaveDetachmentConfig" /> myFgt</label>}
+                                </div>
+                            }
                         </div>
                     }
                 </div>
@@ -789,6 +806,23 @@
                                                         <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Charge" @bind:after="SaveAbilityConfigs" /> Chg</label>
                                                         <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Fight" @bind:after="SaveAbilityConfigs" /> Fgt</label>
                                                     </div>
+                                                    @if (aCfg.Command || aCfg.Move || aCfg.Shoot || aCfg.Charge || aCfg.Fight)
+                                                    {
+                                                        <div class="setup-checks-row">
+                                                            @if (aCfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyCommand" @bind:after="SaveAbilityConfigs" /> eCmd</label>}
+                                                            @if (aCfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyMove" @bind:after="SaveAbilityConfigs" /> eMov</label>}
+                                                            @if (aCfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyShoot" @bind:after="SaveAbilityConfigs" /> eSht</label>}
+                                                            @if (aCfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyCharge" @bind:after="SaveAbilityConfigs" /> eChg</label>}
+                                                            @if (aCfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyFight" @bind:after="SaveAbilityConfigs" /> eFgt</label>}
+                                                        </div>
+                                                        <div class="setup-checks-row">
+                                                            @if (aCfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyCommand" @bind:after="SaveAbilityConfigs" /> myCmd</label>}
+                                                            @if (aCfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyMove" @bind:after="SaveAbilityConfigs" /> myMov</label>}
+                                                            @if (aCfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyShooting" @bind:after="SaveAbilityConfigs" /> mySht</label>}
+                                                            @if (aCfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyCharge" @bind:after="SaveAbilityConfigs" /> myChg</label>}
+                                                            @if (aCfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyFight" @bind:after="SaveAbilityConfigs" /> myFgt</label>}
+                                                        </div>
+                                                    }
                                                 </div>
                                             </div>
                                         }
@@ -978,6 +1012,23 @@
                                             <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Charge" @bind:after="SaveDetachmentConfig" /> Chg</label>
                                             <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Fight" @bind:after="SaveDetachmentConfig" /> Fgt</label>
                                         </div>
+                                        @if (detachmentConfig.Command || detachmentConfig.Move || detachmentConfig.Shoot || detachmentConfig.Charge || detachmentConfig.Fight)
+                                        {
+                                            <div class="setup-checks-row">
+                                                @if (detachmentConfig.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyCommand" @bind:after="SaveDetachmentConfig" /> eCmd</label>}
+                                                @if (detachmentConfig.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyMove" @bind:after="SaveDetachmentConfig" /> eMov</label>}
+                                                @if (detachmentConfig.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyShoot" @bind:after="SaveDetachmentConfig" /> eSht</label>}
+                                                @if (detachmentConfig.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyCharge" @bind:after="SaveDetachmentConfig" /> eChg</label>}
+                                                @if (detachmentConfig.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyFight" @bind:after="SaveDetachmentConfig" /> eFgt</label>}
+                                            </div>
+                                            <div class="setup-checks-row">
+                                                @if (detachmentConfig.Command){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyCommand" @bind:after="SaveDetachmentConfig" /> myCmd</label>}
+                                                @if (detachmentConfig.Move){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyMove" @bind:after="SaveDetachmentConfig" /> myMov</label>}
+                                                @if (detachmentConfig.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyShooting" @bind:after="SaveDetachmentConfig" /> mySht</label>}
+                                                @if (detachmentConfig.Charge){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyCharge" @bind:after="SaveDetachmentConfig" /> myChg</label>}
+                                                @if (detachmentConfig.Fight){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyFight" @bind:after="SaveDetachmentConfig" /> myFgt</label>}
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1011,6 +1062,23 @@
                                                     <label class="setup-lbl"><input type="checkbox" @bind="cfg.Charge" @bind:after="SaveAbilityConfigs" /> Chg</label>
                                                     <label class="setup-lbl"><input type="checkbox" @bind="cfg.Fight" @bind:after="SaveAbilityConfigs" /> Fgt</label>
                                                 </div>
+                                                @if (cfg.Command || cfg.Move || cfg.Shoot || cfg.Charge || cfg.Fight)
+                                                {
+                                                    <div class="setup-checks-row">
+                                                        @if (cfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyCommand" @bind:after="SaveAbilityConfigs" /> eCmd</label>}
+                                                        @if (cfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyMove" @bind:after="SaveAbilityConfigs" /> eMov</label>}
+                                                        @if (cfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyShoot" @bind:after="SaveAbilityConfigs" /> eSht</label>}
+                                                        @if (cfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyCharge" @bind:after="SaveAbilityConfigs" /> eChg</label>}
+                                                        @if (cfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyFight" @bind:after="SaveAbilityConfigs" /> eFgt</label>}
+                                                    </div>
+                                                    <div class="setup-checks-row">
+                                                        @if (cfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyCommand" @bind:after="SaveAbilityConfigs" /> myCmd</label>}
+                                                        @if (cfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyMove" @bind:after="SaveAbilityConfigs" /> myMov</label>}
+                                                        @if (cfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyShooting" @bind:after="SaveAbilityConfigs" /> mySht</label>}
+                                                        @if (cfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyCharge" @bind:after="SaveAbilityConfigs" /> myChg</label>}
+                                                        @if (cfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyFight" @bind:after="SaveAbilityConfigs" /> myFgt</label>}
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
                                     }
@@ -2883,6 +2951,16 @@
         public bool Shoot     { get; set; }
         public bool Charge    { get; set; }
         public bool Fight     { get; set; }
+        public bool EnemyCommand { get; set; }
+        public bool EnemyMove    { get; set; }
+        public bool EnemyShoot   { get; set; }
+        public bool EnemyCharge  { get; set; }
+        public bool EnemyFight   { get; set; }
+        public bool MyCommand  { get; set; }
+        public bool MyMove     { get; set; }
+        public bool MyShooting { get; set; }
+        public bool MyCharge   { get; set; }
+        public bool MyFight    { get; set; }
         public bool AddToUnit { get; set; }
     }
 
@@ -2895,6 +2973,16 @@
         public bool Shoot     { get; set; }
         public bool Charge    { get; set; }
         public bool Fight     { get; set; }
+        public bool EnemyCommand { get; set; }
+        public bool EnemyMove    { get; set; }
+        public bool EnemyShoot   { get; set; }
+        public bool EnemyCharge  { get; set; }
+        public bool EnemyFight   { get; set; }
+        public bool MyCommand  { get; set; }
+        public bool MyMove     { get; set; }
+        public bool MyShooting { get; set; }
+        public bool MyCharge   { get; set; }
+        public bool MyFight    { get; set; }
         public bool Reminder  { get; set; }
     }
 
@@ -3100,16 +3188,47 @@
 
             if (activePhase is not null && !IsDetachmentAlwaysActive)
             {
-                bool match = activePhase.Value switch
+                var d = detachmentConfig;
+                bool enabled = activePhase.Value switch
                 {
-                    GamePhase.Command => detachmentConfig.Command,
-                    GamePhase.Move    => detachmentConfig.Move,
-                    GamePhase.Shoot   => detachmentConfig.Shoot,
-                    GamePhase.Charge  => detachmentConfig.Charge,
-                    GamePhase.Fight   => detachmentConfig.Fight,
+                    GamePhase.Command => d.Command,
+                    GamePhase.Move    => d.Move,
+                    GamePhase.Shoot   => d.Shoot,
+                    GamePhase.Charge  => d.Charge,
+                    GamePhase.Fight   => d.Fight,
                     _                 => true
                 };
-                if (!match) return false;
+                if (!enabled) return false;
+
+                // If My Turn is active and this phase is marked enemy-only, hide it
+                if (activeTurn == TurnFilter.MyTurn)
+                {
+                    bool enemyOnly = activePhase.Value switch
+                    {
+                        GamePhase.Command => d.EnemyCommand,
+                        GamePhase.Move    => d.EnemyMove,
+                        GamePhase.Shoot   => d.EnemyShoot,
+                        GamePhase.Charge  => d.EnemyCharge,
+                        GamePhase.Fight   => d.EnemyFight,
+                        _                 => false
+                    };
+                    if (enemyOnly) return false;
+                }
+
+                // If Enemy Turn is active and this phase is marked my-turn-only, hide it
+                if (activeTurn == TurnFilter.EnemyTurn)
+                {
+                    bool myOnly = activePhase.Value switch
+                    {
+                        GamePhase.Command => d.MyCommand,
+                        GamePhase.Move    => d.MyMove,
+                        GamePhase.Shoot   => d.MyShooting,
+                        GamePhase.Charge  => d.MyCharge,
+                        GamePhase.Fight   => d.MyFight,
+                        _                 => false
+                    };
+                    if (myOnly) return false;
+                }
             }
             return true;
         }
@@ -3490,7 +3609,7 @@
     private bool IsConfiguredForPhase(AbilityEntry a, GamePhase phase)
     {
         if (!abilityConfigs.TryGetValue(AbilityKey(a), out var c)) return true;
-        return phase switch
+        bool enabled = phase switch
         {
             GamePhase.Command => c.Command,
             GamePhase.Move    => c.Move,
@@ -3499,6 +3618,38 @@
             GamePhase.Fight   => c.Fight,
             _                 => true
         };
+        if (!enabled) return false;
+
+        // If My Turn is active and this phase is marked enemy-only, hide it
+        if (activeTurn == TurnFilter.MyTurn)
+        {
+            bool enemyOnly = phase switch
+            {
+                GamePhase.Command => c.EnemyCommand,
+                GamePhase.Move    => c.EnemyMove,
+                GamePhase.Shoot   => c.EnemyShoot,
+                GamePhase.Charge  => c.EnemyCharge,
+                GamePhase.Fight   => c.EnemyFight,
+                _                 => false
+            };
+            if (enemyOnly) return false;
+        }
+
+        // If Enemy Turn is active and this phase is marked my-turn-only, hide it
+        if (activeTurn == TurnFilter.EnemyTurn)
+        {
+            bool myOnly = phase switch
+            {
+                GamePhase.Command => c.MyCommand,
+                GamePhase.Move    => c.MyMove,
+                GamePhase.Shoot   => c.MyShooting,
+                GamePhase.Charge  => c.MyCharge,
+                GamePhase.Fight   => c.MyFight,
+                _                 => false
+            };
+            if (myOnly) return false;
+        }
+        return true;
     }
 
     private void InitAbilityConfigs()
