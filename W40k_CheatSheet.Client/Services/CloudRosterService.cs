@@ -35,9 +35,9 @@ public class CloudRosterService
         {
             var token = await _js.InvokeAsync<string?>("localStorage.getItem", "cloud_access_token");
             var refresh = await _js.InvokeAsync<string?>("localStorage.getItem", "cloud_refresh_token");
-            var email = await _js.InvokeAsync<string?>("localStorage.getItem", "cloud_email");
+            var username = await _js.InvokeAsync<string?>("localStorage.getItem", "cloud_username");
 
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(username))
                 return;
 
             // Check if the access token is still valid (not expired)
@@ -46,15 +46,15 @@ public class CloudRosterService
                 _accessToken = token;
                 _refreshToken = refresh;
                 IsLoggedIn = true;
-                Username = email;
+                Username = username;
                 return;
             }
 
             // Access token expired — try refresh
             if (!string.IsNullOrEmpty(refresh) && await RefreshSessionAsync(refresh))
             {
-                Username = email;
-                await PersistSession(email);
+                Username = username;
+                await PersistSession(username);
                 return;
             }
 
@@ -91,13 +91,13 @@ public class CloudRosterService
         catch { return false; }
     }
 
-    private async Task PersistSession(string email)
+    private async Task PersistSession(string username)
     {
         try
         {
             await _js.InvokeVoidAsync("localStorage.setItem", "cloud_access_token", _accessToken ?? "");
             await _js.InvokeVoidAsync("localStorage.setItem", "cloud_refresh_token", _refreshToken ?? "");
-            await _js.InvokeVoidAsync("localStorage.setItem", "cloud_email", email);
+            await _js.InvokeVoidAsync("localStorage.setItem", "cloud_username", username);
         }
         catch { }
     }
@@ -108,7 +108,7 @@ public class CloudRosterService
         {
             await _js.InvokeVoidAsync("localStorage.removeItem", "cloud_access_token");
             await _js.InvokeVoidAsync("localStorage.removeItem", "cloud_refresh_token");
-            await _js.InvokeVoidAsync("localStorage.removeItem", "cloud_email");
+            await _js.InvokeVoidAsync("localStorage.removeItem", "cloud_username");
         }
         catch { }
     }
@@ -139,14 +139,37 @@ public class CloudRosterService
 
     // ── Auth ──
 
-    public async Task<bool> RegisterAsync(string email, string password)
+    public async Task<bool> IsUsernameAvailableAsync(string username)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+                $"{_supabaseUrl}/rest/v1/profiles?username=eq.{Uri.EscapeDataString(username)}&select=username");
+            request.Headers.Add("apikey", _anonKey);
+
+            var response = await _http.SendAsync(request);
+            if (!response.IsSuccessStatusCode) return false;
+
+            var body = await response.Content.ReadAsStringAsync();
+            return body == "[]";
+        }
+        catch { return false; }
+    }
+
+    public async Task<bool> RegisterAsync(string email, string password, string username)
     {
         ErrorMessage = null;
         try
         {
+            if (!await IsUsernameAvailableAsync(username))
+            {
+                ErrorMessage = "Username already taken.";
+                return false;
+            }
+
             using var request = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl}/auth/v1/signup");
             request.Headers.Add("apikey", _anonKey);
-            request.Content = JsonContent.Create(new { email, password });
+            request.Content = JsonContent.Create(new { email, password, data = new { username } });
 
             var response = await _http.SendAsync(request);
             var body = await response.Content.ReadAsStringAsync();
@@ -157,13 +180,31 @@ public class CloudRosterService
                 return false;
             }
 
-            return await LoginAsync(email, password);
+            if (!await LoginAsync(email, password))
+                return false;
+
+            await InsertProfileAsync(username);
+            return true;
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Connection error: {ex.Message}";
             return false;
         }
+    }
+
+    private async Task InsertProfileAsync(string username)
+    {
+        try
+        {
+            var userId = GetUserIdFromToken();
+            if (userId is null) return;
+
+            using var request = BuildRequest(HttpMethod.Post, "/rest/v1/profiles");
+            request.Content = JsonContent.Create(new { user_id = userId, username });
+            await _http.SendAsync(request);
+        }
+        catch { }
     }
 
     public async Task<bool> LoginAsync(string email, string password)
@@ -196,9 +237,21 @@ public class CloudRosterService
                 return false;
             }
 
+            // Extract username from user metadata, fallback to profiles table, then email
+            string? username = null;
+            if (doc.RootElement.TryGetProperty("user", out var user) &&
+                user.TryGetProperty("user_metadata", out var meta) &&
+                meta.TryGetProperty("username", out var uname))
+            {
+                username = uname.GetString();
+            }
+
+            username ??= await FetchUsernameAsync();
+            username ??= email;
+
             IsLoggedIn = true;
-            Username = email;
-            await PersistSession(email);
+            Username = username;
+            await PersistSession(username);
             return true;
         }
         catch (Exception ex)
@@ -206,6 +259,30 @@ public class CloudRosterService
             ErrorMessage = $"Connection error: {ex.Message}";
             return false;
         }
+    }
+
+    private async Task<string?> FetchUsernameAsync()
+    {
+        try
+        {
+            var userId = GetUserIdFromToken();
+            if (userId is null) return null;
+
+            using var request = BuildRequest(HttpMethod.Get,
+                $"/rest/v1/profiles?user_id=eq.{userId}&select=username");
+
+            var response = await _http.SendAsync(request);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var body = await response.Content.ReadAsStringAsync();
+            using var arr = JsonDocument.Parse(body);
+            var first = arr.RootElement.EnumerateArray().FirstOrDefault();
+            if (first.ValueKind != JsonValueKind.Undefined &&
+                first.TryGetProperty("username", out var un))
+                return un.GetString();
+        }
+        catch { }
+        return null;
     }
 
     public async Task LogoutAsync()

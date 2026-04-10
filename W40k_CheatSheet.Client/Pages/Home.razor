@@ -16,11 +16,23 @@
             @if (loginExpanded)
             {
                 <div class="login-dropdown">
+                    @if (showRegister)
+                    {
+                        <input type="text" placeholder="Username" @bind="cloudUsername" class="cloud-input" />
+                    }
                     <input type="email" placeholder="Email" @bind="cloudEmail" class="cloud-input" />
                     <input type="password" placeholder="Password" @bind="cloudPassword" class="cloud-input" />
                     <div class="cloud-auth-buttons">
-                        <button class="cloud-btn login" @onclick="CloudLogin" disabled="@cloudBusy">Login</button>
-                        <button class="cloud-btn register" @onclick="CloudRegister" disabled="@cloudBusy">Register</button>
+                        @if (showRegister)
+                        {
+                            <button class="cloud-btn register" @onclick="CloudRegister" disabled="@cloudBusy">Register</button>
+                            <button class="cloud-btn login" @onclick="() => showRegister = false">← Back</button>
+                        }
+                        else
+                        {
+                            <button class="cloud-btn login" @onclick="CloudLogin" disabled="@cloudBusy">Login</button>
+                            <button class="cloud-btn register" @onclick="() => showRegister = true">Register</button>
+                        }
                     </div>
                     @if (!string.IsNullOrEmpty(Cloud.ErrorMessage))
                     {
@@ -1517,8 +1529,10 @@
     // ── Cloud sync fields ──
     private string cloudEmail = "";
     private string cloudPassword = "";
+    private string cloudUsername = "";
     private bool cloudBusy;
     private bool loginExpanded;
+    private bool showRegister;
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
 
     private string FactionClass => army?.Faction switch
@@ -3518,14 +3532,16 @@
 
     private async Task CloudRegister()
     {
-        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword)) return;
+        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword) || string.IsNullOrWhiteSpace(cloudUsername)) return;
         cloudBusy = true;
         StateHasChanged();
-        var ok = await Cloud.RegisterAsync(cloudEmail, cloudPassword);
+        var ok = await Cloud.RegisterAsync(cloudEmail, cloudPassword, cloudUsername.Trim());
         if (ok)
         {
             cloudPassword = "";
+            cloudUsername = "";
             loginExpanded = false;
+            showRegister = false;
             await RefreshCloudRosters();
         }
         cloudBusy = false;
@@ -3537,7 +3553,9 @@
         cloudRosters.Clear();
         cloudEmail = "";
         cloudPassword = "";
+        cloudUsername = "";
         loginExpanded = false;
+        showRegister = false;
     }
 
     private async Task RefreshCloudRosters()
