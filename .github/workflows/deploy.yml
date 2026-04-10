@@ -33,8 +33,10 @@ jobs:
           dotnet clean W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj -c Release
           dotnet publish W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj -c Release -o output --no-cache
 
-      - name: Use source index.html (publish strips customizations)
-        run: cp W40k_CheatSheet.Client/wwwroot/index.html output/wwwroot/index.html
+      - name: Use source index.html and CSS (publish strips customizations)
+        run: |
+          cp W40k_CheatSheet.Client/wwwroot/index.html output/wwwroot/index.html
+          cp W40k_CheatSheet.Client/wwwroot/css/app.css output/wwwroot/css/app.css
 
       - name: Fix paths for GitHub Pages
         run: |
