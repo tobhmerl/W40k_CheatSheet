@@ -2973,28 +2973,20 @@
         {
             if (army is null || string.IsNullOrEmpty(army.DetachmentRule)) return false;
 
-            // Hit bonus detachments (e.g., Awakened Dynasty)
+            // Hit bonus detachments (e.g., Awakened Dynasty) — reflected as improved BS/WS on weapon rows
             if (!string.IsNullOrEmpty(army.Detachment) &&
                 army.Detachment.Contains("Awakened Dynasty", StringComparison.OrdinalIgnoreCase))
                 return true;
 
             var rule = army.DetachmentRule;
 
-            // Generic hit-roll bonus pattern
+            // Generic hit-roll bonus pattern — reflected as improved BS/WS
             if (rule.Contains("add 1 to", StringComparison.OrdinalIgnoreCase) &&
-                rule.Contains("hit roll", StringComparison.OrdinalIgnoreCase))
+                rule.Contains("hit roll", StringComparison.OrdinalIgnoreCase) &&
+                rule.Contains("character", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            // Wound-roll bonus pattern
-            if (rule.Contains("add 1 to", StringComparison.OrdinalIgnoreCase) &&
-                rule.Contains("wound roll", StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            // Keyword-granting pattern (e.g., "have the [KEYWORD] ability")
-            if (rule.Contains("have the", StringComparison.OrdinalIgnoreCase) &&
-                rule.Contains("ability", StringComparison.OrdinalIgnoreCase))
-                return true;
-
+            // Wound-roll, keyword-granting, and other patterns can't be reflected in stats — show the text
             return false;
         }
     }
