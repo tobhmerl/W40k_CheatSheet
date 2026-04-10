@@ -34,6 +34,15 @@ jobs:
       - name: Fix base href for GitHub Pages
         run: sed -i 's|<base href="/" />|<base href="/W40k_CheatSheet/" />|g' output/wwwroot/index.html
 
+      - name: Fix inline background image path for GitHub Pages
+        run: sed -i "s|url('images/bg.jpg')|url('/W40k_CheatSheet/images/bg.jpg')|g" output/wwwroot/index.html
+
+      - name: Fix CSS and JS paths for GitHub Pages
+        run: |
+          sed -i 's|href="css/app.css"|href="/W40k_CheatSheet/css/app.css"|g' output/wwwroot/index.html
+          sed -i 's|href="W40k_CheatSheet.Client.styles.css"|href="/W40k_CheatSheet/W40k_CheatSheet.Client.styles.css"|g' output/wwwroot/index.html
+          sed -i 's|src="_framework/blazor.webassembly.js"|src="/W40k_CheatSheet/_framework/blazor.webassembly.js"|g' output/wwwroot/index.html
+
       - name: Copy index.html to 404.html for SPA routing
         run: cp output/wwwroot/index.html output/wwwroot/404.html
 
