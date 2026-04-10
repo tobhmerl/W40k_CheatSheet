@@ -5,20 +5,53 @@
 @inject IJSRuntime JS
 @inject CloudRosterService Cloud
 
-<PageTitle>W40k Roster</PageTitle>
+<PageTitle>Indomitus-Kreuzzug</PageTitle>
 
 <div class="roster-app @FactionClass">
+    @* ── Top-left login toggle ── *@
+    <div class="login-corner">
+        @if (!Cloud.IsLoggedIn)
+        {
+            <span class="login-toggle" @onclick="() => loginExpanded = !loginExpanded">@(loginExpanded ? "✕" : "Login")</span>
+            @if (loginExpanded)
+            {
+                <div class="login-dropdown">
+                    <input type="email" placeholder="Email" @bind="cloudEmail" class="cloud-input" />
+                    <input type="password" placeholder="Password" @bind="cloudPassword" class="cloud-input" />
+                    <div class="cloud-auth-buttons">
+                        <button class="cloud-btn login" @onclick="CloudLogin" disabled="@cloudBusy">Login</button>
+                        <button class="cloud-btn register" @onclick="CloudRegister" disabled="@cloudBusy">Register</button>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Cloud.ErrorMessage))
+                    {
+                        <div class="cloud-error">@Cloud.ErrorMessage</div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <span class="login-toggle logged-in" @onclick="() => loginExpanded = !loginExpanded">@Cloud.Username</span>
+            @if (loginExpanded)
+            {
+                <div class="login-dropdown">
+                    <button class="cloud-btn logout" @onclick="CloudLogout">Logout</button>
+                </div>
+            }
+        }
+    </div>
+
     @if (!loaded)
     {
         <div class="import-section">
-            <h1>⚔️ W40k CheatSheet</h1>
+            <h1>Indomitus-Kreuzzug</h1>
             <p>Loading…</p>
         </div>
     }
     else if (army is null)
     {
         <div class="import-section">
-            <h1>⚔️ W40k CheatSheet</h1>
+            <h1>Indomitus-Kreuzzug</h1>
             <p>Import your army roster JSON to view unit stats.</p>
             <label class="import-btn">
                 📁 Import Roster JSON
@@ -29,46 +62,23 @@
                 <div class="error-msg">@errorMessage</div>
             }
 
-            @* ── Cloud Sync Section ── *@
-            <div class="cloud-section">
-                @if (!Cloud.IsLoggedIn)
-                {
-                    <h3>☁️ Cloud Sync</h3>
-                    <div class="cloud-auth-form">
-                        <input type="email" placeholder="Email" @bind="cloudEmail" class="cloud-input" />
-                        <input type="password" placeholder="Password" @bind="cloudPassword" class="cloud-input" />
-                        <div class="cloud-auth-buttons">
-                            <button class="cloud-btn login" @onclick="CloudLogin" disabled="@cloudBusy">🔑 Login</button>
-                            <button class="cloud-btn register" @onclick="CloudRegister" disabled="@cloudBusy">📝 Register</button>
-                        </div>
-                        @if (!string.IsNullOrEmpty(Cloud.ErrorMessage))
-                        {
-                            <div class="cloud-error">@Cloud.ErrorMessage</div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <h3>☁️ @Cloud.Username</h3>
-                    <button class="cloud-btn logout" @onclick="CloudLogout">🚪 Logout</button>
-                    @if (cloudRosters.Count > 0)
+            @* ── Cloud Armies (shown when logged in) ── *@
+            @if (Cloud.IsLoggedIn && cloudRosters.Count > 0)
+            {
+                <div class="saved-armies">
+                    <h3>☁️ Cloud Armies</h3>
+                    @foreach (var cr in cloudRosters)
                     {
-                        <div class="saved-armies">
-                            <h3>☁️ Cloud Armies</h3>
-                            @foreach (var cr in cloudRosters)
-                            {
-                                <div class="saved-army-row">
-                                    <div class="saved-army-info" @onclick="() => LoadCloudArmy(cr.Id)">
-                                        <span class="saved-army-name">@cr.Name</span>
-                                        <span class="saved-army-meta">@cr.Faction · @cr.Detachment · @cr.Points pts</span>
-                                    </div>
-                                    <button class="saved-army-delete" @onclick="() => DeleteCloudArmy(cr.Id)" @onclick:stopPropagation="true">🗑</button>
-                                </div>
-                            }
+                        <div class="saved-army-row">
+                            <div class="saved-army-info" @onclick="() => LoadCloudArmy(cr.Id)">
+                                <span class="saved-army-name">@cr.Name</span>
+                                <span class="saved-army-meta">@cr.Faction · @cr.Detachment · @cr.Points pts</span>
+                            </div>
+                            <button class="saved-army-delete" @onclick="() => DeleteCloudArmy(cr.Id)" @onclick:stopPropagation="true">🗑</button>
                         </div>
                     }
-                }
-            </div>
+                </div>
+            }
 
             @if (savedArmies.Count > 0)
             {
@@ -1509,6 +1519,7 @@
     private string cloudEmail = "";
     private string cloudPassword = "";
     private bool cloudBusy;
+    private bool loginExpanded;
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
 
     private string FactionClass => army?.Faction switch
