@@ -149,6 +149,23 @@
             {
                 <div class="detachment-rule">
                     <strong>@army.Detachment:</strong> @army.DetachmentRule
+                    @if (!playMode)
+                    {
+                        <div class="setup-checks" style="margin-top:0.4rem" @onclick:stopPropagation="true">
+                            <div class="setup-checks-row" style="justify-content:center">
+                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyTurn" @bind:after="SaveDetachmentConfig" /> My</label>
+                                <label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyTurn" @bind:after="SaveDetachmentConfig" /> Enem</label>
+                                <label class="setup-lbl disable"><input type="checkbox" @bind="detachmentConfig.Reminder" @bind:after="SaveDetachmentConfig" /> Reminder</label>
+                            </div>
+                            <div class="setup-checks-row" style="justify-content:center">
+                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Command" @bind:after="SaveDetachmentConfig" /> Cmd</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Move" @bind:after="SaveDetachmentConfig" /> Mov</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Shoot" @bind:after="SaveDetachmentConfig" /> Sht</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Charge" @bind:after="SaveDetachmentConfig" /> Chg</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Fight" @bind:after="SaveDetachmentConfig" /> Fgt</label>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
