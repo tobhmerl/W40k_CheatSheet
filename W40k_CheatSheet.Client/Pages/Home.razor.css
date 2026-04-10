@@ -2404,6 +2404,7 @@
     padding: 0.25rem 0.3rem;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
 .name-cell {
@@ -2414,6 +2415,7 @@
     display: flex;
     align-items: baseline;
     min-width: 0;
+    font-family: 'IM Fell English', 'Georgia', serif;
 }
 
 .stat-name-text {
@@ -2431,6 +2433,7 @@
     white-space: normal;
     overflow: hidden;
     padding-top: 0;
+    font-family: 'IM Fell English', 'Georgia', serif;
 }
 
 .kw-extra {
