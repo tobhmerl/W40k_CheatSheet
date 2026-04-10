@@ -37,7 +37,7 @@ public class CloudRosterService
             var refresh = await _js.InvokeAsync<string?>("localStorage.getItem", "cloud_refresh_token");
             var username = await _js.InvokeAsync<string?>("localStorage.getItem", "cloud_username");
 
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(token))
                 return;
 
             // Check if the access token is still valid (not expired)
@@ -46,15 +46,17 @@ public class CloudRosterService
                 _accessToken = token;
                 _refreshToken = refresh;
                 IsLoggedIn = true;
-                Username = username;
+                Username = username ?? GetUsernameFromToken() ?? "User";
+                if (username != Username)
+                    await PersistSession(Username);
                 return;
             }
 
             // Access token expired — try refresh
             if (!string.IsNullOrEmpty(refresh) && await RefreshSessionAsync(refresh))
             {
-                Username = username;
-                await PersistSession(username);
+                Username = username ?? GetUsernameFromToken() ?? "User";
+                await PersistSession(Username);
                 return;
             }
 
@@ -237,7 +239,7 @@ public class CloudRosterService
                 return false;
             }
 
-            // Extract username from user metadata, fallback to profiles table, then email
+            // Extract username from user metadata, JWT payload, profiles table, then email
             string? username = null;
             if (doc.RootElement.TryGetProperty("user", out var user) &&
                 user.TryGetProperty("user_metadata", out var meta) &&
@@ -246,6 +248,7 @@ public class CloudRosterService
                 username = uname.GetString();
             }
 
+            username ??= GetUsernameFromToken();
             username ??= await FetchUsernameAsync();
             username ??= email;
 
@@ -400,6 +403,29 @@ public class CloudRosterService
             return doc.RootElement.GetProperty("sub").GetString();
         }
         catch { return null; }
+    }
+
+    private string? GetUsernameFromToken()
+    {
+        if (string.IsNullOrEmpty(_accessToken)) return null;
+        try
+        {
+            var parts = _accessToken.Split('.');
+            if (parts.Length < 2) return null;
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            switch (payload.Length % 4)
+            {
+                case 2: payload += "=="; break;
+                case 3: payload += "="; break;
+            }
+            var bytes = Convert.FromBase64String(payload);
+            using var doc = JsonDocument.Parse(bytes);
+            if (doc.RootElement.TryGetProperty("user_metadata", out var meta) &&
+                meta.TryGetProperty("username", out var un))
+                return un.GetString();
+        }
+        catch { }
+        return null;
     }
 
     private static string ParseError(string body)
