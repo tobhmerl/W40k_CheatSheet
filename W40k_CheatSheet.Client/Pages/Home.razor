@@ -1224,7 +1224,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v2.1</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v2.2</div>
 
     @if (showChangelog)
     {
@@ -1236,13 +1236,22 @@
                 </div>
                 <div class="changelog-body">
 
-                    <div class="changelog-version">v2.1 🎉</div>
+                    <div class="changelog-version">v2.2 🎉</div>
                     <ul class="changelog-list">
-                        <li class="cl-new">Cloud sync — save &amp; load armies online with username/password authentication</li>
+                        <li class="cl-new">Welcome page redesign — hero card with background image overlay and dark theme</li>
+                        <li class="cl-new">Custom import button image replaces plain text button</li>
+                        <li class="cl-new">Username registration — choose a unique username during signup</li>
+                        <li class="cl-changed">Login displays username instead of email address</li>
+                        <li class="cl-changed">Login / Register moved to top-left corner dropdown — accessible from all pages</li>
+                        <li class="cl-changed">Session restore extracts username from JWT token for reliability</li>
+                    </ul>
+
+                    <div class="changelog-version">v2.1</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Cloud sync — save &amp; load armies online via Supabase backend</li>
                         <li class="cl-new">Cross-device access — set up armies on PC, continue on mobile</li>
-                        <li class="cl-new">Server-side API with ASP.NET Core Identity + SQLite persistence</li>
-                        <li class="cl-new">Login / Register UI on the import page</li>
                         <li class="cl-changed">Save button syncs to cloud when logged in, falls back to localStorage when offline</li>
+                        <li class="cl-removed">Server-side ASP.NET Core API removed — app is now fully standalone Blazor WASM with Supabase cloud</li>
                     </ul>
 
                     <div class="changelog-version">v2.0-beta 🎉</div>
