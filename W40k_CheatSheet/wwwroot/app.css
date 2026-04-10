@@ -9,12 +9,24 @@ html {
 }
 
 html, body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #000;
+    font-family: 'IM Fell English', 'Georgia', serif;
+    background-color: #000;
     color: #eee;
     margin: 0;
     padding: 0;
     -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', 'Georgia', serif;
+}
+
+body {
+    background-image: url('_content/W40k_CheatSheet.Client/images/bg.jpg');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 h1:focus {
