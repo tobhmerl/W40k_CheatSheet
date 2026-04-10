@@ -319,12 +319,34 @@
                         </div>
                     </div>
 
-                    @if (!stratHiddenUnits.Contains(unit) && (abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0))
+                    @{
+                        var showDetachmentInCard = playMode && !string.IsNullOrEmpty(army?.DetachmentRule) &&
+                            HasDetachmentPhasesConfigured && !IsDetachmentAlwaysActive && IsDetachmentVisibleForCurrentFilter;
+                        var showDetachmentAlways = playMode && !string.IsNullOrEmpty(army?.DetachmentRule) &&
+                            HasDetachmentPhasesConfigured && IsDetachmentAlwaysActive && !IsDetachmentHidden;
+                    }
+                    @if (!stratHiddenUnits.Contains(unit) && (abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0 || showDetachmentInCard || showDetachmentAlways))
                     {
                         <div class="strat-expand" @onclick:stopPropagation="true">
                             <div class="strat-expand-main">
+                            @if (showDetachmentInCard)
+                            {
+                                <div class="strat-expand-list">
+                                    <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded" : "")">
+                                        <span class="strat-expand-item strat-cell-ability" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">⚔ @army!.Detachment</span>
+                                        @if (focusedDetachmentRule)
+                                        {
+                                            <div class="strat-expand-desc">@army.DetachmentRule</div>
+                                        }
+                                    </div>
+                                </div>
+                            }
                             @if (abilityCount > 0)
                             {
+                                @if (showDetachmentInCard)
+                                {
+                                    <div class="strat-expand-divider"></div>
+                                }
                                 <div class="strat-expand-list">
                                     @foreach (var a in GetCardAbilities(unit))
                                     {
@@ -462,6 +484,16 @@
                                                 }
                                             </div>
                                         }
+                                        @if (showDetachmentAlways)
+                                        {
+                                            <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded-always" : "")">
+                                                <span class="strat-expand-item strat-cell-always" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">[⚔ @army!.Detachment]</span>
+                                                @if (focusedDetachmentRule)
+                                                {
+                                                    <div class="strat-expand-desc">@army.DetachmentRule</div>
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             }
@@ -474,55 +506,6 @@
                             @foreach (var leader in unit.AttachedLeaders)
                             {
                                 <button class="detach-btn" title="Detach @leader.Name" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
-                            }
-                        </div>
-                    }
-                    @if (playMode)
-                    {
-                        @foreach (var leader in unit.AttachedLeaders)
-                        {
-                            @if (!IsKilled(leader) && leader.ModelCount > 1)
-                            {
-                                <div class="attached-leader @(IsKilled(leader) ? "killed" : "")">
-                                    <div class="attached-leader-info">
-                                        <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "")</span>
-                                    </div>
-                                    <span class="model-counter" @onclick:stopPropagation="true">
-                                        <button class="model-btn" @onclick="() => AdjustModelCount(leader, -1)">−</button>
-                                        <span class="model-count @(GetModelCount(leader) < leader.ModelCount ? "model-reduced" : "")">@GetModelCount(leader)</span>
-                                        <button class="model-btn" @onclick="() => AdjustModelCount(leader, 1)">+</button>
-                                    </span>
-                                </div>
-                            }
-                            else if (!IsKilled(leader))
-                            {
-                                <div class="attached-leader">
-                                    <div class="attached-leader-info">
-                                        <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "")</span>
-                                    </div>
-                                    <button class="model-kill-btn" @onclick="() => AdjustModelCount(leader, -1)" @onclick:stopPropagation="true">☠</button>
-                                </div>
-                            }
-                        }
-                    }
-
-                    @if (unit.AttachedLeaders.Count > 0 && playMode)
-                    {
-                        <div class="attached-leader">
-                            <div class="attached-leader-info">
-                                <span>+ @unit.Name</span>
-                            </div>
-                            @if (!IsKilled(unit) && unit.ModelCount > 1)
-                            {
-                                <span class="model-counter" @onclick:stopPropagation="true">
-                                    <button class="model-btn" @onclick="() => AdjustModelCount(unit, -1)">−</button>
-                                    <span class="model-count @(GetModelCount(unit) < unit.ModelCount ? "model-reduced" : "")">@GetModelCount(unit)</span>
-                                    <button class="model-btn" @onclick="() => AdjustModelCount(unit, 1)">+</button>
-                                </span>
-                            }
-                            else if (!IsKilled(unit))
-                            {
-                                <button class="model-kill-btn" @onclick="() => AdjustModelCount(unit, -1)" @onclick:stopPropagation="true">☠</button>
                             }
                         </div>
                     }
