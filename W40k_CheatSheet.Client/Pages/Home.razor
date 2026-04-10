@@ -101,14 +101,14 @@
     }
     else
     {
-        @if (!playMode)
-        {
-            <div class="roster-actions roster-actions-top">
-                <button class="play-btn" @onclick="TogglePlayMode">⚔️ Play</button>
-                <button class="setup-btn @(armyIsSaved ? "saved" : "")" @onclick="SaveCurrentArmy">💾 Save</button>
-                <button class="clear-btn" @onclick="ClearRoster">🏠 Home</button>
-            </div>
-        }
+        <div class="corner-actions">
+            <button class="corner-btn play @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "☰" : "⚔")</button>
+            @if (!playMode)
+            {
+                <button class="corner-btn save @(saveTick ? "tick" : "")" @onclick="SaveCurrentArmy">@(saveTick ? "✓" : "💾")</button>
+            }
+            <button class="corner-btn home" @onclick="ClearRoster">⌂</button>
+        </div>
 
         <div id="roster-top" class="roster-header">
             <h1>@army.Name</h1>
@@ -1189,18 +1189,6 @@
 
         <div class="roster-footer">
             <hr class="footer-divider" />
-            <div class="roster-actions">
-                    <button class="play-btn @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "⚔️ Setup" : "⚔️ Play")</button>
-                @if (!playMode)
-                {
-                    <button class="setup-btn @(armyIsSaved ? "saved" : "")" @onclick="SaveCurrentArmy">💾 Save</button>
-                    @if (saveToast is not null)
-                    {
-                        <span class="save-toast">@saveToast</span>
-                    }
-                    <button class="clear-btn" @onclick="ClearRoster">🏠 Home</button>
-                }
-            </div>
             <div class="roster-meta">
                 @if (!string.IsNullOrEmpty(army.Faction))
                 {
@@ -1502,8 +1490,6 @@
     private readonly HashSet<UnitEntry> stratHiddenUnits = [];
     private readonly HashSet<UnitEntry> visiblePlayUnits = [];
     private bool armyIsSaved;
-    private string? saveToast;
-    private CancellationTokenSource? toastCts;
     private bool preGameDismissed;
     private readonly HashSet<AbilityEntry> usedAbilities = [];
     private readonly HashSet<Stratagem> usedStratagems = [];
@@ -1515,6 +1501,8 @@
     private readonly Dictionary<UnitEntry, int> modelCounts = [];
     private readonly Dictionary<WeaponProfile, int> weaponModelCounts = [];
     private (UnitEntry Unit, int Delta)? weaponRemovePopup;
+    private bool saveTick;
+    private CancellationTokenSource? saveTickCts;
 
     // ── Cloud sync fields ──
     private string cloudEmail = "";
@@ -2546,7 +2534,6 @@
         setupConfirmed = false;
         stratagemSetupConfirmed = false;
         armyIsSaved = false;
-        saveToast = null;
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-json");
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-state");
         await JS.InvokeVoidAsync("localStorage.removeItem", "ability-configs");
@@ -3413,15 +3400,12 @@
 
         if (Cloud.IsLoggedIn)
         {
-            // ── Cloud save only ──
             await SaveToCloud();
             await RefreshCloudRosters();
             armyIsSaved = true;
-            saveToast = wasAlreadySaved ? "✓ Army updated" : "☁️ Saved";
         }
         else
         {
-            // ── Local save only (fallback) ──
             await JS.InvokeVoidAsync("localStorage.setItem", $"saved-army:{name}", JsonSerializer.Serialize(data));
 
             savedArmies.RemoveAll(a => a.Name == name);
@@ -3434,21 +3418,22 @@
             });
             await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
             armyIsSaved = true;
-            if (wasAlreadySaved)
-                saveToast = "✓ Army updated";
         }
 
-        toastCts?.Cancel();
-        toastCts = new CancellationTokenSource();
-        _ = DismissToastAsync(toastCts.Token);
+        // Show checkmark on save button for 1.5s
+        saveTick = true;
+        StateHasChanged();
+        saveTickCts?.Cancel();
+        saveTickCts = new CancellationTokenSource();
+        _ = DismissSaveTickAsync(saveTickCts.Token);
     }
 
-    private async Task DismissToastAsync(CancellationToken ct)
+    private async Task DismissSaveTickAsync(CancellationToken ct)
     {
         try
         {
-            await Task.Delay(2000, ct);
-            saveToast = null;
+            await Task.Delay(1500, ct);
+            saveTick = false;
             StateHasChanged();
         }
         catch (TaskCanceledException) { }
