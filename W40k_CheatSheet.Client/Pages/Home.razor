@@ -1543,6 +1543,11 @@
                 await LoadFromStorage();
 
                 await LoadSavedArmiesIndex();
+
+                // Restore cloud login session from localStorage
+                await Cloud.TryRestoreSessionAsync();
+                if (Cloud.IsLoggedIn)
+                    await RefreshCloudRosters();
             }
             catch { }
             finally
@@ -3509,6 +3514,7 @@
         if (ok)
         {
             cloudPassword = "";
+            loginExpanded = false;
             await RefreshCloudRosters();
         }
         cloudBusy = false;
@@ -3523,17 +3529,19 @@
         if (ok)
         {
             cloudPassword = "";
+            loginExpanded = false;
             await RefreshCloudRosters();
         }
         cloudBusy = false;
     }
 
-    private void CloudLogout()
+    private async Task CloudLogout()
     {
-        Cloud.Logout();
+        await Cloud.LogoutAsync();
         cloudRosters.Clear();
         cloudEmail = "";
         cloudPassword = "";
+        loginExpanded = false;
     }
 
     private async Task RefreshCloudRosters()

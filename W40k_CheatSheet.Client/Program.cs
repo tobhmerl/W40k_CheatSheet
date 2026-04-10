@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using W40k_CheatSheet.Client;
 using W40k_CheatSheet.Client.Services;
 
@@ -12,6 +13,9 @@ var supabaseKey = builder.Configuration["Supabase:AnonKey"] ?? "";
 
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddScoped(sp =>
-    new CloudRosterService(sp.GetRequiredService<HttpClient>(), supabaseUrl, supabaseKey));
+    new CloudRosterService(
+        sp.GetRequiredService<HttpClient>(),
+        sp.GetRequiredService<IJSRuntime>(),
+        supabaseUrl, supabaseKey));
 
 await builder.Build().RunAsync();
