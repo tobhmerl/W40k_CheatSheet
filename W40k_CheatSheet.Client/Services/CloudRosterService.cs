@@ -335,17 +335,14 @@ public class CloudRosterService
         catch { return null; }
     }
 
-    public async Task<bool> SaveRosterAsync(string name, string faction, string detachment, int points, string dataJson)
+    public async Task<Guid?> SaveRosterAsync(Guid? existingId, string name, string faction, string detachment, int points, string dataJson)
     {
         try
         {
             var userId = GetUserIdFromToken();
-            if (userId is null) return false;
+            if (userId is null) return null;
 
-            using var request = BuildRequest(HttpMethod.Post, "/rest/v1/rosters");
-            request.Headers.Add("Prefer", "resolution=merge-duplicates");
-
-            request.Content = JsonContent.Create(new
+            var payload = new
             {
                 user_id = userId,
                 name,
@@ -354,12 +351,29 @@ public class CloudRosterService
                 points,
                 data_json = dataJson,
                 last_modified = DateTime.UtcNow.ToString("o")
-            });
+            };
 
-            var response = await _http.SendAsync(request);
-            return response.IsSuccessStatusCode;
+            if (existingId is { } id)
+            {
+                // Update existing roster
+                using var request = BuildRequest(HttpMethod.Patch, $"/rest/v1/rosters?id=eq.{id}");
+                request.Content = JsonContent.Create(payload);
+                var response = await _http.SendAsync(request);
+                return response.IsSuccessStatusCode ? id : null;
+            }
+            else
+            {
+                // Create new roster, return the new ID
+                using var request = BuildRequest(HttpMethod.Post, "/rest/v1/rosters");
+                request.Headers.Add("Prefer", "return=representation");
+                request.Content = JsonContent.Create(payload);
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode) return null;
+                var rows = await response.Content.ReadFromJsonAsync<List<SupabaseRosterRow>>();
+                return rows?.FirstOrDefault()?.Id;
+            }
         }
-        catch { return false; }
+        catch { return null; }
     }
 
     public async Task<bool> DeleteRosterAsync(Guid id)

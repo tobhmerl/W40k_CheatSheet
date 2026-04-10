@@ -1521,6 +1521,7 @@
     private readonly HashSet<UnitEntry> stratHiddenUnits = [];
     private readonly HashSet<UnitEntry> visiblePlayUnits = [];
     private bool armyIsSaved;
+    private Guid? currentCloudRosterId;
     private bool preGameDismissed;
     private readonly HashSet<AbilityEntry> usedAbilities = [];
     private readonly HashSet<Stratagem> usedStratagems = [];
@@ -2543,6 +2544,7 @@
             abilitiesPanelOpen = false;
             stratagemsPanelOpen = false;
             armyIsSaved = false;
+            currentCloudRosterId = null;
             await SaveToStorage();
             await SaveAbilityConfigs();
             await SaveStratagemConfigs();
@@ -2569,6 +2571,7 @@
         setupConfirmed = false;
         stratagemSetupConfirmed = false;
         armyIsSaved = false;
+        currentCloudRosterId = null;
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-json");
         await JS.InvokeVoidAsync("localStorage.removeItem", "roster-state");
         await JS.InvokeVoidAsync("localStorage.removeItem", "ability-configs");
@@ -3647,6 +3650,7 @@
             playMode = false;
             errorMessage = null;
             armyIsSaved = true;
+            currentCloudRosterId = id;
 
             await SaveToStorage();
             await SaveAbilityConfigs();
@@ -3679,6 +3683,8 @@
             StratagemConfigs = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs)
         };
         var dataJson = JsonSerializer.Serialize(data);
-        await Cloud.SaveRosterAsync(army.Name, army.Faction ?? "", army.Detachment ?? "", army.TotalPoints, dataJson);
+        var savedId = await Cloud.SaveRosterAsync(currentCloudRosterId, army.Name, army.Faction ?? "", army.Detachment ?? "", army.TotalPoints, dataJson);
+        if (savedId is not null)
+            currentCloudRosterId = savedId;
     }
 }
