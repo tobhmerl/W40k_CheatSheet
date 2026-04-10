@@ -66,7 +66,7 @@
             @if (Cloud.IsLoggedIn && cloudRosters.Count > 0)
             {
                 <div class="saved-armies">
-                    <h3>☁️ Cloud Armies</h3>
+                    <h3>☁️ Saved Armies</h3>
                     @foreach (var cr in cloudRosters)
                     {
                         <div class="saved-army-row">
@@ -80,7 +80,8 @@
                 </div>
             }
 
-            @if (savedArmies.Count > 0)
+            @* ── Local armies (only shown when NOT logged in) ── *@
+            @if (!Cloud.IsLoggedIn && savedArmies.Count > 0)
             {
                 <div class="saved-armies">
                     <h3>📦 Saved Armies (Local)</h3>
@@ -3410,36 +3411,36 @@
             StratagemConfigs = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs)
         };
 
-        await JS.InvokeVoidAsync("localStorage.setItem", $"saved-army:{name}", JsonSerializer.Serialize(data));
-
-        savedArmies.RemoveAll(a => a.Name == name);
-        savedArmies.Insert(0, new SavedArmyMeta
-        {
-            Name = name,
-            Faction = army.Faction ?? "",
-            Detachment = army.Detachment ?? "",
-            Points = army.TotalPoints
-        });
-        await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
-
-        armyIsSaved = true;
-        if (wasAlreadySaved)
-        {
-            saveToast = "✓ Army updated";
-            toastCts?.Cancel();
-            toastCts = new CancellationTokenSource();
-            _ = DismissToastAsync(toastCts.Token);
-        }
-
-        // ── Also save to cloud if logged in ──
         if (Cloud.IsLoggedIn)
         {
+            // ── Cloud save only ──
             await SaveToCloud();
-            saveToast = wasAlreadySaved ? "✓ Army updated (cloud)" : "☁️ Synced";
-            toastCts?.Cancel();
-            toastCts = new CancellationTokenSource();
-            _ = DismissToastAsync(toastCts.Token);
+            await RefreshCloudRosters();
+            armyIsSaved = true;
+            saveToast = wasAlreadySaved ? "✓ Army updated" : "☁️ Saved";
         }
+        else
+        {
+            // ── Local save only (fallback) ──
+            await JS.InvokeVoidAsync("localStorage.setItem", $"saved-army:{name}", JsonSerializer.Serialize(data));
+
+            savedArmies.RemoveAll(a => a.Name == name);
+            savedArmies.Insert(0, new SavedArmyMeta
+            {
+                Name = name,
+                Faction = army.Faction ?? "",
+                Detachment = army.Detachment ?? "",
+                Points = army.TotalPoints
+            });
+            await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
+            armyIsSaved = true;
+            if (wasAlreadySaved)
+                saveToast = "✓ Army updated";
+        }
+
+        toastCts?.Cancel();
+        toastCts = new CancellationTokenSource();
+        _ = DismissToastAsync(toastCts.Token);
     }
 
     private async Task DismissToastAsync(CancellationToken ct)
