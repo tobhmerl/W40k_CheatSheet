@@ -2536,6 +2536,8 @@
             stratagemConfigs.Clear();
             InitAbilityConfigs();
             InitStratagemConfigs();
+            if (Cloud.IsLoggedIn)
+                await PrefillFromCloudConfigs();
             setupConfirmed = true;
             stratagemSetupConfirmed = true;
             abilitiesPanelOpen = false;
@@ -3434,6 +3436,9 @@
         if (Cloud.IsLoggedIn)
         {
             await SaveToCloud();
+            await Cloud.SaveUserConfigsAsync(
+                JsonSerializer.Serialize(abilityConfigs),
+                JsonSerializer.Serialize(stratagemConfigs));
             await RefreshCloudRosters();
             armyIsSaved = true;
         }
@@ -3523,6 +3528,41 @@
     }
 
     // ── Cloud sync methods ──────────────────────────────────────────────────
+
+    private async Task PrefillFromCloudConfigs()
+    {
+        try
+        {
+            var (cloudAbilities, cloudStratagems) = await Cloud.LoadUserConfigsAsync();
+
+            if (!string.IsNullOrEmpty(cloudAbilities))
+            {
+                var saved = JsonSerializer.Deserialize<Dictionary<string, AbilitySetupEntry>>(cloudAbilities);
+                if (saved is not null)
+                {
+                    foreach (var (key, value) in saved)
+                    {
+                        if (abilityConfigs.ContainsKey(key))
+                            abilityConfigs[key] = value;
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(cloudStratagems))
+            {
+                var saved = JsonSerializer.Deserialize<Dictionary<string, StratagemSetupEntry>>(cloudStratagems);
+                if (saved is not null)
+                {
+                    foreach (var (key, value) in saved)
+                    {
+                        if (stratagemConfigs.ContainsKey(key))
+                            stratagemConfigs[key] = value;
+                    }
+                }
+            }
+        }
+        catch { }
+    }
 
     private async Task CloudLogin()
     {

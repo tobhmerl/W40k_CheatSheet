@@ -375,6 +375,83 @@ public class CloudRosterService
         catch { return false; }
     }
 
+    // ── User config persistence (cross-army prefill) ──
+
+    public async Task SaveUserConfigsAsync(string abilityConfigsJson, string stratagemConfigsJson)
+    {
+        try
+        {
+            var userId = GetUserIdFromToken();
+            if (userId is null) return;
+
+            // Load existing cloud configs and merge so we never lose configs from other armies
+            var (existingAbilities, existingStratagems) = await LoadUserConfigsAsync();
+            var mergedAbilities = MergeConfigJson(existingAbilities, abilityConfigsJson);
+            var mergedStratagems = MergeConfigJson(existingStratagems, stratagemConfigsJson);
+
+            using var request = BuildRequest(HttpMethod.Post, "/rest/v1/user_configs");
+            request.Headers.Add("Prefer", "resolution=merge-duplicates");
+            request.Content = JsonContent.Create(new
+            {
+                user_id = userId,
+                ability_configs = mergedAbilities,
+                stratagem_configs = mergedStratagems,
+                last_modified = DateTime.UtcNow.ToString("o")
+            });
+
+            await _http.SendAsync(request);
+        }
+        catch { }
+    }
+
+    public async Task<(string? AbilityConfigs, string? StratagemConfigs)> LoadUserConfigsAsync()
+    {
+        try
+        {
+            var userId = GetUserIdFromToken();
+            if (userId is null) return (null, null);
+
+            using var request = BuildRequest(HttpMethod.Get,
+                $"/rest/v1/user_configs?user_id=eq.{userId}&select=ability_configs,stratagem_configs");
+
+            var response = await _http.SendAsync(request);
+            if (!response.IsSuccessStatusCode) return (null, null);
+
+            var body = await response.Content.ReadAsStringAsync();
+            using var arr = JsonDocument.Parse(body);
+            var first = arr.RootElement.EnumerateArray().FirstOrDefault();
+            if (first.ValueKind == JsonValueKind.Undefined) return (null, null);
+
+            string? abilities = null, stratagems = null;
+            if (first.TryGetProperty("ability_configs", out var ac) && ac.ValueKind == JsonValueKind.String)
+                abilities = ac.GetString();
+            if (first.TryGetProperty("stratagem_configs", out var sc) && sc.ValueKind == JsonValueKind.String)
+                stratagems = sc.GetString();
+
+            return (abilities, stratagems);
+        }
+        catch { return (null, null); }
+    }
+
+    private static string MergeConfigJson(string? existing, string current)
+    {
+        if (string.IsNullOrEmpty(existing)) return current;
+        if (string.IsNullOrEmpty(current)) return existing;
+        try
+        {
+            var merged = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(existing)
+                         ?? new Dictionary<string, JsonElement>();
+            var incoming = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(current);
+            if (incoming is not null)
+            {
+                foreach (var (key, value) in incoming)
+                    merged[key] = value;
+            }
+            return JsonSerializer.Serialize(merged);
+        }
+        catch { return current; }
+    }
+
     // ── Helpers ──
 
     private HttpRequestMessage BuildRequest(HttpMethod method, string path)
