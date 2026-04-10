@@ -5,7 +5,7 @@
 @inject IJSRuntime JS
 @inject CloudRosterService Cloud
 
-<PageTitle>Indomitus-Kreuzzug</PageTitle>
+<PageTitle>Segmentum Ultima</PageTitle>
 
 <div class="roster-app @FactionClass">
     @* ── Top-left login toggle ── *@
@@ -44,14 +44,14 @@
     @if (!loaded)
     {
         <div class="import-section">
-            <h1>Indomitus-Kreuzzug</h1>
+            <h1>There is only war ...</h1>
             <p>Loading…</p>
         </div>
     }
     else if (army is null)
     {
         <div class="import-section">
-            <h1>Indomitus-Kreuzzug</h1>
+            <h1>Segmentum Ultima</h1>
             <p>Import your army roster JSON to view unit stats.</p>
             <label class="import-btn">
                 📁 Import Roster JSON
