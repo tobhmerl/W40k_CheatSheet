@@ -8,6 +8,82 @@
 /* ============================================================
    Saved armies list (import page)
    ============================================================ */
+.cloud-section {
+    margin-top: 1.5rem;
+    max-width: 500px;
+    width: 100%;
+}
+
+.cloud-section h3 {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+}
+
+.cloud-auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.cloud-input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #ccc;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.cloud-input:focus {
+    border-color: #5a9bd5;
+}
+
+.cloud-auth-buttons {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+}
+
+.cloud-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #aaa;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.cloud-btn:hover:not(:disabled) {
+    border-color: #5a9bd5;
+    color: #ccc;
+    background: rgba(90, 155, 213, 0.1);
+}
+
+.cloud-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.cloud-btn.login { flex: 1; }
+.cloud-btn.register { flex: 1; }
+.cloud-btn.logout {
+    margin-bottom: 0.5rem;
+    color: #888;
+    font-size: 0.7rem;
+}
+
+.cloud-error {
+    color: #e94560;
+    font-size: 0.7rem;
+    margin-top: 0.3rem;
+}
+
 .saved-armies {
     margin-top: 1.5rem;
     max-width: 500px;

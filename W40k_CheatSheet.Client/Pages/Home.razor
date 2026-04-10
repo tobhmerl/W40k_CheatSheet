@@ -3,6 +3,7 @@
 @using W40k_CheatSheet.Client.Services
 @using System.Text.Json
 @inject IJSRuntime JS
+@inject CloudRosterService Cloud
 
 <PageTitle>W40k Roster</PageTitle>
 
@@ -27,10 +28,52 @@
             {
                 <div class="error-msg">@errorMessage</div>
             }
+
+            @* ── Cloud Sync Section ── *@
+            <div class="cloud-section">
+                @if (!Cloud.IsLoggedIn)
+                {
+                    <h3>☁️ Cloud Sync</h3>
+                    <div class="cloud-auth-form">
+                        <input type="email" placeholder="Email" @bind="cloudEmail" class="cloud-input" />
+                        <input type="password" placeholder="Password" @bind="cloudPassword" class="cloud-input" />
+                        <div class="cloud-auth-buttons">
+                            <button class="cloud-btn login" @onclick="CloudLogin" disabled="@cloudBusy">🔑 Login</button>
+                            <button class="cloud-btn register" @onclick="CloudRegister" disabled="@cloudBusy">📝 Register</button>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Cloud.ErrorMessage))
+                        {
+                            <div class="cloud-error">@Cloud.ErrorMessage</div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <h3>☁️ @Cloud.Username</h3>
+                    <button class="cloud-btn logout" @onclick="CloudLogout">🚪 Logout</button>
+                    @if (cloudRosters.Count > 0)
+                    {
+                        <div class="saved-armies">
+                            <h3>☁️ Cloud Armies</h3>
+                            @foreach (var cr in cloudRosters)
+                            {
+                                <div class="saved-army-row">
+                                    <div class="saved-army-info" @onclick="() => LoadCloudArmy(cr.Id)">
+                                        <span class="saved-army-name">@cr.Name</span>
+                                        <span class="saved-army-meta">@cr.Faction · @cr.Detachment · @cr.Points pts</span>
+                                    </div>
+                                    <button class="saved-army-delete" @onclick="() => DeleteCloudArmy(cr.Id)" @onclick:stopPropagation="true">🗑</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
             @if (savedArmies.Count > 0)
             {
                 <div class="saved-armies">
-                    <h3>📦 Saved Armies</h3>
+                    <h3>📦 Saved Armies (Local)</h3>
                     @foreach (var sa in savedArmies)
                     {
                         <div class="saved-army-row">
@@ -1160,7 +1203,7 @@
             </div>
         </div>
     }
-    <div class="version-tag" @onclick="() => showChangelog = true">v2.0-beta</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v2.1</div>
 
     @if (showChangelog)
     {
@@ -1171,6 +1214,15 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v2.1 🎉</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Cloud sync — save &amp; load armies online with username/password authentication</li>
+                        <li class="cl-new">Cross-device access — set up armies on PC, continue on mobile</li>
+                        <li class="cl-new">Server-side API with ASP.NET Core Identity + SQLite persistence</li>
+                        <li class="cl-new">Login / Register UI on the import page</li>
+                        <li class="cl-changed">Save button syncs to cloud when logged in, falls back to localStorage when offline</li>
+                    </ul>
 
                     <div class="changelog-version">v2.0-beta 🎉</div>
                     <ul class="changelog-list">
@@ -1452,6 +1504,12 @@
     private readonly Dictionary<UnitEntry, int> modelCounts = [];
     private readonly Dictionary<WeaponProfile, int> weaponModelCounts = [];
     private (UnitEntry Unit, int Delta)? weaponRemovePopup;
+
+    // ── Cloud sync fields ──
+    private string cloudEmail = "";
+    private string cloudPassword = "";
+    private bool cloudBusy;
+    private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
 
     private string FactionClass => army?.Faction switch
     {
@@ -3356,6 +3414,16 @@
             toastCts = new CancellationTokenSource();
             _ = DismissToastAsync(toastCts.Token);
         }
+
+        // ── Also save to cloud if logged in ──
+        if (Cloud.IsLoggedIn)
+        {
+            await SaveToCloud();
+            saveToast = wasAlreadySaved ? "✓ Army updated (cloud)" : "☁️ Synced";
+            toastCts?.Cancel();
+            toastCts = new CancellationTokenSource();
+            _ = DismissToastAsync(toastCts.Token);
+        }
     }
 
     private async Task DismissToastAsync(CancellationToken ct)
@@ -3417,5 +3485,118 @@
         savedArmies.RemoveAll(a => a.Name == name);
         await JS.InvokeVoidAsync("localStorage.removeItem", $"saved-army:{name}");
         await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
+    }
+
+    // ── Cloud sync methods ──────────────────────────────────────────────────
+
+    private async Task CloudLogin()
+    {
+        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword)) return;
+        cloudBusy = true;
+        StateHasChanged();
+        var ok = await Cloud.LoginAsync(cloudEmail, cloudPassword);
+        if (ok)
+        {
+            cloudPassword = "";
+            await RefreshCloudRosters();
+        }
+        cloudBusy = false;
+    }
+
+    private async Task CloudRegister()
+    {
+        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword)) return;
+        cloudBusy = true;
+        StateHasChanged();
+        var ok = await Cloud.RegisterAsync(cloudEmail, cloudPassword);
+        if (ok)
+        {
+            cloudPassword = "";
+            await RefreshCloudRosters();
+        }
+        cloudBusy = false;
+    }
+
+    private void CloudLogout()
+    {
+        Cloud.Logout();
+        cloudRosters.Clear();
+        cloudEmail = "";
+        cloudPassword = "";
+    }
+
+    private async Task RefreshCloudRosters()
+    {
+        cloudRosters = await Cloud.ListRostersAsync();
+    }
+
+    private async Task LoadCloudArmy(Guid id)
+    {
+        try
+        {
+            var dataJson = await Cloud.LoadRosterDataAsync(id);
+            if (string.IsNullOrEmpty(dataJson)) { errorMessage = "Failed to load cloud army."; return; }
+
+            var data = JsonSerializer.Deserialize<SavedArmyData>(dataJson);
+            if (data is null) return;
+
+            rawJson = data.RawJson;
+            army = parser.Parse(rawJson);
+
+            if (data.State is not null)
+                ApplyState(data.State);
+
+            abilityConfigs.Clear();
+            foreach (var (k, v) in data.AbilityConfigs)
+                abilityConfigs[k] = v;
+
+            stratagemConfigs.Clear();
+            foreach (var (k, v) in data.StratagemConfigs)
+                stratagemConfigs[k] = v;
+
+            InitAbilityConfigs();
+            InitStratagemConfigs();
+
+            setupConfirmed = true;
+            stratagemSetupConfirmed = true;
+            expandedUnits.Clear();
+            stratHiddenUnits.Clear();
+            killedUnits.Clear();
+            playMode = false;
+            errorMessage = null;
+            armyIsSaved = true;
+
+            await SaveToStorage();
+            await SaveAbilityConfigs();
+            await SaveStratagemConfigs();
+        }
+        catch { errorMessage = "Failed to load cloud army."; }
+    }
+
+    private async Task DeleteCloudArmy(Guid id)
+    {
+        await Cloud.DeleteRosterAsync(id);
+        await RefreshCloudRosters();
+    }
+
+    private async Task SaveToCloud()
+    {
+        if (army is null || rawJson is null || !Cloud.IsLoggedIn) return;
+        var state = new RosterState
+        {
+            UnitOrder = army.Units.Select(u => u.Name).ToList(),
+            Attachments = army.Units
+                .SelectMany(u => u.AttachedLeaders.Select(l => new AttachmentInfo { Leader = l.Name, Host = u.Name }))
+                .ToList()
+        };
+        var data = new SavedArmyData
+        {
+            RawJson = rawJson,
+            State = state,
+            AbilityConfigs = new Dictionary<string, AbilitySetupEntry>(abilityConfigs),
+            StratagemConfigs = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs)
+        };
+        var dataJson = JsonSerializer.Serialize(data);
+        await Cloud.SaveRosterAsync(army.Name, army.Faction ?? "", army.Detachment ?? "", army.TotalPoints, dataJson);
     }
 }
