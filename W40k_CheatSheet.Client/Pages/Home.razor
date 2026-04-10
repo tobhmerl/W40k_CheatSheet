@@ -363,25 +363,19 @@
                     {
                         <div class="strat-expand" @onclick:stopPropagation="true">
                             <div class="strat-expand-main">
-                            @if (showDetachmentInCard)
+                            @if (showDetachmentInCard || abilityCount > 0)
                             {
                                 <div class="strat-expand-list">
-                                    <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded" : "")">
-                                        <span class="strat-expand-item strat-cell-ability" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">⚔ @army!.Detachment</span>
-                                        @if (focusedDetachmentRule)
-                                        {
-                                            <div class="strat-expand-desc">@army.DetachmentRule</div>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                            @if (abilityCount > 0)
-                            {
-                                @if (showDetachmentInCard)
-                                {
-                                    <div class="strat-expand-divider"></div>
-                                }
-                                <div class="strat-expand-list">
+                                    @if (showDetachmentInCard)
+                                    {
+                                        <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded" : "")">
+                                            <span class="strat-expand-item strat-cell-ability" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">⚔ @army!.Detachment</span>
+                                            @if (focusedDetachmentRule)
+                                            {
+                                                <div class="strat-expand-desc">@army.DetachmentRule</div>
+                                            }
+                                        </div>
+                                    }
                                     @foreach (var a in GetCardAbilities(unit))
                                     {
                                         if (usedAbilities.Contains(a)) { continue; }
@@ -520,8 +514,8 @@
                                         }
                                         @if (showDetachmentAlways)
                                         {
-                                            <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded-always" : "")">
-                                                <span class="strat-expand-item strat-cell-always" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">[⚔ @army!.Detachment]</span>
+                                            <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded" : "")">
+                                                <span class="strat-expand-item strat-cell-ability" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">[⚔ @army!.Detachment]</span>
                                                 @if (focusedDetachmentRule)
                                                 {
                                                     <div class="strat-expand-desc">@army.DetachmentRule</div>
