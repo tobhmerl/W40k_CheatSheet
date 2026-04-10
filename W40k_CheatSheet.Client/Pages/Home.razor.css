@@ -1929,6 +1929,13 @@
     font-size: 0.49rem;
 }
 
+/* Compact detach buttons (non-play mode) */
+.attached-leader-compact {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.1rem 0;
+}
+
 .attached-leader-info {
     display: flex;
     flex-direction: column;

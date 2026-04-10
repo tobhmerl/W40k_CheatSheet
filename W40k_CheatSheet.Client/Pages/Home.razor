@@ -468,56 +468,51 @@
                         </div>
                     }
 
-                    @foreach (var leader in unit.AttachedLeaders)
+                    @if (!playMode && unit.AttachedLeaders.Count > 0)
                     {
-                        var leaderKeywordAbilities = leader.Abilities
-                            .Where(a => IsAddedToUnit(a) && IsAddedToUnitVisible(a))
-                            .Select(a => (Ability: a, Keyword: ParseLeaderUnitKeyword(a) ?? ParseBearerKeyword(a)))
-                            .Where(x => x.Keyword is not null)
-                            .ToList();
-                        <div class="attached-leader @(IsKilled(leader) ? "killed" : "")">
-                            <div class="attached-leader-info">
-                                <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "")</span>
-                                @if (leaderKeywordAbilities.Count > 0 && !IsKilled(leader))
-                                {
-                                    <div class="attached-leader-abilities" @onclick:stopPropagation="true">
-                                        @foreach (var lk in leaderKeywordAbilities)
-                                        {
-                                            <span class="attached-leader-ability @(focusedAbility == lk.Ability ? "expanded" : "")" @onclick="() => ToggleFocusAbility(lk.Ability)">@lk.Keyword</span>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                            @if (playMode && !IsKilled(leader) && leader.ModelCount > 1)
+                        <div class="attached-leader-compact">
+                            @foreach (var leader in unit.AttachedLeaders)
                             {
-                                <span class="model-counter" @onclick:stopPropagation="true">
-                                    <button class="model-btn" @onclick="() => AdjustModelCount(leader, -1)">−</button>
-                                    <span class="model-count @(GetModelCount(leader) < leader.ModelCount ? "model-reduced" : "")">@GetModelCount(leader)</span>
-                                    <button class="model-btn" @onclick="() => AdjustModelCount(leader, 1)">+</button>
-                                </span>
-                            }
-                            else if (playMode && !IsKilled(leader))
-                            {
-                                <button class="model-kill-btn" @onclick="() => AdjustModelCount(leader, -1)" @onclick:stopPropagation="true">☠</button>
-                            }
-                            else if (!playMode)
-                            {
-                                <button class="detach-btn" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
+                                <button class="detach-btn" title="Detach @leader.Name" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
                             }
                         </div>
-                        @if (focusedAbility is not null && leaderKeywordAbilities.Any(lk => lk.Ability == focusedAbility))
+                    }
+                    @if (playMode)
+                    {
+                        @foreach (var leader in unit.AttachedLeaders)
                         {
-                            <div class="attached-leader-ability-desc">@focusedAbility.Description</div>
+                            @if (!IsKilled(leader) && leader.ModelCount > 1)
+                            {
+                                <div class="attached-leader @(IsKilled(leader) ? "killed" : "")">
+                                    <div class="attached-leader-info">
+                                        <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "")</span>
+                                    </div>
+                                    <span class="model-counter" @onclick:stopPropagation="true">
+                                        <button class="model-btn" @onclick="() => AdjustModelCount(leader, -1)">−</button>
+                                        <span class="model-count @(GetModelCount(leader) < leader.ModelCount ? "model-reduced" : "")">@GetModelCount(leader)</span>
+                                        <button class="model-btn" @onclick="() => AdjustModelCount(leader, 1)">+</button>
+                                    </span>
+                                </div>
+                            }
+                            else if (!IsKilled(leader))
+                            {
+                                <div class="attached-leader">
+                                    <div class="attached-leader-info">
+                                        <span>+ @leader.Name @(leader.IsWarlord ? "⭐" : "")</span>
+                                    </div>
+                                    <button class="model-kill-btn" @onclick="() => AdjustModelCount(leader, -1)" @onclick:stopPropagation="true">☠</button>
+                                </div>
+                            }
                         }
                     }
 
-                    @if (unit.AttachedLeaders.Count > 0)
+                    @if (unit.AttachedLeaders.Count > 0 && playMode)
                     {
                         <div class="attached-leader">
                             <div class="attached-leader-info">
                                 <span>+ @unit.Name</span>
                             </div>
-                            @if (playMode && !IsKilled(unit) && unit.ModelCount > 1)
+                            @if (!IsKilled(unit) && unit.ModelCount > 1)
                             {
                                 <span class="model-counter" @onclick:stopPropagation="true">
                                     <button class="model-btn" @onclick="() => AdjustModelCount(unit, -1)">−</button>
@@ -525,7 +520,7 @@
                                     <button class="model-btn" @onclick="() => AdjustModelCount(unit, 1)">+</button>
                                 </span>
                             }
-                            else if (playMode && !IsKilled(unit))
+                            else if (!IsKilled(unit))
                             {
                                 <button class="model-kill-btn" @onclick="() => AdjustModelCount(unit, -1)" @onclick:stopPropagation="true">☠</button>
                             }
