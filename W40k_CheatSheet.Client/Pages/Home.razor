@@ -1133,7 +1133,7 @@
                         </div>
                     }
 
-                    @* ── Always active abilities (≥ 4 phases checked — phase filter skipped) ── *@
+                    @* ── Always active abilities (≥ 6 phases checked — phase filter skipped) ── *@
                     bool hasAlwaysActive = PanelUnits.Any(e =>
                     {
                         if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
@@ -3161,7 +3161,7 @@
             int count = (detachmentConfig.Command ? 1 : 0) + (detachmentConfig.Move ? 1 : 0) +
                         (detachmentConfig.Shoot ? 1 : 0) + (detachmentConfig.Charge ? 1 : 0) +
                         (detachmentConfig.Fight ? 1 : 0);
-            return count >= 4;
+            return count >= 6;
         }
     }
 
@@ -3578,13 +3578,13 @@
         return (invuln, fnp);
     }
 
-    // ≥ 4 phases checked → "always active" group (shown regardless of phase filter)
+    // ≥ 6 phases checked → "always active" group (shown regardless of phase filter)
     private bool IsAlwaysActive(AbilityEntry a)
     {
         if (!abilityConfigs.TryGetValue(AbilityKey(a), out var c)) return false;
         int count = (c.Command ? 1 : 0) + (c.Move ? 1 : 0) + (c.Shoot ? 1 : 0)
                   + (c.Charge ? 1 : 0) + (c.Fight ? 1 : 0);
-        return count >= 4;
+        return count >= 6;
     }
 
     private bool IsStratAlwaysActive(Stratagem s)
@@ -3593,7 +3593,7 @@
         if (!c.MyTurn || !c.EnemyTurn) return false;
         int count = (c.Command ? 1 : 0) + (c.Move ? 1 : 0) + (c.Shoot ? 1 : 0)
                   + (c.Charge ? 1 : 0) + (c.Fight ? 1 : 0);
-        return count >= 4;
+        return count >= 6;
     }
 
     private bool IsConfiguredForTurn(AbilityEntry a, TurnFilter turn) =>
