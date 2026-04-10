@@ -28,8 +28,12 @@ jobs:
           dotnet-version: '10.0.x'
           dotnet-quality: 'ga'
 
-      - name: Publish
-        run: dotnet publish W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj -c Release -o output
+      - name: Clean and Publish
+        run: |
+          dotnet clean W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj -c Release
+          dotnet publish W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj -c Release -o output --no-cache
+          echo "=== Published index.html ==="
+          cat output/wwwroot/index.html
 
       - name: Fix paths for GitHub Pages
         run: |
