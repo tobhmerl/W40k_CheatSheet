@@ -666,17 +666,27 @@
 
 .import-btn {
     display: inline-block;
-    background: #00b4d8;
-    color: #fff;
-    padding: 0.4rem 0.85rem;
-    border-radius: 5px;
     cursor: pointer;
-    font-size: 0.63rem;
-    font-weight: 600;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: transform 0.15s, filter 0.15s;
+}
+
+.import-btn img {
+    display: block;
+    max-width: 280px;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
 }
 
 .import-btn:hover {
-    background: #0096c7;
+    transform: scale(1.05);
+}
+
+.import-btn:hover img {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7)) brightness(1.1);
 }
 
 .import-btn.small {
