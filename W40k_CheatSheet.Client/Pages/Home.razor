@@ -889,6 +889,13 @@
                                             @if (sCfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyCharge" @bind:after="SaveStratagemConfigs" /> eChg</label>}
                                             @if (sCfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyFight" @bind:after="SaveStratagemConfigs" /> eFgt</label>}
                                         </div>
+                                        <div class="setup-checks-row">
+                                            @if (sCfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyCommand" @bind:after="SaveStratagemConfigs" /> myCmd</label>}
+                                            @if (sCfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyMove" @bind:after="SaveStratagemConfigs" /> myMov</label>}
+                                            @if (sCfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyShooting" @bind:after="SaveStratagemConfigs" /> mySht</label>}
+                                            @if (sCfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyCharge" @bind:after="SaveStratagemConfigs" /> myChg</label>}
+                                            @if (sCfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyFight" @bind:after="SaveStratagemConfigs" /> myFgt</label>}
+                                        </div>
                                     }
                                 </div>
                             </div>
@@ -2712,6 +2719,11 @@
         public bool EnemyShoot   { get; set; }
         public bool EnemyCharge  { get; set; }
         public bool EnemyFight   { get; set; }
+        public bool MyCommand  { get; set; }
+        public bool MyMove     { get; set; }
+        public bool MyShooting { get; set; }
+        public bool MyCharge   { get; set; }
+        public bool MyFight    { get; set; }
         public bool Disabled  { get; set; }
     }
 
@@ -2781,6 +2793,21 @@
                 _                 => false
             };
             if (enemyOnly) return false;
+        }
+
+        // If Enemy Turn is active and this phase is marked my-turn-only, hide it
+        if (activeTurn == TurnFilter.EnemyTurn)
+        {
+            bool myOnly = phase switch
+            {
+                GamePhase.Command => c.MyCommand,
+                GamePhase.Move    => c.MyMove,
+                GamePhase.Shoot   => c.MyShooting,
+                GamePhase.Charge  => c.MyCharge,
+                GamePhase.Fight   => c.MyFight,
+                _                 => false
+            };
+            if (myOnly) return false;
         }
         return true;
     }
