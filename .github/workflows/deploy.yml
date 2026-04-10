@@ -32,19 +32,16 @@ jobs:
         run: |
           dotnet clean W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj -c Release
           dotnet publish W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj -c Release -o output --no-cache
-          echo "=== Published index.html ==="
-          cat output/wwwroot/index.html
+
+      - name: Use source index.html (publish strips customizations)
+        run: cp W40k_CheatSheet.Client/wwwroot/index.html output/wwwroot/index.html
 
       - name: Fix paths for GitHub Pages
         run: |
           FILE=output/wwwroot/index.html
-          echo "=== BEFORE ==="
-          cat "$FILE"
-          # Fix base href
           sed -i 's|<base href="/" />|<base href="/W40k_CheatSheet/" />|g' "$FILE"
-          # Fix inline background image (CSS url() does not respect base href)
           sed -i "s|url('images/|url('/W40k_CheatSheet/images/|g" "$FILE"
-          echo "=== AFTER ==="
+          echo "=== Final index.html ==="
           cat "$FILE"
 
       - name: Copy index.html to 404.html for SPA routing
