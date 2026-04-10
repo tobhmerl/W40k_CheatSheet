@@ -132,6 +132,8 @@
     margin-top: 1.5rem;
     max-width: 500px;
     width: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .saved-armies h3 {
@@ -586,10 +588,10 @@
     display: inline-block;
     background: #00b4d8;
     color: #fff;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
+    padding: 0.4rem 0.85rem;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.63rem;
     font-weight: 600;
 }
 
