@@ -1821,6 +1821,7 @@
     font-size: 0.52rem;
     font-weight: 600;
     line-height: 1.5;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
 .strat-expand-main {
@@ -2065,6 +2066,7 @@
     margin-top: 0.3rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding-top: 0.3rem;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Extra unit keywords (leader auras shown as labels) */
@@ -2477,7 +2479,6 @@
     display: flex;
     align-items: baseline;
     min-width: 0;
-    font-family: 'IM Fell English', 'Georgia', serif;
 }
 
 .stat-name-text {
@@ -2495,7 +2496,6 @@
     white-space: normal;
     overflow: hidden;
     padding-top: 0;
-    font-family: 'IM Fell English', 'Georgia', serif;
 }
 
 .kw-extra {
