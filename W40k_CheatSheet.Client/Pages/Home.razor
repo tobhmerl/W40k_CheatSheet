@@ -1950,7 +1950,11 @@
     private void ToggleCollapse(UnitEntry unit)
     {
         if (!expandedUnits.Remove(unit))
+        {
             expandedUnits.Add(unit);
+            rangedExpandedUnits.Add(unit);
+            meleeExpandedUnits.Add(unit);
+        }
     }
 
     private bool IsRangedExpanded(UnitEntry unit) => rangedExpandedUnits.Contains(unit);
