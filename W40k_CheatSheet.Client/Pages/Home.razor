@@ -124,6 +124,15 @@
     else
     {
         <div class="corner-actions">
+            @if (playMode)
+            {
+                <div class="cp-counter" id="cp-counter">
+                    <button class="cp-btn" @onclick="() => cpCounter = Math.Max(0, cpCounter - 1)">−</button>
+                    <span class="cp-value">@cpCounter</span>
+                    <span class="cp-label">CP</span>
+                    <button class="cp-btn" @onclick="() => cpCounter++">+</button>
+                </div>
+            }
             <button class="corner-btn play @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "☰" : "⚔")</button>
             @if (!playMode)
             {
@@ -1264,12 +1273,6 @@
         <hr class="footer-divider" />
 
         <div class="score-tracker">
-            <div class="cp-counter">
-                <button class="cp-btn" @onclick="() => cpCounter = Math.Max(0, cpCounter - 1)">−</button>
-                <span class="cp-value">@cpCounter</span>
-                <span class="cp-label">CP</span>
-                <button class="cp-btn" @onclick="() => cpCounter++">+</button>
-            </div>
             <div class="score-total-row">
                 <span class="score-total">@(defenderPrimary + defenderSecondary)</span>
                 <span class="score-total-label">Total</span>
@@ -1676,6 +1679,19 @@
                     "window.scrollToElement=window.scrollToElement||function(id){" +
                     "var el=document.getElementById(id);" +
                     "if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}");
+
+                await JS.InvokeVoidAsync("eval",
+                    "(function(){" +
+                    "var last=0;" +
+                    "window.addEventListener('scroll',function(){" +
+                    "var cp=document.getElementById('cp-counter');" +
+                    "if(!cp)return;" +
+                    "var y=window.scrollY;" +
+                    "if(y>last&&y>60){cp.classList.add('cp-hidden')}" +
+                    "else{cp.classList.remove('cp-hidden')}" +
+                    "last=y;" +
+                    "},{passive:true})" +
+                    "})()");
 
                 await LoadFromStorage();
 
