@@ -1207,6 +1207,57 @@
     padding: 0.75rem 0;
 }
 
+.cp-counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.cp-btn {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    border: 1px solid #444;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: all 0.15s;
+}
+
+.cp-btn:hover {
+    background: rgba(255, 193, 7, 0.15);
+    border-color: #ffc107;
+    color: #ffc107;
+}
+
+.cp-btn:active {
+    transform: scale(0.9);
+}
+
+.cp-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffc107;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.cp-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .score-section {
     width: 100%;
     max-width: 400px;

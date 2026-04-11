@@ -1264,6 +1264,12 @@
         <hr class="footer-divider" />
 
         <div class="score-tracker">
+            <div class="cp-counter">
+                <button class="cp-btn" @onclick="() => cpCounter = Math.Max(0, cpCounter - 1)">−</button>
+                <span class="cp-value">@cpCounter</span>
+                <span class="cp-label">CP</span>
+                <button class="cp-btn" @onclick="() => cpCounter++">+</button>
+            </div>
             <div class="score-total-row">
                 <span class="score-total">@(defenderPrimary + defenderSecondary)</span>
                 <span class="score-total-label">Total</span>
@@ -1621,6 +1627,7 @@
     private int aggressorPrimary;
     private int defenderSecondary;
     private int aggressorSecondary;
+    private int cpCounter;
     private readonly HashSet<UnitEntry> expandedUnits = [];
     private List<SavedArmyMeta> savedArmies = [];
     private string? activeJumpUnit;
@@ -1782,6 +1789,7 @@
                         s.RequiredKeywords.Any(rk =>
                             unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
             .Where(s => IsStratAlwaysActive(s))
+            .Where(s => ParseCpCost(s.Cost) <= cpCounter)
             .OrderBy(s => TurnColorOrder(s.TurnColor))
             .ThenBy(s => s.Name)
             .ToList();
@@ -1799,7 +1807,8 @@
             .Where(s => s.RequiredKeywords.Count == 0 ||
                         s.RequiredKeywords.Any(rk =>
                             unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
-            .Where(s => !IsStratAlwaysActive(s));
+            .Where(s => !IsStratAlwaysActive(s))
+            .Where(s => ParseCpCost(s.Cost) <= cpCounter);
 
         if (activeTurn is not null)
             available = available.Where(s => IsStratConfiguredForTurn(s, activeTurn.Value));
@@ -1859,6 +1868,7 @@
         weaponModelCounts.Clear();
         weaponRemovePopup = null;
         preGameDismissed = false;
+        cpCounter = 0;
     }
 
     private static bool IsOncePerBattle(AbilityEntry a) =>
@@ -2166,6 +2176,9 @@
                             s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
                 .Where(s => !IsDisabledStratagem(s));
 
+            if (playMode)
+                available = available.Where(s => ParseCpCost(s.Cost) <= cpCounter);
+
             if (!showAllStratagems)
             {
                 if (activeTurn is not null)
@@ -2194,6 +2207,14 @@
         if (phases.HasFlag(GamePhase.Fight))   return 4;
         return 5;
     }
+
+    private static int ParseCpCost(string cost) => cost switch
+    {
+        "I" => 1,
+        "II" => 2,
+        "III" => 3,
+        _ => int.TryParse(cost.Replace("CP", ""), out var n) ? n : 0
+    };
 
     private static int TurnColorOrder(StratagemTurn color) => color switch
     {
