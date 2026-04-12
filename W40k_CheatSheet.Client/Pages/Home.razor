@@ -3205,10 +3205,11 @@
     {
         get
         {
+            if (!detachmentConfig.MyTurn || !detachmentConfig.EnemyTurn) return false;
             int count = (detachmentConfig.Command ? 1 : 0) + (detachmentConfig.Move ? 1 : 0) +
                         (detachmentConfig.Shoot ? 1 : 0) + (detachmentConfig.Charge ? 1 : 0) +
                         (detachmentConfig.Fight ? 1 : 0);
-            return count >= 6;
+            return count >= 5;
         }
     }
 
@@ -3625,13 +3626,14 @@
         return (invuln, fnp);
     }
 
-    // ≥ 6 phases checked → "always active" group (shown regardless of phase filter)
+    // All main checkboxes checked → "always active" group (shown regardless of phase filter)
     private bool IsAlwaysActive(AbilityEntry a)
     {
         if (!abilityConfigs.TryGetValue(AbilityKey(a), out var c)) return false;
+        if (!c.MyTurn || !c.EnemyTurn) return false;
         int count = (c.Command ? 1 : 0) + (c.Move ? 1 : 0) + (c.Shoot ? 1 : 0)
                   + (c.Charge ? 1 : 0) + (c.Fight ? 1 : 0);
-        return count >= 6;
+        return count >= 5;
     }
 
     private bool IsStratAlwaysActive(Stratagem s)
@@ -3640,7 +3642,7 @@
         if (!c.MyTurn || !c.EnemyTurn) return false;
         int count = (c.Command ? 1 : 0) + (c.Move ? 1 : 0) + (c.Shoot ? 1 : 0)
                   + (c.Charge ? 1 : 0) + (c.Fight ? 1 : 0);
-        return count >= 6;
+        return count >= 5;
     }
 
     private bool IsConfiguredForTurn(AbilityEntry a, TurnFilter turn) =>
