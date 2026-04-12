@@ -1746,7 +1746,7 @@
     {
         var abilities = GetAllAbilities(unit)
             .Where(a => !IsSetupOnlyAbility(a))
-            .Where(a => !IsAddedToUnit(a))
+            .Where(a => !(IsAddedToUnit(a) && IsReflectableAsUnitStat(a)))
             .ToList();
         if (!playMode) return abilities;
         return abilities.Where(a =>
@@ -3133,6 +3133,10 @@
 
     private static bool CanAddToUnit(AbilityEntry a) =>
         ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderUnitKeyword(a) is not null || ParseLeaderCritModifier(a) is not null || ParseBearerKeyword(a) is not null || IsLeaderAuraDescription(a.Description);
+
+    // True only when the ability produces a visible stat/keyword on the unit card (invuln, FNP, weapon keyword, crit threshold, bearer keyword)
+    private static bool IsReflectableAsUnitStat(AbilityEntry a) =>
+        ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderUnitKeyword(a) is not null || ParseLeaderCritModifier(a) is not null || ParseBearerKeyword(a) is not null;
 
     private static (string Threshold, WeaponTarget Target)? ParseLeaderCritModifier(AbilityEntry a)
     {
