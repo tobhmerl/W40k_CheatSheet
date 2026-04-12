@@ -364,9 +364,11 @@
 
                     @{
                         var showDetachmentInCard = playMode && !string.IsNullOrEmpty(army?.DetachmentRule) &&
-                            HasDetachmentPhasesConfigured && !IsDetachmentAlwaysActive && IsDetachmentVisibleForCurrentFilter;
+                            HasDetachmentPhasesConfigured && !IsDetachmentAlwaysActive && IsDetachmentVisibleForCurrentFilter &&
+                            !IsDetachmentRuleReflectedInStats;
                         var showDetachmentAlways = playMode && !string.IsNullOrEmpty(army?.DetachmentRule) &&
-                            HasDetachmentPhasesConfigured && IsDetachmentAlwaysActive && !IsDetachmentHidden;
+                            HasDetachmentPhasesConfigured && IsDetachmentAlwaysActive && !IsDetachmentHidden &&
+                            !IsDetachmentRuleReflectedInStats;
                     }
                     @if (!stratHiddenUnits.Contains(unit) && (abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0 || showDetachmentInCard || showDetachmentAlways))
                     {
