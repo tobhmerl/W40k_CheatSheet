@@ -420,7 +420,7 @@
                                             <span class="strat-expand-item @(s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "strat-cell-blue" : "strat-cell-red")" @onclick="() => ToggleCardStratagem(s, unit)"
                                                   @onpointerdown="() => OnceStratagemPointerDown(s)"
                                                   @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                  @oncontextmenu:preventDefault>@s.Name</span> <span class="strat-cost-inline">@s.Cost</span>
+                                                  @oncontextmenu:preventDefault>@s.Name</span> @if (ParseCpCost(s.Cost) > 1) { <span class="strat-cost-inline">@s.Cost</span> }
                                             @if (focusedStratagem == s && focusedStratagemUnit == unit)
                                             {
                                                 <div class="strat-expand-desc">
@@ -452,7 +452,7 @@
                                             <span class="strat-expand-item strat-cell-green" @onclick="() => ToggleCardStratagem(g, unit)"
                                                   @onpointerdown="() => OnceStratagemPointerDown(g)"
                                                   @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                  @oncontextmenu:preventDefault>@g.Name</span> <span class="strat-cost-inline">@g.Cost</span>
+                                                  @oncontextmenu:preventDefault>@g.Name</span> @if (ParseCpCost(g.Cost) > 1) { <span class="strat-cost-inline">@g.Cost</span> }
                                             @if (focusedStratagem == g && focusedStratagemUnit == unit)
                                             {
                                                 <div class="strat-expand-desc">
@@ -493,7 +493,7 @@
                                                 <span class="strat-expand-item @sColor" @onclick="() => ToggleCardStratagem(s, unit)"
                                                       @onpointerdown="() => OnceStratagemPointerDown(s)"
                                                       @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                      @oncontextmenu:preventDefault>[@s.Name]</span> <span class="strat-cost-inline">@s.Cost</span>
+                                                      @oncontextmenu:preventDefault>[@s.Name]</span> @if (ParseCpCost(s.Cost) > 1) { <span class="strat-cost-inline">@s.Cost</span> }
                                                 @if (focusedStratagem == s && focusedStratagemUnit == unit)
                                                 {
                                                     <div class="strat-expand-desc">
@@ -887,7 +887,7 @@
                                  @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
                                 <div class="strat-header @GetStratTurnClass(strat)">
                                     <span class="strat-name">@strat.Name <span class="strat-category-inline">@strat.Category</span></span>
-                                    <span class="strat-cost">@strat.Cost</span>
+                                    @if (ParseCpCost(strat.Cost) > 1) { <span class="strat-cost">@strat.Cost</span> }
                                 </div>
                                 @if (focusedStratagem == strat)
                                 {
@@ -948,12 +948,12 @@
                              @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
                              @oncontextmenu:preventDefault>
                             <div class="strat-header @GetStratTurnClass(strat)">
-                                <span class="strat-name">@strat.Name <span class="strat-category-inline">@strat.Category</span></span>
-                                <span class="strat-cost">@strat.Cost</span>
-                            </div>
-                            @if (focusedStratagem == strat)
-                            {
-                                <div class="strat-details @(stratDetailsZoomed ? "zoomed" : "")" @onclick="() => stratDetailsZoomed = !stratDetailsZoomed" @onclick:stopPropagation="true">
+                                    <span class="strat-name">@strat.Name <span class="strat-category-inline">@strat.Category</span></span>
+                                    @if (ParseCpCost(strat.Cost) > 1) { <span class="strat-cost">@strat.Cost</span> }
+                                </div>
+                                @if (focusedStratagem == strat)
+                                {
+                                    <div class="strat-details @(stratDetailsZoomed ? "zoomed" : "")" @onclick="() => stratDetailsZoomed = !stratDetailsZoomed" @onclick:stopPropagation="true">
                                     <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
                                     <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
                                     <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
