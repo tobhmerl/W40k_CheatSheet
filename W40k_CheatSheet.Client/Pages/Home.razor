@@ -765,7 +765,7 @@
                                 </button>
                             }
 
-                            @if (!playMode && !string.IsNullOrEmpty(extraUnitKw))
+                            @if (!string.IsNullOrEmpty(extraUnitKw))
                             {
                                 var extraKwCss = "unit-extra-keywords" + (extraKwExpandedUnit == unit ? " expanded" : "");
                                 <div class="@extraKwCss" @onclick="() => { extraKwExpandedUnit = extraKwExpandedUnit == unit ? null : unit; }" @onclick:stopPropagation="true">
@@ -3346,7 +3346,7 @@
             return null;
 
         var match = System.Text.RegularExpressions.Regex.Match(desc,
-            @"have the (\w+(?:\s\w+)*?) ability",
+            @"ha(?:ve|s) the (\w+(?:\s\w+)*?) ability",
             System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         if (match.Success)
             return match.Groups[1].Value.Trim().ToUpperInvariant();
