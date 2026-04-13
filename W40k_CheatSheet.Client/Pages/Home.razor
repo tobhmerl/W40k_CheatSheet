@@ -473,11 +473,20 @@
                             }
                             </div>
                             @{
-                                var hasRightContent = alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0;
+                                var hasRightContent = alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0 || unitKwBadges.Count > 0;
                             }
                             @if (hasRightContent)
                             {
                                 <div class="strat-expand-always">
+                                    @if (unitKwBadges.Count > 0)
+                                    {
+                                        <div class="strat-expand-kw-badges">
+                                            @foreach (var badge in unitKwBadges)
+                                            {
+                                                <span class="unit-kw-badge">@badge</span>
+                                            }
+                                        </div>
+                                    }
                                     <div class="strat-expand-list">
                                         @foreach (var s in alwaysActiveStrats)
                                         {

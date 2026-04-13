@@ -2522,6 +2522,13 @@
     margin-right: 0.25rem;
 }
 
+.strat-expand-kw-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem 0.15rem;
+    padding-bottom: 0.1rem;
+}
+
 .crit-extra {
     color: #ff9800;
     font-weight: 600;
