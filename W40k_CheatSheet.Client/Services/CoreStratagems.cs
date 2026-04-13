@@ -679,6 +679,109 @@ public static class CoreStratagems
             FullWhen = "Your Shooting phase or the Fight phase.",
             FullTarget = "One NECRONS unit from your army (excluding TITANIC units) that has not been selected to shoot or fight this phase.",
             FullEffect = "Until the end of the phase, each time a model in your unit makes an attack, an unmodified Hit roll of 5+ scores a Critical Hit."
+        },
+
+        // ── Pantheon of Woe ──
+
+        new()
+        {
+            Name = "Phase Melding",
+            Cost = "I",
+            Category = "Pantheon of Woe – Strategic Ploy",
+            Detachment = "Pantheon of Woe",
+            Phases = GamePhase.Move,
+            TurnColor = StratagemTurn.Red,
+            When = "Enemy Move phase — when an unravelling enemy Falls Back.",
+            Target = "1 NECRONS unit in ER of that enemy.",
+            Effect = "Enemy must take Desperate Escape tests. Battle-shocked: −1 to each test.",
+            FullWhen = "Your opponent's Movement phase, when an unravelling enemy unit is selected to Fall Back.",
+            FullTarget = "One Necrons unit from your army that is within Engagement Range of that enemy unit.",
+            FullEffect = "When that enemy unit Falls Back, all models in that enemy unit must take a Desperate Escape test. When doing so, if that enemy unit is Battle-shocked, subtract 1 from each of those tests."
+        },
+        new()
+        {
+            Name = "Disharmonisation Cascade",
+            Cost = "I",
+            Category = "Pantheon of Woe – Epic Deed",
+            Detachment = "Pantheon of Woe",
+            Phases = GamePhase.All,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Monster"],
+            When = "Any phase — when a NECRONS MONSTER is destroyed, before Deadly Demise.",
+            Target = "That MONSTER model (even though destroyed).",
+            Effect = "Til phase end → Deadly Demise triggers on 3+ instead of 6.",
+            FullWhen = "Any phase, just after a Necrons Monster model from your army is destroyed, before making its Deadly Demise roll.",
+            FullTarget = "That Necrons Monster model. You can use this Stratagem on that model even though it was just destroyed.",
+            FullEffect = "Until the end of the phase, your model's Deadly Demise ability inflicts mortal wounds on a D6 roll of 3+ instead of on a 6."
+        },
+        new()
+        {
+            Name = "Molecular Erosion",
+            Cost = "I",
+            Category = "Pantheon of Woe – Strategic Ploy",
+            Detachment = "Pantheon of Woe",
+            Phases = GamePhase.Command,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Monster"],
+            When = "Command phase.",
+            Target = "1 NECRONS MONSTER unit.",
+            Effect = "Pick 1 visible unravelling enemy → Battle-shock test at −1. If failed: D3+1 MW.",
+            Restriction = "Once per battle round.",
+            FullWhen = "Command phase.",
+            FullTarget = "One Necrons Monster unit from your army.",
+            FullEffect = "Select one unravelling enemy unit visible to your unit. That enemy unit must take a Battle-shock test. When doing so, subtract 1 from the result. If that test is failed, that enemy unit suffers D3+1 mortal wounds.",
+            FullRestriction = "You can only use this Stratagem once per battle round."
+        },
+        new()
+        {
+            Name = "Chronodistortion",
+            Cost = "I",
+            Category = "Pantheon of Woe – Battle Tactic",
+            Detachment = "Pantheon of Woe",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            When = "Fight phase — after an enemy selects targets.",
+            Target = "1 NECRONS unit targeted by the attacker.",
+            Effect = "Til phase end → destroyed models that haven't fought: 4+ to stay (+1 if unravelling), fight, then removed.",
+            FullWhen = "Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One Necrons unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the end of the phase, each time a model in your unit is destroyed, if that model has not fought this phase, roll one D6, adding 1 if the attacking unit is unravelling: on a 4+, do not remove the destroyed model from play; it can fight after the attacking unit has finished making its attacks, and is then removed from play."
+        },
+        new()
+        {
+            Name = "Entrophasic Aura Targeting",
+            Cost = "I",
+            Category = "Pantheon of Woe – Battle Tactic",
+            Detachment = "Pantheon of Woe",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            MyTurnPhases = GamePhase.Shoot | GamePhase.Fight,
+            EnemyTurnPhases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            When = "Your Shooting phase or Fight phase.",
+            Target = "1 NECRONS unit (excl. MONSTER), not yet shot or fought.",
+            Effect = "Til phase end → re-roll hit rolls of 1. If target is unravelling: also re-roll wound rolls of 1.",
+            FullWhen = "Your Shooting phase or the Fight phase.",
+            FullTarget = "One Necrons unit (excluding Monsters) from your army that has not been selected to shoot or fight this phase.",
+            FullEffect = "Until the end of the phase, each time a model in your unit makes an attack that targets an enemy unit, re-roll a Hit roll of 1. If the target of that attack is unravelling, re-roll a Wound roll of 1 as well."
+        },
+        new()
+        {
+            Name = "Mass Transmogrification",
+            Cost = "I",
+            Category = "Pantheon of Woe – Epic Deed",
+            Detachment = "Pantheon of Woe",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            MyTurnPhases = GamePhase.Shoot | GamePhase.Fight,
+            EnemyTurnPhases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            When = "Your Shooting phase or Fight phase — after a NECRONS MONSTER destroys an enemy.",
+            Target = "1 friendly NECRONS unit (excl. MONSTER) ≤6\" of that MONSTER.",
+            Effect = "If enemy was unravelling at phase start → your unit's Reanimation Protocols activate.",
+            Restriction = "Once per turn.",
+            FullWhen = "Your Shooting phase or the Fight phase, just after a Necrons Monster unit from your army destroys an enemy unit.",
+            FullTarget = "One friendly Necrons unit (excluding Monsters) within 6\" of that Monster unit.",
+            FullEffect = "If that enemy unit was unravelling at the start of the phase, your friendly unit's Reanimation Protocols activate.",
+            FullRestriction = "You can only use this Stratagem once per turn."
         }
     ];
 }
