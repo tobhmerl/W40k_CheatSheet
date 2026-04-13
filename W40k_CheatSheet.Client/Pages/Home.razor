@@ -287,7 +287,7 @@
                 var melee = GetAllMeleeWeapons(unit);
                 var allAbilities = GetAllAbilities(unit);
                 var enhancements = GetAllEnhancements(unit)
-                    .Where(e => !allAbilities.Any(a => a.Name.Equals(e, StringComparison.OrdinalIgnoreCase) && IsAddedToUnit(a)))
+                    .Where(e => !allAbilities.Any(a => a.Name.Equals(e, StringComparison.OrdinalIgnoreCase) && IsAddedToUnit(a) && IsReflectableAsUnitStat(a)))
                     .ToList();
                 var keywords = GetAllKeywords(unit);
                 var extraRangedKw = GetExtraWeaponKeywords(unit, false);
@@ -3066,6 +3066,8 @@
     private bool IsAddedToUnitVisible(AbilityEntry a)
     {
         if (IsHiddenAbility(a)) return false;
+        // Stat-reflected abilities (keywords, invulns, weapon keywords, crit) are always visible
+        if (IsReflectableAsUnitStat(a)) return true;
         if (activeTurn is not null && !IsConfiguredForTurn(a, activeTurn.Value)) return false;
         if (activePhase is not null && !IsAlwaysActive(a) && !IsConfiguredForPhase(a, activePhase.Value)) return false;
         return true;
