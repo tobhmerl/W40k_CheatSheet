@@ -294,6 +294,7 @@
                 var extraMeleeKw = GetExtraWeaponKeywords(unit, true);
                 var extraDef = GetExtraDefensiveAuras(unit);
                 var extraUnitKw = GetExtraUnitKeywords(unit);
+                var unitKwBadges = playMode ? GetUnitKeywordBadges(unit) : new List<string>();
                 var extraCritRanged = GetExtraCritModifier(unit, false);
                 var extraCritMelee = GetExtraCritModifier(unit, true);
                 var hitBonus = UnitHasDetachmentHitBonus(unit);
@@ -582,7 +583,7 @@
                                     <table class="stats-table">
                                         <thead>
                                             <tr>
-                                                <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
+                                                <th>@foreach (var badge in unitKwBadges){<span class="unit-kw-badge">@badge</span>}</th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1789,7 +1790,7 @@
             .Where(a => !IsSetupOnlyAbility(a))
             .Where(a => IsAlwaysActive(a))
             .Where(a => !IsHiddenAbility(a))
-            .Where(a => !(IsAddedToUnit(a) && IsReflectableAsWeaponOrDefStat(a)))
+            .Where(a => !(IsAddedToUnit(a) && IsReflectableAsUnitStat(a)))
             .Where(a => !IsStatReflectedAbility(a, unit))
             .ToList();
     }
@@ -3144,6 +3145,29 @@
     private static bool IsReflectableAsWeaponOrDefStat(AbilityEntry a) =>
         ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderCritModifier(a) is not null;
 
+    private List<string> GetUnitKeywordBadges(UnitEntry unit)
+    {
+        var badges = new List<string>();
+        void Scan(IEnumerable<AbilityEntry> abilities)
+        {
+            foreach (var a in abilities)
+            {
+                if (!IsAddedToUnit(a)) continue;
+                if (IsHiddenAbility(a)) continue;
+                var kw = ParseLeaderUnitKeyword(a) ?? ParseBearerKeyword(a);
+                if (kw is not null && !badges.Contains(kw))
+                    badges.Add(kw);
+            }
+        }
+        Scan(unit.Abilities);
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            Scan(leader.Abilities);
+        }
+        return badges;
+    }
+
     private static (string Threshold, WeaponTarget Target)? ParseLeaderCritModifier(AbilityEntry a)
     {
         var desc = a.Description;
@@ -3367,11 +3391,10 @@
             {
                 if (!IsAddedToUnit(ability)) continue;
                 if (!IsAddedToUnitVisible(ability)) continue;
-                // In play mode, abilities shown in always-active section should not also appear here
-                if (playMode && IsAlwaysActive(ability) && !IsReflectableAsWeaponOrDefStat(ability)) continue;
                 var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
+                    if (playMode) continue;
                     if (!extras.Contains(keyword))
                         extras.Add(keyword);
                 }
@@ -3379,6 +3402,7 @@
                          ParseLeaderDefensiveAura(ability) is null &&
                          ParseLeaderCritModifier(ability) is null)
                 {
+                    if (playMode && IsAlwaysActive(ability)) continue;
                     if (!extras.Contains(ability.Name))
                         extras.Add(ability.Name);
                 }
@@ -3403,10 +3427,10 @@
             {
                 if (!IsAddedToUnit(ability)) continue;
                 if (!IsAddedToUnitVisible(ability)) continue;
-                if (playMode && IsAlwaysActive(ability) && !IsReflectableAsWeaponOrDefStat(ability)) continue;
                 var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
+                    if (playMode) continue;
                     if (seen.Add(keyword))
                         result.Add((keyword, ability.Description));
                 }
@@ -3414,6 +3438,7 @@
                          ParseLeaderDefensiveAura(ability) is null &&
                          ParseLeaderCritModifier(ability) is null)
                 {
+                    if (playMode && IsAlwaysActive(ability)) continue;
                     if (seen.Add(ability.Name))
                         result.Add((ability.Name, ability.Description));
                 }

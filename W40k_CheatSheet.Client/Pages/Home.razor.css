@@ -2514,6 +2514,14 @@
     font-weight: 600;
 }
 
+.unit-kw-badge {
+    color: #ff9800;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-right: 0.25rem;
+}
+
 .crit-extra {
     color: #ff9800;
     font-weight: 600;
