@@ -1789,7 +1789,7 @@
             .Where(a => !IsSetupOnlyAbility(a))
             .Where(a => IsAlwaysActive(a))
             .Where(a => !IsHiddenAbility(a))
-            .Where(a => !(IsAddedToUnit(a) && CanAddToUnit(a)))
+            .Where(a => !(IsAddedToUnit(a) && IsReflectableAsWeaponOrDefStat(a)))
             .Where(a => !IsStatReflectedAbility(a, unit))
             .ToList();
     }
@@ -3140,6 +3140,10 @@
     private static bool IsReflectableAsUnitStat(AbilityEntry a) =>
         ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderUnitKeyword(a) is not null || ParseLeaderCritModifier(a) is not null || ParseBearerKeyword(a) is not null;
 
+    // True only for abilities reflected on weapon rows or defensive stats (invuln, FnP, weapon keywords, crit) — NOT unit-level keywords or generic auras
+    private static bool IsReflectableAsWeaponOrDefStat(AbilityEntry a) =>
+        ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderCritModifier(a) is not null;
+
     private static (string Threshold, WeaponTarget Target)? ParseLeaderCritModifier(AbilityEntry a)
     {
         var desc = a.Description;
@@ -3363,6 +3367,8 @@
             {
                 if (!IsAddedToUnit(ability)) continue;
                 if (!IsAddedToUnitVisible(ability)) continue;
+                // In play mode, abilities shown in always-active section should not also appear here
+                if (playMode && IsAlwaysActive(ability) && !IsReflectableAsWeaponOrDefStat(ability)) continue;
                 var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
@@ -3397,6 +3403,7 @@
             {
                 if (!IsAddedToUnit(ability)) continue;
                 if (!IsAddedToUnitVisible(ability)) continue;
+                if (playMode && IsAlwaysActive(ability) && !IsReflectableAsWeaponOrDefStat(ability)) continue;
                 var keyword = ParseLeaderUnitKeyword(ability) ?? ParseBearerKeyword(ability);
                 if (keyword is not null)
                 {
