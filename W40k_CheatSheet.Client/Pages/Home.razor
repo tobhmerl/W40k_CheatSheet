@@ -1685,6 +1685,7 @@
             .Where(s => s.RequiredKeywords.Count == 0 ||
                         s.RequiredKeywords.Any(rk =>
                             unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
+            .Where(s => !UnitMatchesExclusion(unitKeywords, s))
             .Where(s => IsStratAlwaysActive(s))
             .Where(s => ParseCpCost(s.Cost) <= cpCounter)
             .OrderBy(s => TurnColorOrder(s.TurnColor))
@@ -1704,6 +1705,7 @@
             .Where(s => s.RequiredKeywords.Count == 0 ||
                         s.RequiredKeywords.Any(rk =>
                             unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
+            .Where(s => !UnitMatchesExclusion(unitKeywords, s))
             .Where(s => !IsStratAlwaysActive(s))
             .Where(s => ParseCpCost(s.Cost) <= cpCounter);
 
@@ -1732,6 +1734,7 @@
             .Where(s => s.RequiredKeywords.Count == 0 ||
                         s.RequiredKeywords.Any(rk =>
                             unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
+            .Where(s => !UnitMatchesExclusion(unitKeywords, s))
             .OrderBy(s => LowestPhaseOrder(s))
             .ThenBy(s => TurnColorOrder(s.TurnColor))
             .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
@@ -2262,7 +2265,6 @@
 
     private bool CanFocusedUnitUse(Stratagem strat)
     {
-        if (strat.RequiredKeywords.Count == 0) return true;
         if (!HasUnitFocus) return true;
 
         var unitKeywords = focusedUnit is not null
@@ -2271,8 +2273,43 @@
                 ? GetAllKeywords(focusedCard)
                 : focusedStatOwner!.Keywords;
 
+        if (UnitMatchesExclusion(unitKeywords, strat)) return false;
+
+        if (strat.RequiredKeywords.Count == 0) return true;
+
         return strat.RequiredKeywords.Any(rk =>
             unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static List<string> ParseExcludedKeywords(Stratagem s)
+    {
+        var text = !string.IsNullOrEmpty(s.FullTarget) ? s.FullTarget : s.Target;
+        if (string.IsNullOrEmpty(text)) return [];
+
+        var results = new List<string>();
+        var matches = System.Text.RegularExpressions.Regex.Matches(text,
+            @"excl(?:uding)?\.?\s+(?!units?\s+that\b)(\w+)(?:\s+units?)?",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        foreach (System.Text.RegularExpressions.Match match in matches)
+        {
+            var kw = match.Groups[1].Value.Trim();
+            if (kw.EndsWith('s') && kw.Length > 1 && !kw.EndsWith("ss", StringComparison.OrdinalIgnoreCase))
+                kw = kw[..^1];
+            if (!string.IsNullOrEmpty(kw) &&
+                !kw.Equals("unit", StringComparison.OrdinalIgnoreCase) &&
+                !results.Any(r => r.Equals(kw, StringComparison.OrdinalIgnoreCase)))
+                results.Add(kw);
+        }
+        return results;
+    }
+
+    private static bool UnitMatchesExclusion(IEnumerable<string> unitKeywords, Stratagem strat)
+    {
+        var excluded = ParseExcludedKeywords(strat);
+        if (excluded.Count == 0) return false;
+        return excluded.Any(ek =>
+            unitKeywords.Any(uk => uk.Equals(ek, StringComparison.OrdinalIgnoreCase)));
     }
 
     private void ToggleFocusWeapon(WeaponProfile weapon)
