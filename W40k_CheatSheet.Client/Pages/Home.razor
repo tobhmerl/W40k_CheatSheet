@@ -869,13 +869,7 @@
         <div id="stratagems-panel" class="stratagems-panel">
             <div class="stratagems-panel-header" @onclick="() => stratagemsPanelOpen = !stratagemsPanelOpen">
                 <span>🎯 @(!playMode ? "Configure Stratagems" : "Stratagems Overview")</span>
-                <span class="abilities-panel-controls">
-                    @if (playMode)
-                    {
-                        <button class="show-all-btn @(showAllStratagems ? "active" : "")" @onclick="() => showAllStratagems = !showAllStratagems" @onclick:stopPropagation="true">@(showAllStratagems ? "Filter" : "Show all")</button>
-                    }
-                    <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
-                </span>
+                <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
             </div>
             @if (stratagemsPanelOpen)
             {
@@ -992,13 +986,7 @@
         <div id="abilities-panel" class="abilities-panel">
             <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
                 <span>📜 @(!playMode ? "Configure Abilities" : "Abilities Overview")</span>
-                <span class="abilities-panel-controls">
-                    @if (playMode)
-                    {
-                        <button class="show-all-btn @(showAllAbilities ? "active" : "")" @onclick="() => showAllAbilities = !showAllAbilities" @onclick:stopPropagation="true">@(showAllAbilities ? "Filter" : "Show all")</button>
-                    }
-                    <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
-                </span>
+                <span class="collapse-icon">@(abilitiesPanelOpen ? "▾" : "▸")</span>
             </div>
             @if (abilitiesPanelOpen)
             {
@@ -1103,9 +1091,8 @@
                     }
                     else
                     {
-                    @* ── Detachment rule in abilities panel (when turn/phase configured) ── *@
-                    @if (!string.IsNullOrEmpty(army!.DetachmentRule) && HasDetachmentPhasesConfigured &&
-                         (showAllAbilities || IsDetachmentVisibleForCurrentFilter))
+                    @* ── Detachment rule in abilities panel ── *@
+                    @if (!string.IsNullOrEmpty(army!.DetachmentRule) && HasDetachmentPhasesConfigured)
                     {
                         <div class="abilities-panel-unit">
                             <div class="abilities-panel-unit-name">⚔ @army.Detachment</div>
@@ -1117,32 +1104,22 @@
                         </div>
                     }
 
-                    @* ── Phase-specific abilities (1-3 phases checked) ── *@
+                    @* ── All abilities grouped by unit (no turn/phase filtering) ── *@
                     @foreach (var entry in PanelUnits)
                     {
                         var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
                                              (focusedUnit is not null && focusedUnit != entry.Unit);
                         if (isOtherFocused) { continue; }
 
-                        var phaseAbilities = entry.Abilities.Where(a => HasPhasesConfigured(a) && !IsAlwaysActive(a));
-                        if (!showAllAbilities)
-                        {
-                            phaseAbilities = phaseAbilities.Where(a => !IsHiddenAbility(a));
-                            if (activePhase is not null)
-                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForPhase(a, activePhase.Value));
-                            if (activeTurn is not null)
-                                phaseAbilities = phaseAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                        }
-
-                        var phaseList = phaseAbilities.ToList();
-                        if (phaseList.Count == 0) { continue; }
+                        var allAbilities = entry.Abilities.ToList();
+                        if (allAbilities.Count == 0) { continue; }
 
                         <div class="abilities-panel-unit">
                             <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                            @foreach (var ability in phaseList)
+                            @foreach (var ability in allAbilities)
                             {
-                                var pUsed = usedAbilities.Contains(ability);
-                                <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "") @(pUsed ? "once-used" : "")"
+                                var aUsed = usedAbilities.Contains(ability);
+                                <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "") @(aUsed ? "once-used" : "")"
                                      @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true"
                                      @onpointerdown="() => OnceAbilityPointerDown(ability)"
                                      @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
@@ -1152,115 +1129,6 @@
                                 </div>
                             }
                         </div>
-                    }
-
-                    @* ── Always active abilities (≥ 6 phases checked — phase filter skipped) ── *@
-                    bool hasAlwaysActive = PanelUnits.Any(e =>
-                    {
-                        if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
-                            (focusedUnit is not null && focusedUnit != e.Unit)) return false;
-                        var aa = e.Abilities.Where(a => IsAlwaysActive(a));
-                        if (!showAllAbilities)
-                        {
-                            aa = aa.Where(a => !IsHiddenAbility(a));
-                            if (activeTurn is not null)
-                                aa = aa.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                        }
-                        return aa.Any();
-                    });
-                    @if (hasAlwaysActive)
-                    {
-                        <div class="abilities-panel-divider-row">
-                            <span class="abilities-panel-divider-text always-active">Always active</span>
-                        </div>
-                        @foreach (var entry in PanelUnits)
-                        {
-                            var isOtherFocused3 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
-                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
-                            if (isOtherFocused3) { continue; }
-
-                            var aaAbilities = entry.Abilities.Where(a => IsAlwaysActive(a));
-                            if (!showAllAbilities)
-                            {
-                                aaAbilities = aaAbilities.Where(a => !IsHiddenAbility(a));
-                                if (activeTurn is not null)
-                                    aaAbilities = aaAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                            }
-
-                            var aaList = aaAbilities.ToList();
-                            if (aaList.Count == 0) { continue; }
-
-                            <div class="abilities-panel-unit">
-                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                                @foreach (var ability in aaList)
-                                {
-                                    var aaUsed = usedAbilities.Contains(ability);
-                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "") @(aaUsed ? "once-used" : "")"
-                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true"
-                                         @onpointerdown="() => OnceAbilityPointerDown(ability)"
-                                         @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                         @oncontextmenu:preventDefault>
-                                        <span class="ability-name">@ability.Name</span>
-                                        <div class="ability-desc">@ability.Description</div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                    }
-
-                    @* ── General abilities (no phases configured) ── *@
-                    bool hasGeneral = PanelUnits.Any(e =>
-                    {
-                        if ((focusedStatOwner is not null && focusedCard != e.Unit) ||
-                            (focusedUnit is not null && focusedUnit != e.Unit)) return false;
-                        var g = e.Abilities.Where(a => !HasPhasesConfigured(a));
-                        if (!showAllAbilities)
-                        {
-                            g = g.Where(a => !IsHiddenAbility(a));
-                            if (activeTurn is not null)
-                                g = g.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                        }
-                        return g.Any();
-                    });
-                    @if (hasGeneral)
-                    {
-                        <div class="abilities-panel-divider-row">
-                            <span class="abilities-panel-divider-text">General</span>
-                        </div>
-                        @foreach (var entry in PanelUnits)
-                        {
-                            var isOtherFocused2 = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
-                                                  (focusedUnit is not null && focusedUnit != entry.Unit);
-                            if (isOtherFocused2) { continue; }
-
-                            var genAbilities = entry.Abilities.Where(a => !HasPhasesConfigured(a));
-                            if (!showAllAbilities)
-                            {
-                                genAbilities = genAbilities.Where(a => !IsHiddenAbility(a));
-                                if (activeTurn is not null)
-                                    genAbilities = genAbilities.Where(a => IsConfiguredForTurn(a, activeTurn.Value));
-                                genAbilities = genAbilities.Where(a => !IsStatReflectedAbility(a, entry.Unit));
-                            }
-
-                            var genList = genAbilities.ToList();
-                            if (genList.Count == 0) { continue; }
-
-                            <div class="abilities-panel-unit">
-                                <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
-                                @foreach (var ability in genList)
-                                {
-                                    var gUsed = usedAbilities.Contains(ability);
-                                    <div class="abilities-panel-item @(focusedAbility == ability ? "expanded" : "") @(gUsed ? "once-used" : "")"
-                                         @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true"
-                                         @onpointerdown="() => OnceAbilityPointerDown(ability)"
-                                         @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                         @oncontextmenu:preventDefault>
-                                        <span class="ability-name">@ability.Name</span>
-                                        <div class="ability-desc">@ability.Description</div>
-                                    </div>
-                                }
-                            </div>
-                        }
                     }
                     }
 
@@ -2210,15 +2078,6 @@
 
             if (playMode)
                 available = available.Where(s => ParseCpCost(s.Cost) <= cpCounter);
-
-            if (!showAllStratagems)
-            {
-                if (activeTurn is not null)
-                    available = available.Where(s => IsStratConfiguredForTurn(s, activeTurn.Value));
-
-                if (activePhase is not null)
-                    available = available.Where(s => IsStratConfiguredForPhase(s, activePhase.Value));
-            }
 
             return available
                 .OrderBy(s => LowestPhaseOrder(s))
