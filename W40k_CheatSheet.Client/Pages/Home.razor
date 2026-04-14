@@ -282,6 +282,7 @@
                 var allAbilities = GetAllAbilities(unit);
                 var enhancements = GetAllEnhancements(unit)
                     .Where(e => !allAbilities.Any(a => a.Name.Equals(e, StringComparison.OrdinalIgnoreCase) && IsAddedToUnit(a) && IsReflectableAsUnitStat(a)))
+                    .Where(e => !playMode || !allAbilities.Any(a => a.Name.Equals(e, StringComparison.OrdinalIgnoreCase)))
                     .ToList();
                 var keywords = GetAllKeywords(unit);
                 var extraRangedKw = GetExtraWeaponKeywords(unit, false);
