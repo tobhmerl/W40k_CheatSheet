@@ -2811,6 +2811,14 @@
     color: #ccc;
 }
 
+/* Footer action buttons (setup, save, home) */
+.footer-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
 .version-tag {
     text-align: center;
     padding: 1.5rem 0 0.5rem;

@@ -123,23 +123,17 @@
     }
     else
     {
-        <div class="corner-actions">
-            @if (playMode)
-            {
+        @if (playMode)
+        {
+            <div class="corner-actions">
                 <div class="cp-counter" id="cp-counter">
                     <button class="cp-btn" @onclick="() => cpCounter = Math.Max(0, cpCounter - 1)">−</button>
                     <span class="cp-value">@cpCounter</span>
                     <span class="cp-label">CP</span>
                     <button class="cp-btn" @onclick="() => cpCounter++">+</button>
                 </div>
-            }
-            <button class="corner-btn play @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "☰" : "⚔")</button>
-            @if (!playMode)
-            {
-                <button class="corner-btn save @(saveTick ? "tick" : "")" @onclick="SaveCurrentArmy">@(saveTick ? "✓" : "💾")</button>
-            }
-            <button class="corner-btn home" @onclick="ClearRoster">⌂</button>
-        </div>
+            </div>
+        }
 
         <div id="roster-top" class="roster-header">
             <h1>@army.Name</h1>
@@ -1218,6 +1212,14 @@
             </div>
         </div>
     }
+    <div class="footer-actions">
+        <button class="corner-btn play @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "☰" : "⚔")</button>
+        @if (!playMode)
+        {
+            <button class="corner-btn save @(saveTick ? "tick" : "")" @onclick="SaveCurrentArmy">@(saveTick ? "✓" : "💾")</button>
+        }
+        <button class="corner-btn home" @onclick="ClearRoster">⌂</button>
+    </div>
     <div class="version-tag" @onclick="() => showChangelog = true">v2.2</div>
 
     @if (showChangelog)
