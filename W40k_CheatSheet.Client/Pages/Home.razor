@@ -343,6 +343,13 @@
                             {
                                 <span class="strat-toggle @(!stratHiddenUnits.Contains(unit) ? "expanded" : "")" @onclick="() => ToggleStratDots(unit)" @onclick:stopPropagation="true">@(!stratHiddenUnits.Contains(unit) ? "▾" : "▸")</span>
                             }
+                            @if (playMode)
+                            {
+                                @foreach (var badge in GetUnitKeywordBadgesWithSource(unit))
+                                {
+                                    <span class="header-kw-badge buff-source-trigger" @onclick="() => ShowBuffSource(badge.Keyword, badge.Source, badge.Description)" @onclick:stopPropagation="true">[@badge.Keyword]</span>
+                                }
+                            }
                         </div>
                         <div class="header-right">
                                 <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
@@ -467,20 +474,11 @@
                             }
                             </div>
                             @{
-                                var hasRightContent = alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0 || unitKwBadges.Count > 0;
+                                var hasRightContent = alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0;
                             }
                             @if (hasRightContent)
                             {
                                 <div class="strat-expand-always">
-                                    @if (unitKwBadges.Count > 0)
-                                    {
-                                        <div class="strat-expand-kw-badges">
-                                            @foreach (var badge in unitKwBadges)
-                                            {
-                                                <span class="unit-kw-badge">@badge</span>
-                                            }
-                                        </div>
-                                    }
                                     <div class="strat-expand-list">
                                         @foreach (var s in alwaysActiveStrats)
                                         {
@@ -586,7 +584,7 @@
                                     <table class="stats-table">
                                         <thead>
                                             <tr>
-                                                <th>@foreach (var badge in unitKwBadges){<span class="unit-kw-badge">@badge</span>}</th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
+                                                <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -3037,6 +3035,56 @@
         }
         return badges;
     }
+
+    private record struct KeywordBadgeInfo(string Keyword, string Source, string Description);
+
+    private List<KeywordBadgeInfo> GetUnitKeywordBadgesWithSource(UnitEntry unit)
+    {
+        var results = new List<KeywordBadgeInfo>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        void Scan(IEnumerable<AbilityEntry> abilities, string ownerName)
+        {
+            foreach (var a in abilities)
+            {
+                if (!IsAddedToUnit(a)) continue;
+                if (IsHiddenAbility(a)) continue;
+                var kw = ParseLeaderUnitKeyword(a) ?? ParseBearerKeyword(a);
+                if (kw is not null && seen.Add(kw))
+                {
+                    var desc = LookupUnitAbilityKeywordDescription(kw);
+                    results.Add(new KeywordBadgeInfo(kw, $"{ownerName} \u2014 {a.Name}", desc));
+                }
+            }
+        }
+        Scan(unit.Abilities, unit.Name);
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            Scan(leader.Abilities, leader.Name);
+        }
+        return results;
+    }
+
+    private static string LookupUnitAbilityKeywordDescription(string keyword)
+    {
+        if (UnitAbilityKeywordDescriptions.TryGetValue(keyword, out var desc))
+            return desc;
+        return "";
+    }
+
+    private static readonly Dictionary<string, string> UnitAbilityKeywordDescriptions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["STEALTH"] = "If every model in a unit has this ability, then each time a ranged attack is made against it, subtract 1 from that attack's Hit roll.",
+        ["SCOUTS"] = "If every model in a unit has this ability, at the start of the first battle round, it can make a Normal move of up to the distance specified.",
+        ["INFILTRATORS"] = "During deployment, if every model in a unit has this ability, then when you set it up, it can be set up anywhere on the battlefield that is more than 9\" horizontally away from all enemy models.",
+        ["DEEP STRIKE"] = "During the Declare Battle Formations step, if every model in a unit has this ability, you can set it up in Reserves instead of on the battlefield. If you do, in the Reinforcements step of one of your Movement phases you can set it up anywhere on the battlefield more than 9\" horizontally away from all enemy models.",
+        ["LONE OPERATIVE"] = "Unless part of an Attached unit, this unit can only be selected as the target of a ranged attack if the attacking model is within 12\".",
+        ["DEADLY DEMISE"] = "When this model is destroyed, roll one D6. On a 6, each unit within 6\" suffers a number of mortal wounds denoted by the number after the keyword.",
+        ["FEEL NO PAIN"] = "Each time this model would lose a wound, roll one D6: if the result equals or exceeds the number after the keyword, that wound is not lost.",
+        ["FIRING DECK"] = "Each time this Transport shoots, you can select one or more units embarked within it. Measure and roll attacks using the Transport but use the embarked models' weapons.",
+        ["FIGHTS FIRST"] = "Units with this ability that are eligible to fight do so in the Fights First step, provided every model in the unit has this ability.",
+        ["LEADER"] = "This model can be attached to a specific unit, joining it as its leader.",
+    };
 
     private static (string Threshold, WeaponTarget Target)? ParseLeaderCritModifier(AbilityEntry a)
     {

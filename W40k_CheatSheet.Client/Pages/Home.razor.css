@@ -1825,6 +1825,21 @@
     color: #ccc;
 }
 
+.header-kw-badge {
+    font-size: 0.55em;
+    font-weight: 700;
+    color: #ff9800;
+    margin-left: 0.3rem;
+    cursor: pointer;
+    white-space: nowrap;
+    vertical-align: baseline;
+    transition: color 0.15s;
+}
+
+.header-kw-badge:hover {
+    color: #ffb74d;
+}
+
 .strat-expand {
     display: flex;
     gap: 0.4rem;
