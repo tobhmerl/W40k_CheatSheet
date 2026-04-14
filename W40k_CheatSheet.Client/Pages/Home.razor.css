@@ -1838,6 +1838,7 @@
 .strat-expand-main {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
 }
 
 .strat-expand-always {
@@ -1846,7 +1847,9 @@
     gap: 0.05rem;
     border-left: 1px solid rgba(168, 139, 197, 0.3);
     padding-left: 0.4rem;
-    flex: 0 0 10rem;
+    flex: 0 1 10rem;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .strat-expand-list {
@@ -1889,6 +1892,11 @@
 .strat-expand-entry {
     cursor: pointer;
     transition: all 0.15s ease;
+}
+
+.strat-expand-entry {
+    min-width: 0;
+    overflow: hidden;
 }
 
 .strat-expand-entry.expanded {
