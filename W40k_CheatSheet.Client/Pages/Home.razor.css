@@ -638,6 +638,10 @@
     overflow: hidden;
     width: 100%;
     max-width: 500px;
+    aspect-ratio: 16 / 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .welcome-faction-toggle {
@@ -714,9 +718,9 @@
 
 .import-btn img {
     display: block;
-    max-width: 280px;
-    width: 100%;
-    height: auto;
+    width: 280px;
+    height: 56px;
+    object-fit: contain;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
 }
 
