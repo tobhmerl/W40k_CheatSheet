@@ -78,6 +78,7 @@
                         <div class="welcome-faction-toggle">
                             <img src="images/select_necrons.png" alt="Necrons" class="faction-select-img" @onclick="@(() => welcomeBg = "necrons")" />
                             <img src="images/select_blood_angels.png" alt="Blood Angels" class="faction-select-img" @onclick="@(() => welcomeBg = "blood_angels")" />
+                            <img src="images/select_dark_angels.png" alt="Dark Angels" class="faction-select-img" @onclick="@(() => welcomeBg = "dark_angels")" />
                         </div>
                     </div>
                 </div>
@@ -87,6 +88,7 @@
                 <div class="welcome-faction-toggle">
                     <img src="images/select_necrons.png" alt="Necrons" class="faction-select-img @(welcomeBg == "necrons" ? "active" : "")" @onclick="@(() => welcomeBg = "necrons")" />
                     <img src="images/select_blood_angels.png" alt="Blood Angels" class="faction-select-img @(welcomeBg == "blood_angels" ? "active" : "")" @onclick="@(() => welcomeBg = "blood_angels")" />
+                    <img src="images/select_dark_angels.png" alt="Dark Angels" class="faction-select-img @(welcomeBg == "dark_angels" ? "active" : "")" @onclick="@(() => welcomeBg = "dark_angels")" />
                 </div>
                 <div class="welcome-card" style="background: url('images/bg_@(welcomeBg).jpg') no-repeat center/cover;">
                     <div class="welcome-overlay"></div>
@@ -94,7 +96,7 @@
                         <h1>Segmentum Ultima</h1>
                         <p>Import your army roster JSON to view unit stats.</p>
                         <label class="import-btn">
-                            <img src="images/@(welcomeBg == "blood_angels" ? "import_button_blood_angels.png" : "import_button_necrons.png")" alt="Import Roster (JSON)" />
+                            <img src="images/import_button_@(welcomeBg).png" alt="Import Roster (JSON)" />
                             <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
                         </label>
                         @if (!string.IsNullOrEmpty(errorMessage))
@@ -1566,6 +1568,7 @@
     {
         "necrons" => faction.Contains("Necron", StringComparison.OrdinalIgnoreCase),
         "blood_angels" => faction.Contains("Blood Angel", StringComparison.OrdinalIgnoreCase),
+        "dark_angels" => faction.Contains("Dark Angel", StringComparison.OrdinalIgnoreCase),
         _ => false
     };
     private bool loginExpanded;
