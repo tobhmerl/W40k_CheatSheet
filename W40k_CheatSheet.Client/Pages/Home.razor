@@ -78,7 +78,7 @@
                     <h1>Segmentum Ultima</h1>
                     <p>Import your army roster JSON to view unit stats.</p>
                     <label class="import-btn">
-                        <img src="images/import_button.PNG" alt="Import Roster (JSON)" />
+                        <img src="images/@(welcomeBg == "blood_angels" ? "import_button_blood_angels.png" : "import_button.PNG")" alt="Import Roster (JSON)" />
                         <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
                     </label>
                     @if (!string.IsNullOrEmpty(errorMessage))
