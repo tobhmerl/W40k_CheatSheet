@@ -68,7 +68,11 @@
     else if (army is null)
     {
         <div class="import-section">
-            <div class="welcome-card">
+            <div class="welcome-faction-toggle">
+                <button class="@(welcomeBg == "necrons" ? "active" : "")" @onclick="@(() => welcomeBg = "necrons")">Necrons</button>
+                <button class="@(welcomeBg == "blood_angels" ? "active" : "")" @onclick="@(() => welcomeBg = "blood_angels")">Blood Angels</button>
+            </div>
+            <div class="welcome-card" style="background: url('images/bg_@(welcomeBg).jpg') no-repeat center/cover;">
                 <div class="welcome-overlay"></div>
                 <div class="welcome-content">
                     <h1>Segmentum Ultima</h1>
@@ -1539,6 +1543,7 @@
     private string cloudPassword = "";
     private string cloudUsername = "";
     private bool cloudBusy;
+    private string welcomeBg = "necrons";
     private bool loginExpanded;
     private bool showRegister;
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
