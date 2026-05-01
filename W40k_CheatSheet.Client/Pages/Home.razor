@@ -68,25 +68,42 @@
     else if (army is null)
     {
         <div class="import-section">
-            <div class="welcome-faction-toggle">
-                <button class="@(welcomeBg == "necrons" ? "active" : "")" @onclick="@(() => welcomeBg = "necrons")">Necrons</button>
-                <button class="@(welcomeBg == "blood_angels" ? "active" : "")" @onclick="@(() => welcomeBg = "blood_angels")">Blood Angels</button>
-            </div>
-            <div class="welcome-card" style="background: url('images/bg_@(welcomeBg).jpg') no-repeat center/cover;">
-                <div class="welcome-overlay"></div>
-                <div class="welcome-content">
-                    <h1>Segmentum Ultima</h1>
-                    <p>Import your army roster JSON to view unit stats.</p>
-                    <label class="import-btn">
-                        <img src="images/@(welcomeBg == "blood_angels" ? "import_button_blood_angels.png" : "import_button_necrons.png")" alt="Import Roster (JSON)" />
-                        <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
-                    </label>
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="error-msg">@errorMessage</div>
-                    }
+            @if (welcomeBg is null)
+            {
+                <div class="welcome-card" style="background: #111;">
+                    <div class="welcome-overlay"></div>
+                    <div class="welcome-content">
+                        <h1>Segmentum Ultima</h1>
+                        <p>Select your faction to begin.</p>
+                        <div class="welcome-faction-toggle">
+                            <img src="images/select_necrons.png" alt="Necrons" class="faction-select-img" @onclick="@(() => welcomeBg = "necrons")" />
+                            <img src="images/select_blood_angels.png" alt="Blood Angels" class="faction-select-img" @onclick="@(() => welcomeBg = "blood_angels")" />
+                        </div>
+                    </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="welcome-faction-toggle">
+                    <img src="images/select_necrons.png" alt="Necrons" class="faction-select-img @(welcomeBg == "necrons" ? "active" : "")" @onclick="@(() => welcomeBg = "necrons")" />
+                    <img src="images/select_blood_angels.png" alt="Blood Angels" class="faction-select-img @(welcomeBg == "blood_angels" ? "active" : "")" @onclick="@(() => welcomeBg = "blood_angels")" />
+                </div>
+                <div class="welcome-card" style="background: url('images/bg_@(welcomeBg).jpg') no-repeat center/cover;">
+                    <div class="welcome-overlay"></div>
+                    <div class="welcome-content">
+                        <h1>Segmentum Ultima</h1>
+                        <p>Import your army roster JSON to view unit stats.</p>
+                        <label class="import-btn">
+                            <img src="images/@(welcomeBg == "blood_angels" ? "import_button_blood_angels.png" : "import_button_necrons.png")" alt="Import Roster (JSON)" />
+                            <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
+                        </label>
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="error-msg">@errorMessage</div>
+                        }
+                    </div>
+                </div>
+            }
 
             @* ── Cloud Armies (shown when logged in) ── *@
             @if (Cloud.IsLoggedIn && cloudRosters.Count > 0)
@@ -1543,7 +1560,7 @@
     private string cloudPassword = "";
     private string cloudUsername = "";
     private bool cloudBusy;
-    private string welcomeBg = "necrons";
+    private string? welcomeBg = null;
     private bool loginExpanded;
     private bool showRegister;
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
