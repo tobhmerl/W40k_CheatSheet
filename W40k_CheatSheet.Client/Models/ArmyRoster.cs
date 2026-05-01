@@ -109,3 +109,25 @@ public class RuleEntry
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
 }
+
+public class DetachmentEffectDefinition
+{
+    public string Detachment { get; set; } = "";
+    public List<DetachmentEffect> Effects { get; set; } = [];
+}
+
+public class DetachmentEffect
+{
+    /// <summary>bs, ws, attacks, strength, ap, damage, toughness, save</summary>
+    public string Stat { get; set; } = "";
+    /// <summary>+1, -1, +2, etc.</summary>
+    public int Modifier { get; set; }
+    /// <summary>melee, ranged, all</summary>
+    public string WeaponType { get; set; } = "all";
+    /// <summary>Condition key: always, has_leader_character, charged, battle_shocked_and_charged, etc.</summary>
+    public string Condition { get; set; } = "always";
+    /// <summary>If true, this effect is reflected directly in stats (hides detachment rule text from card)</summary>
+    public bool ReflectedInStats { get; set; }
+    /// <summary>Short display label for the buff source tooltip</summary>
+    public string SourceLabel { get; set; } = "";
+}

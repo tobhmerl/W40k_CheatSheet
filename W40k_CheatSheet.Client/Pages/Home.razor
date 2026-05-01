@@ -4,6 +4,7 @@
 @using System.Text.Json
 @inject IJSRuntime JS
 @inject CloudRosterService Cloud
+@inject DetachmentEffectsService DetachmentEffects
 
 <PageTitle>Segmentum Ultima</PageTitle>
 
@@ -1556,6 +1557,7 @@
     private (UnitEntry Unit, int Delta)? weaponRemovePopup;
     private bool saveTick;
     private CancellationTokenSource? saveTickCts;
+    private List<DetachmentEffect> activeDetachmentEffects = [];
 
     // ── Cloud sync fields ──
     private string cloudEmail = "";
@@ -2622,6 +2624,7 @@
             using var reader = new StreamReader(stream);
             rawJson = await reader.ReadToEndAsync();
             army = parser.Parse(rawJson);
+            activeDetachmentEffects = await DetachmentEffects.GetEffectsForDetachment(army.Detachment);
             abilityConfigs.Clear();
             stratagemConfigs.Clear();
             detachmentConfig = new DetachmentSetupEntry();
@@ -2699,6 +2702,7 @@
 
             rawJson = json;
             army = parser.Parse(json);
+            activeDetachmentEffects = await DetachmentEffects.GetEffectsForDetachment(army.Detachment);
 
             var stateJson = await JS.InvokeAsync<string?>("localStorage.getItem", "roster-state");
             if (!string.IsNullOrEmpty(stateJson))
@@ -3294,54 +3298,39 @@
         }
     }
 
-    // Keep this for weapon stats modification (Awakened Dynasty etc.) — unrelated to config display
+    // Keep this for weapon stats modification — data-driven via detachment_effects.json
     private bool IsDetachmentRuleReflectedInStats
     {
         get
         {
             if (army is null || string.IsNullOrEmpty(army.DetachmentRule)) return false;
-
-            // Hit bonus detachments (e.g., Awakened Dynasty) — reflected as improved BS/WS on weapon rows
-            if (!string.IsNullOrEmpty(army.Detachment) &&
-                army.Detachment.Contains("Awakened Dynasty", StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            var rule = army.DetachmentRule;
-
-            // Generic hit-roll bonus pattern — reflected as improved BS/WS
-            if (rule.Contains("add 1 to", StringComparison.OrdinalIgnoreCase) &&
-                rule.Contains("hit roll", StringComparison.OrdinalIgnoreCase) &&
-                rule.Contains("character", StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            return false;
+            return activeDetachmentEffects.Any(e => e.ReflectedInStats);
         }
     }
 
     private bool UnitHasDetachmentHitBonus(UnitEntry unit)
     {
         if (army is null) return false;
-
-        bool ruleApplies = false;
-
-        // Match by detachment name
-        if (!string.IsNullOrEmpty(army.Detachment) &&
-            army.Detachment.Contains("Awakened Dynasty", StringComparison.OrdinalIgnoreCase))
-            ruleApplies = true;
-
-        // Match by rule text (flexible: "add 1 to the Hit roll" / "add 1 to Hit rolls" etc.)
-        if (!ruleApplies && !string.IsNullOrEmpty(army.DetachmentRule) &&
-            army.DetachmentRule.Contains("add 1 to", StringComparison.OrdinalIgnoreCase) &&
-            army.DetachmentRule.Contains("hit roll", StringComparison.OrdinalIgnoreCase) &&
-            army.DetachmentRule.Contains("character", StringComparison.OrdinalIgnoreCase))
-            ruleApplies = true;
-
-        if (!ruleApplies) return false;
-
-        return unit.AttachedLeaders.Any(l =>
-            !IsKilled(l) &&
-            l.Keywords.Any(k => k.Equals("Character", StringComparison.OrdinalIgnoreCase)));
+        var hitEffects = activeDetachmentEffects.Where(e =>
+            e.ReflectedInStats && (e.Stat == "bs" || e.Stat == "ws"));
+        foreach (var effect in hitEffects)
+        {
+            if (EvaluateCondition(effect.Condition, unit))
+                return true;
+        }
+        return false;
     }
+
+    private bool EvaluateCondition(string condition, UnitEntry unit) => condition switch
+    {
+        "always" => true,
+        "has_leader_character" => unit.AttachedLeaders.Any(l =>
+            !IsKilled(l) &&
+            l.Keywords.Any(k => k.Equals("Character", StringComparison.OrdinalIgnoreCase))),
+        "charged" => true, // condition shown contextually, always applies when relevant
+        "battle_shocked_and_charged" => true, // conditional display handled separately
+        _ => false
+    };
 
     private static string ImproveSkill(string skill)
     {
@@ -3525,9 +3514,10 @@
 
     private string GetHitBonusSource(UnitEntry unit)
     {
-        if (army is not null && UnitHasDetachmentHitBonus(unit))
-            return army.Detachment ?? "Detachment";
-        return "";
+        if (army is null || !UnitHasDetachmentHitBonus(unit)) return "";
+        var effect = activeDetachmentEffects.FirstOrDefault(e =>
+            e.ReflectedInStats && (e.Stat == "bs" || e.Stat == "ws") && EvaluateCondition(e.Condition, unit));
+        return effect?.SourceLabel ?? army.Detachment ?? "Detachment";
     }
 
     private (string InvulnSource, string FnpSource) GetExtraDefensiveAuraSources(UnitEntry unit)
@@ -3860,6 +3850,7 @@
 
             rawJson = data.RawJson;
             army = parser.Parse(rawJson);
+            activeDetachmentEffects = await DetachmentEffects.GetEffectsForDetachment(army.Detachment);
 
             if (data.State is not null)
                 ApplyState(data.State);
@@ -3998,6 +3989,7 @@
 
             rawJson = data.RawJson;
             army = parser.Parse(rawJson);
+            activeDetachmentEffects = await DetachmentEffects.GetEffectsForDetachment(army.Detachment);
 
             if (data.State is not null)
                 ApplyState(data.State);

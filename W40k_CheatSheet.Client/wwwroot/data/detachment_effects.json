@@ -1,0 +1,36 @@
+[
+  {
+    "detachment": "Awakened Dynasty",
+    "effects": [
+      {
+        "stat": "bs",
+        "modifier": -1,
+        "weaponType": "all",
+        "condition": "has_leader_character",
+        "reflectedInStats": true,
+        "sourceLabel": "Awakened Dynasty"
+      }
+    ]
+  },
+  {
+    "detachment": "Rage-Cursed Onslaught",
+    "effects": [
+      {
+        "stat": "attacks",
+        "modifier": 1,
+        "weaponType": "melee",
+        "condition": "charged",
+        "reflectedInStats": false,
+        "sourceLabel": "Maddened Ferocity"
+      },
+      {
+        "stat": "attacks",
+        "modifier": 2,
+        "weaponType": "melee",
+        "condition": "battle_shocked_and_charged",
+        "reflectedInStats": false,
+        "sourceLabel": "Maddened Ferocity (Battle-shocked)"
+      }
+    ]
+  }
+]
