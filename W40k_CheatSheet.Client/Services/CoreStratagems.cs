@@ -782,6 +782,106 @@ public static class CoreStratagems
             FullTarget = "One friendly Necrons unit (excluding Monsters) within 6\" of that Monster unit.",
             FullEffect = "If that enemy unit was unravelling at the start of the phase, your friendly unit's Reanimation Protocols activate.",
             FullRestriction = "You can only use this Stratagem once per turn."
+        },
+
+        // Rage-Cursed Onslaught (Blood Angels)
+        new()
+        {
+            Name = "Red Wrath",
+            Cost = "I",
+            Category = "Rage-Cursed Onslaught – Battle Tactic",
+            Detachment = "Rage-Cursed Onslaught",
+            Phases = GamePhase.Move,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Adeptus Astartes"],
+            When = "Your Movement phase — after an ADEPTUS ASTARTES unit Advances.",
+            Target = "That ADEPTUS ASTARTES unit.",
+            Effect = "Til end of turn → eligible to shoot or charge after Advancing. Optional Red Thirst: Battle-shocked but eligible to shoot AND charge.",
+            FullWhen = "Your Movement phase, just after an Adeptus Astartes unit from your army Advances.",
+            FullTarget = "That Adeptus Astartes unit.",
+            FullEffect = "Until the end of the turn, your unit is eligible to either shoot or declare a charge in a turn in which it Advanced. You can instead choose for your unit to give in to the Red Thirst; if it does, it becomes Battle-shocked (but the effects of this Stratagem still apply to it), and until the end of the turn, your unit is eligible to shoot and declare a charge in a turn in which it Advanced."
+        },
+        new()
+        {
+            Name = "A Grim Warning",
+            Cost = "I",
+            Category = "Rage-Cursed Onslaught – Strategic Ploy",
+            Detachment = "Rage-Cursed Onslaught",
+            Phases = GamePhase.Command | GamePhase.Move | GamePhase.Shoot | GamePhase.Charge | GamePhase.Fight,
+            TurnColor = StratagemTurn.Green,
+            RequiredKeywords = ["Blood Angels"],
+            When = "Any phase — after a Blood Angels unit is destroyed on a controlled objective.",
+            Target = "That Blood Angels unit (even though destroyed).",
+            Effect = "Select one of those objective markers → remains under your control until opponent's LoC exceeds yours at end of a phase.",
+            FullWhen = "Any phase.",
+            FullTarget = "One Blood Angels unit from your army that was just destroyed while it was within range of one or more objective markers you controlled at the end of the previous phase. You can use this Stratagem on that unit even though it was just destroyed.",
+            FullEffect = "Select one of those objective markers. That objective marker remains under your control until your opponent's Level of Control over that objective marker is greater than yours at the end of a phase."
+        },
+        new()
+        {
+            Name = "Deathless Duty",
+            Cost = "II",
+            Category = "Rage-Cursed Onslaught – Epic Deed",
+            Detachment = "Rage-Cursed Onslaught",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Red,
+            RequiredKeywords = ["Death Company"],
+            When = "Fight phase — after an enemy selects targets.",
+            Target = "1 DEATH COMPANY unit targeted by the attacker.",
+            Effect = "Til end of phase → destroyed models that haven't fought stay, fight after attacker finishes, then removed.",
+            FullWhen = "Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One Death Company unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the end of the phase, each time a model in your unit is destroyed, if that model has not fought this phase, do not remove it from play. The destroyed model can fight after the attacking unit has finished making its attacks, and is then removed from play."
+        },
+        new()
+        {
+            Name = "Limb from Limb",
+            Cost = "I",
+            Category = "Rage-Cursed Onslaught – Battle Tactic",
+            Detachment = "Rage-Cursed Onslaught",
+            Phases = GamePhase.Fight,
+            TurnColor = StratagemTurn.Blue,
+            RequiredKeywords = ["Adeptus Astartes"],
+            When = "Fight phase.",
+            Target = "1 ADEPTUS ASTARTES unit that made a Charge move this turn.",
+            Effect = "Choose melee S or AP +1. Optional Red Thirst: Battle-shocked but both S and AP +1.",
+            FullWhen = "Fight phase.",
+            FullTarget = "One Adeptus Astartes unit from your army that made a Charge move this turn.",
+            FullEffect = "Select either the Strength or Armour Penetration characteristic of melee weapons equipped by models in your unit. Until the end of the phase, add 1 to the selected characteristic. You can instead choose for your unit to give in to the Red Thirst; if it does, it becomes Battle-shocked (but the effects of this Stratagem still apply to it), and until the end of the phase, add 1 to the Strength and Armour Penetration characteristics of melee weapons equipped by models in your unit."
+        },
+        new()
+        {
+            Name = "Insensate Rampage",
+            Cost = "I",
+            Category = "Rage-Cursed Onslaught – Battle Tactic",
+            Detachment = "Rage-Cursed Onslaught",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            EnemyTurnPhases = GamePhase.Shoot | GamePhase.Fight,
+            TurnColor = StratagemTurn.Red,
+            RequiredKeywords = ["Death Company"],
+            When = "Enemy Shooting or Fight phase — after an enemy selects targets.",
+            Target = "1 DEATH COMPANY unit targeted by the attacker.",
+            Effect = "Til end of phase → Feel No Pain 5+.",
+            FullWhen = "Your opponent's Shooting phase or the Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One Death Company unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the end of the phase, models in your unit have the Feel No Pain 5+ ability."
+        },
+        new()
+        {
+            Name = "Armour of Contempt",
+            Cost = "I",
+            Category = "Rage-Cursed Onslaught – Battle Tactic",
+            Detachment = "Rage-Cursed Onslaught",
+            Phases = GamePhase.Shoot | GamePhase.Fight,
+            EnemyTurnPhases = GamePhase.Shoot | GamePhase.Fight,
+            TurnColor = StratagemTurn.Red,
+            RequiredKeywords = ["Adeptus Astartes"],
+            When = "Enemy Shooting or Fight phase — after an enemy selects targets.",
+            Target = "1 ADEPTUS ASTARTES unit targeted by the attacker.",
+            Effect = "Til attacker finishes → worsen AP of attacks targeting your unit by 1.",
+            FullWhen = "Your opponent's Shooting phase or the Fight phase, just after an enemy unit has selected its targets.",
+            FullTarget = "One Adeptus Astartes unit from your army that was selected as the target of one or more of the attacking unit's attacks.",
+            FullEffect = "Until the attacking unit has finished making its attacks, each time an attack targets your unit, worsen the Armour Penetration characteristic of that attack by 1."
         }
     ];
 }
