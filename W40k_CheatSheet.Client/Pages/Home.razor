@@ -105,12 +105,12 @@
                 </div>
             }
 
-            @* ── Cloud Armies (shown when logged in) ── *@
-            @if (Cloud.IsLoggedIn && cloudRosters.Count > 0)
+            @* ── Cloud Armies (shown when logged in, filtered by selected faction) ── *@
+            @if (Cloud.IsLoggedIn && cloudRosters.Any(cr => FactionMatchesWelcome(cr.Faction)))
             {
                 <div class="saved-armies">
                     <h3>☁️ Saved Armies</h3>
-                    @foreach (var cr in cloudRosters)
+                    @foreach (var cr in cloudRosters.Where(cr => FactionMatchesWelcome(cr.Faction)))
                     {
                         <div class="saved-army-row">
                             <div class="saved-army-info" @onclick="() => LoadCloudArmy(cr.Id)">
@@ -123,12 +123,12 @@
                 </div>
             }
 
-            @* ── Local armies (only shown when NOT logged in) ── *@
-            @if (!Cloud.IsLoggedIn && savedArmies.Count > 0)
+            @* ── Local armies (only shown when NOT logged in, filtered by selected faction) ── *@
+            @if (!Cloud.IsLoggedIn && savedArmies.Any(sa => FactionMatchesWelcome(sa.Faction)))
             {
                 <div class="saved-armies">
                     <h3>📦 Saved Armies (Local)</h3>
-                    @foreach (var sa in savedArmies)
+                    @foreach (var sa in savedArmies.Where(sa => FactionMatchesWelcome(sa.Faction)))
                     {
                         <div class="saved-army-row">
                             <div class="saved-army-info" @onclick="() => LoadSavedArmy(sa.Name)">
@@ -1561,6 +1561,13 @@
     private string cloudUsername = "";
     private bool cloudBusy;
     private string? welcomeBg = null;
+
+    private bool FactionMatchesWelcome(string faction) => welcomeBg switch
+    {
+        "necrons" => faction.Contains("Necron", StringComparison.OrdinalIgnoreCase),
+        "blood_angels" => faction.Contains("Blood Angel", StringComparison.OrdinalIgnoreCase),
+        _ => false
+    };
     private bool loginExpanded;
     private bool showRegister;
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
