@@ -1241,6 +1241,10 @@
         {
             <button class="corner-btn save @(saveTick ? "tick" : "")" @onclick="SaveCurrentArmy">@(saveTick ? "✓" : "💾")</button>
         }
+        @if (playMode)
+        {
+            <button class="corner-btn reset-filters" @onclick="ResetAllFilters" title="Remove all filters">✕</button>
+        }
         <button class="corner-btn home" @onclick="ClearRoster">⌂</button>
     </div>
     <div class="version-tag" @onclick="() => showChangelog = true">v2.2</div>
@@ -2064,6 +2068,21 @@
     {
         activeTurn = activeTurn == turn ? null : turn;
         preGameDismissed = true;
+    }
+
+    private void ResetAllFilters()
+    {
+        activeTurn = null;
+        activePhase = null;
+        focusedUnit = null;
+        focusedWeapon = null;
+        focusedStatOwner = null;
+        focusedCard = null;
+        focusedAbility = null;
+        focusedStratagem = null;
+        focusedStratagemUnit = null;
+        focusedExtraAbility = null;
+        preGameDismissed = false;
     }
 
     private void ToggleFocusAbility(AbilityEntry ability)
