@@ -2766,6 +2766,58 @@
     opacity: 1;
 }
 
+/* Targeted toggle button */
+.targeted-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.65rem;
+    padding: 0 0.2rem;
+    border-radius: 3px;
+    opacity: 0.6;
+    transition: all 0.15s;
+}
+
+.targeted-btn:hover {
+    opacity: 1;
+}
+
+.targeted-btn.active {
+    opacity: 1;
+    color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.4);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+/* Defensive modifier pills */
+.def-mod-row td {
+    padding: 0.15rem 0.3rem !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.def-mod-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background: rgba(255, 107, 107, 0.12);
+    border: 1px solid rgba(255, 107, 107, 0.35);
+    color: #ff6b6b;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 0.25rem;
+}
+
+.def-mod-cond {
+    color: #999;
+    font-weight: 400;
+    font-size: 0.5rem;
+}
+
 .weapon-total-attacks {
     font-size: 0.6rem;
     color: #888;

@@ -29,6 +29,7 @@ public class UnitEntry
     public List<string> Enhancements { get; set; } = [];
     public List<UnitEntry> AttachedLeaders { get; set; } = [];
     public int ModelCount { get; set; } = 1;
+    public List<DefensiveModifier> DefensiveModifiers { get; set; } = [];
 }
 
 public class StatLine
@@ -130,4 +131,19 @@ public class DetachmentEffect
     public bool ReflectedInStats { get; set; }
     /// <summary>Short display label for the buff source tooltip</summary>
     public string SourceLabel { get; set; } = "";
+}
+
+/// <summary>A parsed defensive modifier from an ability (e.g. "subtract 1 from the Wound roll").</summary>
+public class DefensiveModifier
+{
+    /// <summary>"hit" or "wound"</summary>
+    public string Roll { get; set; } = "";
+    /// <summary>Modifier value, e.g. -1</summary>
+    public int Value { get; set; }
+    /// <summary>"melee", "ranged", or "all"</summary>
+    public string AttackType { get; set; } = "all";
+    /// <summary>Optional condition text for display, e.g. "S &gt; T"</summary>
+    public string Condition { get; set; } = "";
+    /// <summary>Source ability name</summary>
+    public string Source { get; set; } = "";
 }

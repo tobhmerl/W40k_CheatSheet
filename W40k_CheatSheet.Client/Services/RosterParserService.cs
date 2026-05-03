@@ -93,6 +93,30 @@ public partial class RosterParserService
 
         unit.ModelCount = CountModels(selection);
 
+        // Extract defensive modifiers from abilities
+        foreach (var ability in unit.Abilities)
+        {
+            var dm = DefensiveModifierRegex().Match(ability.Description);
+            if (!dm.Success) continue;
+            var roll = dm.Groups[2].Value.ToLowerInvariant(); // "hit" or "wound"
+            var value = -int.Parse(dm.Groups[1].Value);
+            var attackType = ability.Description.Contains("melee attack", StringComparison.OrdinalIgnoreCase) ? "melee"
+                           : ability.Description.Contains("ranged attack", StringComparison.OrdinalIgnoreCase) ? "ranged"
+                           : "all";
+            var condition = "";
+            if (ability.Description.Contains("Strength", StringComparison.OrdinalIgnoreCase) &&
+                ability.Description.Contains("Toughness", StringComparison.OrdinalIgnoreCase))
+                condition = "S > T";
+            unit.DefensiveModifiers.Add(new DefensiveModifier
+            {
+                Roll = roll,
+                Value = value,
+                AttackType = attackType,
+                Condition = condition,
+                Source = ability.Name
+            });
+        }
+
         return unit;
     }
 
@@ -358,6 +382,9 @@ public partial class RosterParserService
 
     [GeneratedRegex(@"feel no pain (\d\+)", RegexOptions.IgnoreCase)]
     private static partial Regex FnpExplicitRegex();
+
+    [GeneratedRegex(@"subtract\s+(\d+)\s+from\s+(?:that\s+attack'?s?\s+|the\s+)?(Hit|Wound)\s+roll", RegexOptions.IgnoreCase)]
+    private static partial Regex DefensiveModifierRegex();
 
     private static Match MatchFnp(string desc)
     {

@@ -382,6 +382,10 @@
                             {
                                 <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
                             }
+                            @if (playMode && GetAllDefensiveModifiers(unit).Count > 0)
+                            {
+                                <button class="targeted-btn @(targetedUnits.Contains(unit) ? "active" : "")" @onclick="() => ToggleTargeted(unit)" @onclick:stopPropagation="true">🎯</button>
+                            }
                             @if (playMode && IsKilled(unit))
                             {
                                 <button class="revive-btn" @onclick="() => ReviveUnit(unit)" @onclick:stopPropagation="true">↩</button>
@@ -663,6 +667,28 @@
                                                     <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
                                                     <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
                                                 </tr>
+                                                @if (playMode && targetedUnits.Contains(unit))
+                                                {
+                                                    var mods = GetAllDefensiveModifiers(unit);
+                                                    if (mods.Count > 0)
+                                                    {
+                                                        <tr class="def-mod-row">
+                                                            <td colspan="7">
+                                                                @foreach (var mod in mods)
+                                                                                {
+                                                                                    var prefix = mod.AttackType == "melee" ? "⚔ " : mod.AttackType == "ranged" ? "🎯 " : "";
+                                                                                    var label = $"{prefix}{char.ToUpper(mod.Roll[0])}{mod.Roll[1..]} {mod.Value:+#;-#}";
+                                                                                    var tipText = string.IsNullOrEmpty(mod.Condition) ? mod.Source : $"{mod.Source} ({mod.Condition})";
+                                                                                    var descText = string.IsNullOrEmpty(mod.Condition) ? "" : $"Condition: {mod.Condition}";
+                                                                                    <span class="def-mod-pill buff-source-trigger" title="@tipText" @onclick="() => ShowBuffSource(label, mod.Source, descText)" @onclick:stopPropagation="true">
+                                                                                        @label
+                                                                                        @if (!string.IsNullOrEmpty(mod.Condition)) { <span class="def-mod-cond">@mod.Condition</span> }
+                                                                                    </span>
+                                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
                                             }
                                         </tbody>
                                     </table>
@@ -1535,6 +1561,7 @@
     private DetachmentSetupEntry detachmentConfig = new();
     private bool focusedDetachmentRule;
     private readonly HashSet<UnitEntry> killedUnits = [];
+    private readonly HashSet<UnitEntry> targetedUnits = [];
     private int defenderPrimary;
     private int aggressorPrimary;
     private int defenderSecondary;
@@ -2083,6 +2110,24 @@
         focusedStratagemUnit = null;
         focusedExtraAbility = null;
         preGameDismissed = false;
+        targetedUnits.Clear();
+    }
+
+    private void ToggleTargeted(UnitEntry unit)
+    {
+        if (!targetedUnits.Remove(unit))
+            targetedUnits.Add(unit);
+    }
+
+    private List<DefensiveModifier> GetAllDefensiveModifiers(UnitEntry unit)
+    {
+        var mods = new List<DefensiveModifier>(unit.DefensiveModifiers);
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            mods.AddRange(leader.DefensiveModifiers);
+        }
+        return mods;
     }
 
     private void ToggleFocusAbility(AbilityEntry ability)
