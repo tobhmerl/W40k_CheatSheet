@@ -117,6 +117,22 @@ public partial class RosterParserService
             });
         }
 
+        // Extract charge effects from abilities
+        foreach (var ability in unit.Abilities)
+        {
+            var cm = ChargeEffectRegex().Match(ability.Description);
+            if (!cm.Success) continue;
+            // Build a short summary from the description
+            var desc = ability.Description;
+            var summary = BuildChargeSummary(desc);
+            unit.ChargeEffects.Add(new ChargeEffect
+            {
+                Summary = summary,
+                Source = ability.Name,
+                Description = desc
+            });
+        }
+
         return unit;
     }
 
@@ -385,6 +401,25 @@ public partial class RosterParserService
 
     [GeneratedRegex(@"subtract\s+(\d+)\s+from\s+(?:that\s+attack'?s?\s+|the\s+)?(Hit|Wound)\s+roll", RegexOptions.IgnoreCase)]
     private static partial Regex DefensiveModifierRegex();
+
+    [GeneratedRegex(@"ends?\s+a\s+Charge\s+move", RegexOptions.IgnoreCase)]
+    private static partial Regex ChargeEffectRegex();
+
+    private static string BuildChargeSummary(string desc)
+    {
+        // Try to extract mortal wound info
+        var mw = Regex.Matches(desc, @"on\s+a?\s*(\d+(?:-\d+)?)\s*[,:]\s*(?:that\s+unit\s+)?suffers?\s+(D?\d+(?:\+\d+)?)\s+mortal\s+wounds?", RegexOptions.IgnoreCase);
+        if (mw.Count > 0)
+        {
+            var parts = mw.Select(m => $"{m.Groups[2].Value} MW ({m.Groups[1].Value})");
+            return string.Join(", ", parts);
+        }
+        // Fallback: generic mortal wound mention
+        var simple = Regex.Match(desc, @"suffers?\s+(D?\d+(?:\+\d+)?)\s+mortal\s+wounds?", RegexOptions.IgnoreCase);
+        if (simple.Success)
+            return $"{simple.Groups[1].Value} MW";
+        return "On Charge";
+    }
 
     private static Match MatchFnp(string desc)
     {

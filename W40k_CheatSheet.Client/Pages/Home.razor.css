@@ -2790,6 +2790,46 @@
     background: rgba(255, 107, 107, 0.1);
 }
 
+/* Charged toggle button */
+.charged-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.65rem;
+    padding: 0 0.2rem;
+    border-radius: 3px;
+    opacity: 0.6;
+    transition: all 0.15s;
+}
+
+.charged-btn:hover {
+    opacity: 1;
+}
+
+.charged-btn.active {
+    opacity: 1;
+    color: #ffc107;
+    border-color: rgba(255, 193, 7, 0.4);
+    background: rgba(255, 193, 7, 0.1);
+}
+
+/* Charge effect pills */
+.charge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background: rgba(255, 193, 7, 0.12);
+    border: 1px solid rgba(255, 193, 7, 0.35);
+    color: #ffc107;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 0.25rem;
+}
+
 /* Defensive modifier pills */
 .def-mod-row td {
     padding: 0.15rem 0.3rem !important;

@@ -386,6 +386,10 @@
                             {
                                 <button class="targeted-btn @(targetedUnits.Contains(unit) ? "active" : "")" @onclick="() => ToggleTargeted(unit)" @onclick:stopPropagation="true">🎯</button>
                             }
+                            @if (playMode && GetAllChargeEffects(unit).Count > 0)
+                            {
+                                <button class="charged-btn @(chargedUnits.Contains(unit) ? "active" : "")" @onclick="() => ToggleCharged(unit)" @onclick:stopPropagation="true">⚡</button>
+                            }
                             @if (playMode && IsKilled(unit))
                             {
                                 <button class="revive-btn" @onclick="() => ReviveUnit(unit)" @onclick:stopPropagation="true">↩</button>
@@ -685,6 +689,23 @@
                                                                                         @if (!string.IsNullOrEmpty(mod.Condition)) { <span class="def-mod-cond">@mod.Condition</span> }
                                                                                     </span>
                                                                                 }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                @if (playMode && chargedUnits.Contains(unit))
+                                                {
+                                                    var cEffects = GetAllChargeEffects(unit);
+                                                    if (cEffects.Count > 0)
+                                                    {
+                                                        <tr class="def-mod-row">
+                                                            <td colspan="7">
+                                                                @foreach (var ce in cEffects)
+                                                                {
+                                                                    <span class="charge-pill buff-source-trigger" title="@ce.Source" @onclick="() => ShowBuffSource(ce.Summary, ce.Source, ce.Description)" @onclick:stopPropagation="true">
+                                                                        ⚡ @ce.Summary
+                                                                    </span>
+                                                                }
                                                             </td>
                                                         </tr>
                                                     }
@@ -1562,6 +1583,7 @@
     private bool focusedDetachmentRule;
     private readonly HashSet<UnitEntry> killedUnits = [];
     private readonly HashSet<UnitEntry> targetedUnits = [];
+    private readonly HashSet<UnitEntry> chargedUnits = [];
     private int defenderPrimary;
     private int aggressorPrimary;
     private int defenderSecondary;
@@ -2111,12 +2133,19 @@
         focusedExtraAbility = null;
         preGameDismissed = false;
         targetedUnits.Clear();
+        chargedUnits.Clear();
     }
 
     private void ToggleTargeted(UnitEntry unit)
     {
         if (!targetedUnits.Remove(unit))
             targetedUnits.Add(unit);
+    }
+
+    private void ToggleCharged(UnitEntry unit)
+    {
+        if (!chargedUnits.Remove(unit))
+            chargedUnits.Add(unit);
     }
 
     private List<DefensiveModifier> GetAllDefensiveModifiers(UnitEntry unit)
@@ -2128,6 +2157,17 @@
             mods.AddRange(leader.DefensiveModifiers);
         }
         return mods;
+    }
+
+    private List<ChargeEffect> GetAllChargeEffects(UnitEntry unit)
+    {
+        var effects = new List<ChargeEffect>(unit.ChargeEffects);
+        foreach (var leader in unit.AttachedLeaders)
+        {
+            if (IsKilled(leader)) continue;
+            effects.AddRange(leader.ChargeEffects);
+        }
+        return effects;
     }
 
     private void ToggleFocusAbility(AbilityEntry ability)

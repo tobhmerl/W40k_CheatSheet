@@ -30,6 +30,7 @@ public class UnitEntry
     public List<UnitEntry> AttachedLeaders { get; set; } = [];
     public int ModelCount { get; set; } = 1;
     public List<DefensiveModifier> DefensiveModifiers { get; set; } = [];
+    public List<ChargeEffect> ChargeEffects { get; set; } = [];
 }
 
 public class StatLine
@@ -146,4 +147,15 @@ public class DefensiveModifier
     public string Condition { get; set; } = "";
     /// <summary>Source ability name</summary>
     public string Source { get; set; } = "";
+}
+
+/// <summary>A parsed on-charge trigger from an ability (e.g. mortal wounds on charge).</summary>
+public class ChargeEffect
+{
+    /// <summary>Short summary, e.g. "D3 MW (2-5), D3+3 MW (6)"</summary>
+    public string Summary { get; set; } = "";
+    /// <summary>Source ability name</summary>
+    public string Source { get; set; } = "";
+    /// <summary>Full ability description for tooltip</summary>
+    public string Description { get; set; } = "";
 }
