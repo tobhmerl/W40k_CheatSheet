@@ -235,11 +235,37 @@ public partial class RosterParserService
 
     private static void ProcessRule(Rule rule, UnitEntry unit)
     {
-        if (!IsPreGameProfileName(rule.Name))
-            return;
+        if (rule.Hidden) return;
 
         var desc = SanitizeText(rule.Description);
-        unit.Abilities.Add(new AbilityEntry { Name = rule.Name, Description = desc, Phases = GamePhase.Move });
+
+        // Feel No Pain from rules (e.g. C'tan "Feel No Pain 5+")
+        var fnpNameMatch = Regex.Match(rule.Name, @"feel no pain (\d\+)", RegexOptions.IgnoreCase);
+        if (fnpNameMatch.Success)
+        {
+            unit.FeelNoPain = BetterValue(unit.FeelNoPain, fnpNameMatch.Groups[1].Value);
+            return;
+        }
+        var fnpMatch = MatchFnp(desc);
+        if (fnpMatch.Success && rule.Name.Contains("Feel No Pain", StringComparison.OrdinalIgnoreCase))
+        {
+            unit.FeelNoPain = BetterValue(unit.FeelNoPain, fnpMatch.Groups[1].Value);
+            return;
+        }
+
+        // Deadly Demise — store as an ability so it shows in the card
+        if (rule.Name.StartsWith("Deadly Demise", StringComparison.OrdinalIgnoreCase))
+        {
+            unit.Abilities.Add(new AbilityEntry { Name = rule.Name, Description = desc, Phases = GamePhase.All });
+            return;
+        }
+
+        // Pre-game abilities (Scout, Deep Strike, Infiltrators)
+        if (IsPreGameProfileName(rule.Name))
+        {
+            unit.Abilities.Add(new AbilityEntry { Name = rule.Name, Description = desc, Phases = GamePhase.Move });
+            return;
+        }
     }
 
     private static int GetTotalPoints(Selection selection)
