@@ -1,0 +1,202 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (!StratHidden && (AbilityCount > 0 || HeaderStrats.Count > 0 || AlwaysActiveAbilities.Count > 0 || AlwaysActiveStrats.Count > 0 || ShowDetachmentInCard || ShowDetachmentAlways))
+{
+    var blueRedStrats = HeaderStrats.Where(s => s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed or StratagemTurn.Red or StratagemTurn.RedBlue).ToList();
+    var greenStrats = HeaderStrats.Where(s => s.TurnColor is StratagemTurn.Green).ToList();
+    var hasRightContent = AlwaysActiveAbilities.Count > 0 || AlwaysActiveStrats.Count > 0 || ShowDetachmentAlways;
+    <div class="strat-expand" @onclick:stopPropagation="true">
+        <div class="strat-expand-main">
+            @if (ShowDetachmentInCard || AbilityCount > 0)
+            {
+                <div class="strat-expand-list">
+                    @if (ShowDetachmentInCard)
+                    {
+                        <div class="strat-expand-entry @(FocusedDetachmentRule ? "expanded" : "")">
+                            <span class="strat-expand-item strat-cell-ability" @onclick="ToggleDetachmentRule">⚔ @Detachment</span>
+                            @if (FocusedDetachmentRule)
+                            {
+                                <div class="strat-expand-desc">@DetachmentRule</div>
+                            }
+                        </div>
+                    }
+                    @foreach (var a in CardAbilities)
+                    {
+                        if (UsedAbilities.Contains(a)) { continue; }
+                        <div class="strat-expand-entry @(FocusedAbility == a ? "expanded" : "")">
+                            <span class="strat-expand-item strat-cell-ability" @onclick="() => OnToggleFocusAbility.InvokeAsync(a)"
+                                  @onpointerdown="() => OnceAbilityPointerDown.InvokeAsync(a)"
+                                  @onpointerup="() => OncePointerUp.InvokeAsync()" @onpointerleave="() => OncePointerUp.InvokeAsync()"
+                                  @oncontextmenu:preventDefault>@a.Name</span>
+                            @if (FocusedAbility == a)
+                            {
+                                <div class="strat-expand-desc">@a.Description</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            @if (blueRedStrats.Count > 0)
+            {
+                @if (AbilityCount > 0)
+                {
+                    <div class="strat-expand-divider"></div>
+                }
+                <div class="strat-expand-list">
+                    @foreach (var s in blueRedStrats)
+                    {
+                        if (UsedStratagems.Contains(s)) { continue; }
+                        var isBlue = s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed;
+                        <div class="strat-expand-entry @(FocusedStratagem == s && FocusedStratagemUnit == Unit ? (isBlue ? "expanded-blue" : "expanded-red") : "")">
+                            <span class="strat-expand-item @(isBlue ? "strat-cell-blue" : "strat-cell-red")" @onclick="() => OnToggleCardStratagem.InvokeAsync((s, Unit))"
+                                  @onpointerdown="() => OnceStratagemPointerDown.InvokeAsync(s)"
+                                  @onpointerup="() => OncePointerUp.InvokeAsync()" @onpointerleave="() => OncePointerUp.InvokeAsync()"
+                                  @oncontextmenu:preventDefault>@s.Name</span> @if (ParseCpCost(s.Cost) > 1) { <span class="strat-cost-inline">@s.Cost</span> }
+                            @if (FocusedStratagem == s && FocusedStratagemUnit == Unit)
+                            {
+                                <div class="strat-expand-desc">
+                                    <div>@s.Effect</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(s.FullWhen) ? s.FullWhen : s.When)</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(s.FullTarget) ? s.FullTarget : s.Target)</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(s.FullEffect) ? s.FullEffect : s.Effect)</div>
+                                    @if (!string.IsNullOrEmpty(s.FullRestriction) || !string.IsNullOrEmpty(s.Restriction))
+                                    {
+                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(s.FullRestriction) ? s.FullRestriction : s.Restriction)</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            @if (greenStrats.Count > 0)
+            {
+                @if (blueRedStrats.Count > 0 || AbilityCount > 0)
+                {
+                    <div class="strat-expand-divider"></div>
+                }
+                <div class="strat-expand-list">
+                    @foreach (var g in greenStrats)
+                    {
+                        if (UsedStratagems.Contains(g)) { continue; }
+                        <div class="strat-expand-entry @(FocusedStratagem == g && FocusedStratagemUnit == Unit ? "expanded-green" : "")">
+                            <span class="strat-expand-item strat-cell-green" @onclick="() => OnToggleCardStratagem.InvokeAsync((g, Unit))"
+                                  @onpointerdown="() => OnceStratagemPointerDown.InvokeAsync(g)"
+                                  @onpointerup="() => OncePointerUp.InvokeAsync()" @onpointerleave="() => OncePointerUp.InvokeAsync()"
+                                  @oncontextmenu:preventDefault>@g.Name</span> @if (ParseCpCost(g.Cost) > 1) { <span class="strat-cost-inline">@g.Cost</span> }
+                            @if (FocusedStratagem == g && FocusedStratagemUnit == Unit)
+                            {
+                                <div class="strat-expand-desc">
+                                    <div>@g.Effect</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(g.FullWhen) ? g.FullWhen : g.When)</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(g.FullTarget) ? g.FullTarget : g.Target)</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(g.FullEffect) ? g.FullEffect : g.Effect)</div>
+                                    @if (!string.IsNullOrEmpty(g.FullRestriction) || !string.IsNullOrEmpty(g.Restriction))
+                                    {
+                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(g.FullRestriction) ? g.FullRestriction : g.Restriction)</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        @if (hasRightContent)
+        {
+            <div class="strat-expand-always">
+                <div class="strat-expand-list">
+                    @foreach (var s in AlwaysActiveStrats)
+                    {
+                        if (UsedStratagems.Contains(s)) { continue; }
+                        var sColor = s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "strat-cell-blue"
+                                   : s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue ? "strat-cell-red"
+                                   : "strat-cell-green";
+                        var sExpCss = FocusedStratagem == s && FocusedStratagemUnit == Unit
+                            ? (s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "expanded-blue"
+                               : s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue ? "expanded-red"
+                               : "expanded-green")
+                            : "";
+                        <div class="strat-expand-entry @sExpCss">
+                            <span class="strat-expand-item @sColor" @onclick="() => OnToggleCardStratagem.InvokeAsync((s, Unit))"
+                                  @onpointerdown="() => OnceStratagemPointerDown.InvokeAsync(s)"
+                                  @onpointerup="() => OncePointerUp.InvokeAsync()" @onpointerleave="() => OncePointerUp.InvokeAsync()"
+                                  @oncontextmenu:preventDefault>[@s.Name]</span> @if (ParseCpCost(s.Cost) > 1) { <span class="strat-cost-inline">@s.Cost</span> }
+                            @if (FocusedStratagem == s && FocusedStratagemUnit == Unit)
+                            {
+                                <div class="strat-expand-desc">
+                                    <div>@s.Effect</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(s.FullWhen) ? s.FullWhen : s.When)</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(s.FullTarget) ? s.FullTarget : s.Target)</div>
+                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(s.FullEffect) ? s.FullEffect : s.Effect)</div>
+                                    @if (!string.IsNullOrEmpty(s.FullRestriction) || !string.IsNullOrEmpty(s.Restriction))
+                                    {
+                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(s.FullRestriction) ? s.FullRestriction : s.Restriction)</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    @foreach (var aa in AlwaysActiveAbilities)
+                    {
+                        if (UsedAbilities.Contains(aa)) { continue; }
+                        <div class="strat-expand-entry @(FocusedAbility == aa ? "expanded" : "")">
+                            <span class="strat-expand-item strat-cell-ability" @onclick="() => OnToggleFocusAbility.InvokeAsync(aa)"
+                                  @onpointerdown="() => OnceAbilityPointerDown.InvokeAsync(aa)"
+                                  @onpointerup="() => OncePointerUp.InvokeAsync()" @onpointerleave="() => OncePointerUp.InvokeAsync()"
+                                  @oncontextmenu:preventDefault>[@aa.Name]</span>
+                            @if (FocusedAbility == aa)
+                            {
+                                <div class="strat-expand-desc">@aa.Description</div>
+                            }
+                        </div>
+                    }
+                    @if (ShowDetachmentAlways)
+                    {
+                        <div class="strat-expand-entry @(FocusedDetachmentRule ? "expanded" : "")">
+                            <span class="strat-expand-item strat-cell-ability" @onclick="ToggleDetachmentRule">[⚔ @Detachment]</span>
+                            @if (FocusedDetachmentRule)
+                            {
+                                <div class="strat-expand-desc">@DetachmentRule</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public UnitEntry Unit { get; set; } = default!;
+    [Parameter] public bool StratHidden { get; set; }
+    [Parameter] public int AbilityCount { get; set; }
+    [Parameter] public IReadOnlyList<Stratagem> HeaderStrats { get; set; } = [];
+    [Parameter] public IReadOnlyList<AbilityEntry> CardAbilities { get; set; } = [];
+    [Parameter] public IReadOnlyList<AbilityEntry> AlwaysActiveAbilities { get; set; } = [];
+    [Parameter] public IReadOnlyList<Stratagem> AlwaysActiveStrats { get; set; } = [];
+
+    [Parameter] public bool ShowDetachmentInCard { get; set; }
+    [Parameter] public bool ShowDetachmentAlways { get; set; }
+    [Parameter] public string? Detachment { get; set; }
+    [Parameter] public string? DetachmentRule { get; set; }
+
+    [Parameter] public IReadOnlyCollection<AbilityEntry> UsedAbilities { get; set; } = Array.Empty<AbilityEntry>();
+    [Parameter] public IReadOnlyCollection<Stratagem> UsedStratagems { get; set; } = Array.Empty<Stratagem>();
+
+    [Parameter] public AbilityEntry? FocusedAbility { get; set; }
+    [Parameter] public Stratagem? FocusedStratagem { get; set; }
+    [Parameter] public UnitEntry? FocusedStratagemUnit { get; set; }
+    [Parameter] public bool FocusedDetachmentRule { get; set; }
+    [Parameter] public EventCallback<bool> FocusedDetachmentRuleChanged { get; set; }
+
+    [Parameter] public EventCallback<AbilityEntry> OnToggleFocusAbility { get; set; }
+    [Parameter] public EventCallback<(Stratagem Strat, UnitEntry Unit)> OnToggleCardStratagem { get; set; }
+    [Parameter] public EventCallback<AbilityEntry> OnceAbilityPointerDown { get; set; }
+    [Parameter] public EventCallback<Stratagem> OnceStratagemPointerDown { get; set; }
+    [Parameter] public EventCallback OncePointerUp { get; set; }
+
+    [Parameter, EditorRequired] public Func<string, int> ParseCpCost { get; set; } = default!;
+
+    private Task ToggleDetachmentRule() => FocusedDetachmentRuleChanged.InvokeAsync(!FocusedDetachmentRule);
+}

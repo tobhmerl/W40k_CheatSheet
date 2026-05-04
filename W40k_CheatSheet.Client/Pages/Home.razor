@@ -187,9 +187,6 @@
                                 <span class="warlord-badge">⭐</span>
                             }
                             @{
-                                var blueStrats = headerStrats.Where(s => s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed).ToList();
-                                var redStrats = headerStrats.Where(s => s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue).ToList();
-                                var greenStrats = headerStrats.Where(s => s.TurnColor is StratagemTurn.Green).ToList();
                                 var hasStrats = abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0;
                             }
                             @if (hasStrats)
@@ -233,174 +230,29 @@
                             HasDetachmentPhasesConfigured && IsDetachmentAlwaysActive && !IsDetachmentHidden &&
                             !IsDetachmentRuleReflectedInStats;
                     }
-                    @if (!stratHiddenUnits.Contains(unit) && (abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0 || showDetachmentInCard || showDetachmentAlways))
-                    {
-                        <div class="strat-expand" @onclick:stopPropagation="true">
-                            <div class="strat-expand-main">
-                            @if (showDetachmentInCard || abilityCount > 0)
-                            {
-                                <div class="strat-expand-list">
-                                    @if (showDetachmentInCard)
-                                    {
-                                        <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded" : "")">
-                                            <span class="strat-expand-item strat-cell-ability" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">⚔ @army!.Detachment</span>
-                                            @if (focusedDetachmentRule)
-                                            {
-                                                <div class="strat-expand-desc">@army.DetachmentRule</div>
-                                            }
-                                        </div>
-                                    }
-                                    @foreach (var a in GetCardAbilities(unit))
-                                    {
-                                        if (usedAbilities.Contains(a)) { continue; }
-                                        <div class="strat-expand-entry @(focusedAbility == a ? "expanded" : "")">
-                                            <span class="strat-expand-item strat-cell-ability" @onclick="() => ToggleFocusAbility(a)"
-                                                  @onpointerdown="() => OnceAbilityPointerDown(a)"
-                                                  @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                  @oncontextmenu:preventDefault>@a.Name</span>
-                                            @if (focusedAbility == a)
-                                            {
-                                                <div class="strat-expand-desc">@a.Description</div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            }
-                            @{
-                                var blueRedStrats = headerStrats.Where(s => s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed or StratagemTurn.Red or StratagemTurn.RedBlue).ToList();
-                            }
-                            @if (blueRedStrats.Count > 0)
-                            {
-                                @if (abilityCount > 0)
-                                {
-                                    <div class="strat-expand-divider"></div>
-                                }
-                                <div class="strat-expand-list">
-                                    @foreach (var s in blueRedStrats)
-                                    {
-                                        if (usedStratagems.Contains(s)) { continue; }
-                                        <div class="strat-expand-entry @(focusedStratagem == s && focusedStratagemUnit == unit ? (s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "expanded-blue" : "expanded-red") : "")">
-                                            <span class="strat-expand-item @(s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "strat-cell-blue" : "strat-cell-red")" @onclick="() => ToggleCardStratagem(s, unit)"
-                                                  @onpointerdown="() => OnceStratagemPointerDown(s)"
-                                                  @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                  @oncontextmenu:preventDefault>@s.Name</span> @if (ParseCpCost(s.Cost) > 1) { <span class="strat-cost-inline">@s.Cost</span> }
-                                            @if (focusedStratagem == s && focusedStratagemUnit == unit)
-                                            {
-                                                <div class="strat-expand-desc">
-                                                    <div>@s.Effect</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(s.FullWhen) ? s.FullWhen : s.When)</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(s.FullTarget) ? s.FullTarget : s.Target)</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(s.FullEffect) ? s.FullEffect : s.Effect)</div>
-                                                    @if (!string.IsNullOrEmpty(s.FullRestriction) || !string.IsNullOrEmpty(s.Restriction))
-                                                    {
-                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(s.FullRestriction) ? s.FullRestriction : s.Restriction)</div>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            }
-                            @if (greenStrats.Count > 0)
-                            {
-                                @if (blueRedStrats.Count > 0 || abilityCount > 0)
-                                {
-                                    <div class="strat-expand-divider"></div>
-                                }
-                                <div class="strat-expand-list">
-                                    @foreach (var g in greenStrats)
-                                    {
-                                        if (usedStratagems.Contains(g)) { continue; }
-                                        <div class="strat-expand-entry @(focusedStratagem == g && focusedStratagemUnit == unit ? "expanded-green" : "")">
-                                            <span class="strat-expand-item strat-cell-green" @onclick="() => ToggleCardStratagem(g, unit)"
-                                                  @onpointerdown="() => OnceStratagemPointerDown(g)"
-                                                  @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                  @oncontextmenu:preventDefault>@g.Name</span> @if (ParseCpCost(g.Cost) > 1) { <span class="strat-cost-inline">@g.Cost</span> }
-                                            @if (focusedStratagem == g && focusedStratagemUnit == unit)
-                                            {
-                                                <div class="strat-expand-desc">
-                                                    <div>@g.Effect</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(g.FullWhen) ? g.FullWhen : g.When)</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(g.FullTarget) ? g.FullTarget : g.Target)</div>
-                                                    <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(g.FullEffect) ? g.FullEffect : g.Effect)</div>
-                                                    @if (!string.IsNullOrEmpty(g.FullRestriction) || !string.IsNullOrEmpty(g.Restriction))
-                                                    {
-                                                        <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(g.FullRestriction) ? g.FullRestriction : g.Restriction)</div>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            }
-                            </div>
-                            @{
-                                var hasRightContent = alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0;
-                            }
-                            @if (hasRightContent)
-                            {
-                                <div class="strat-expand-always">
-                                    <div class="strat-expand-list">
-                                        @foreach (var s in alwaysActiveStrats)
-                                        {
-                                            if (usedStratagems.Contains(s)) { continue; }
-                                            var sColor = s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "strat-cell-blue"
-                                                       : s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue ? "strat-cell-red"
-                                                       : "strat-cell-green";
-                                            var sExpCss = focusedStratagem == s && focusedStratagemUnit == unit
-                                                ? (s.TurnColor is StratagemTurn.Blue or StratagemTurn.BlueRed ? "expanded-blue"
-                                                   : s.TurnColor is StratagemTurn.Red or StratagemTurn.RedBlue ? "expanded-red"
-                                                   : "expanded-green")
-                                                : "";
-                                            <div class="strat-expand-entry @sExpCss">
-                                                <span class="strat-expand-item @sColor" @onclick="() => ToggleCardStratagem(s, unit)"
-                                                      @onpointerdown="() => OnceStratagemPointerDown(s)"
-                                                      @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                      @oncontextmenu:preventDefault>[@s.Name]</span> @if (ParseCpCost(s.Cost) > 1) { <span class="strat-cost-inline">@s.Cost</span> }
-                                                @if (focusedStratagem == s && focusedStratagemUnit == unit)
-                                                {
-                                                    <div class="strat-expand-desc">
-                                                        <div>@s.Effect</div>
-                                                        <div class="card-strat-field"><span class="card-strat-label">When:</span> @(!string.IsNullOrEmpty(s.FullWhen) ? s.FullWhen : s.When)</div>
-                                                        <div class="card-strat-field"><span class="card-strat-label">Target:</span> @(!string.IsNullOrEmpty(s.FullTarget) ? s.FullTarget : s.Target)</div>
-                                                        <div class="card-strat-field"><span class="card-strat-label">Effect:</span> @(!string.IsNullOrEmpty(s.FullEffect) ? s.FullEffect : s.Effect)</div>
-                                                        @if (!string.IsNullOrEmpty(s.FullRestriction) || !string.IsNullOrEmpty(s.Restriction))
-                                                        {
-                                                            <div class="card-strat-field"><span class="card-strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(s.FullRestriction) ? s.FullRestriction : s.Restriction)</div>
-                                                        }
-                                                    </div>
-                                                }
-                                            </div>
-                                        }
-                                        @foreach (var aa in alwaysActiveAbilities)
-                                        {
-                                            if (usedAbilities.Contains(aa)) { continue; }
-                                            <div class="strat-expand-entry @(focusedAbility == aa ? "expanded" : "")">
-                                                <span class="strat-expand-item strat-cell-ability" @onclick="() => ToggleFocusAbility(aa)"
-                                                      @onpointerdown="() => OnceAbilityPointerDown(aa)"
-                                                      @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                                                      @oncontextmenu:preventDefault>[@aa.Name]</span>
-                                                @if (focusedAbility == aa)
-                                                {
-                                                    <div class="strat-expand-desc">@aa.Description</div>
-                                                }
-                                            </div>
-                                        }
-                                        @if (showDetachmentAlways)
-                                        {
-                                            <div class="strat-expand-entry @(focusedDetachmentRule ? "expanded" : "")">
-                                                <span class="strat-expand-item strat-cell-ability" @onclick="() => focusedDetachmentRule = !focusedDetachmentRule">[⚔ @army!.Detachment]</span>
-                                                @if (focusedDetachmentRule)
-                                                {
-                                                    <div class="strat-expand-desc">@army.DetachmentRule</div>
-                                                }
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
+                    <UnitCardStratExpand Unit="unit"
+                                         StratHidden="stratHiddenUnits.Contains(unit)"
+                                         AbilityCount="abilityCount"
+                                         HeaderStrats="headerStrats"
+                                         CardAbilities="GetCardAbilities(unit)"
+                                         AlwaysActiveAbilities="alwaysActiveAbilities"
+                                         AlwaysActiveStrats="alwaysActiveStrats"
+                                         ShowDetachmentInCard="showDetachmentInCard"
+                                         ShowDetachmentAlways="showDetachmentAlways"
+                                         Detachment="@army?.Detachment"
+                                         DetachmentRule="@army?.DetachmentRule"
+                                         UsedAbilities="usedAbilities"
+                                         UsedStratagems="usedStratagems"
+                                         FocusedAbility="focusedAbility"
+                                         FocusedStratagem="focusedStratagem"
+                                         FocusedStratagemUnit="focusedStratagemUnit"
+                                         @bind-FocusedDetachmentRule="focusedDetachmentRule"
+                                         OnToggleFocusAbility="ToggleFocusAbility"
+                                         OnToggleCardStratagem="ToggleCardStratagemTuple"
+                                         OnceAbilityPointerDown="OnceAbilityPointerDown"
+                                         OnceStratagemPointerDown="OnceStratagemPointerDown"
+                                         OncePointerUp="OncePointerUp"
+                                         ParseCpCost="ParseCpCost" />
 
                     @if (!playMode && unit.AttachedLeaders.Count > 0)
                     {
@@ -1483,6 +1335,9 @@
         }
         stratDetailsZoomed = false;
     }
+
+    private void ToggleCardStratagemTuple((Stratagem Strat, UnitEntry Unit) args)
+        => ToggleCardStratagem(args.Strat, args.Unit);
 
     private List<Stratagem> AllOverviewStratagems
     {
