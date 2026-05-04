@@ -1019,10 +1019,8 @@
                     }
                     else
                     {
-                    @foreach (var strat in FilteredStratagems)
+                    @foreach (var strat in AllOverviewStratagems)
                     {
-                        var canUse = CanFocusedUnitUse(strat);
-                        if (HasUnitFocus && !canUse) { continue; }
                         var stUsed = usedStratagems.Contains(strat);
                         <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "") @(stUsed ? "once-used" : "")"
                              @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true"
@@ -1182,12 +1180,9 @@
                         </div>
                     }
 
-                    @* ── All abilities grouped by unit (no turn/phase filtering) ── *@
+                    @* ── All abilities grouped by unit (no filtering — reference only) ── *@
                     @foreach (var entry in PanelUnits)
                     {
-                        var isOtherFocused = (focusedStatOwner is not null && focusedCard != entry.Unit) ||
-                                             (focusedUnit is not null && focusedUnit != entry.Unit);
-                        if (isOtherFocused) { continue; }
 
                         var allAbilities = entry.Abilities.ToList();
                         if (allAbilities.Count == 0) { continue; }
@@ -2216,6 +2211,23 @@
             focusedExtraAbility = null;
         else
             focusedExtraAbility = (unit, label, description);
+    }
+
+    private List<Stratagem> AllOverviewStratagems
+    {
+        get
+        {
+            var detachment = army?.Detachment ?? "";
+            return CoreStratagems.All
+                .Where(s => string.IsNullOrEmpty(s.Detachment) ||
+                            s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
+                .Where(s => !IsDisabledStratagem(s))
+                .OrderBy(s => LowestPhaseOrder(s))
+                .ThenBy(s => TurnColorOrder(s.TurnColor))
+                .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
+                .ThenBy(s => s.Name)
+                .ToList();
+        }
     }
 
     private List<Stratagem> FilteredStratagems
