@@ -1,7 +1,7 @@
 @if (UnitIsLeader && !HasAttached)
 {
     <button class="attach-link" @onclick="() => OnStartAttach.InvokeAsync()" @onclick:stopPropagation="true">
-        ⛓ Attach to unit
+        <span class="icon-symbol">⛓</span> Attach to unit
     </button>
 }
 

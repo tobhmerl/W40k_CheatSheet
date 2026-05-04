@@ -2,6 +2,11 @@ html {
     font-size: 16px;
 }
 
+/* Unified icon symbol color — muted amber/gold, low-key but distinct */
+.icon-symbol {
+    color: #b08d57;
+}
+
 @media (min-width: 768px) {
     html {
         font-size: 18px;

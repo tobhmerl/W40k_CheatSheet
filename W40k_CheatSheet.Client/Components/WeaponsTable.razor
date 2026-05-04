@@ -6,7 +6,7 @@
         <table class="weapons-table">
             <thead class="weapon-section-header" @onclick="OnToggleSection" @onclick:stopPropagation="true">
                 <tr>
-                    <th>@Title <span class="weapon-collapse-icon">@(Expanded ? "▾" : "▸")</span></th>
+                    <th><span class="icon-symbol">@Title.Split(' ')[0]</span> @string.Join(' ', Title.Split(' ').Skip(1)) <span class="weapon-collapse-icon">@(Expanded ? "▾" : "▸")</span></th>
                     <th>Rng</th><th>A</th><th>@SkillLabel</th><th>S</th><th>AP</th><th>D</th>
                 </tr>
             </thead>

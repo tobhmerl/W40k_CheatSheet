@@ -2,7 +2,7 @@
 
 <div id="stratagems-panel" class="stratagems-panel">
     <div class="stratagems-panel-header" @onclick="ToggleOpen">
-        <span>⚑ @(!PlayMode ? "Configure Stratagems" : "Stratagems Overview")</span>
+        <span><span class="icon-symbol">⚑</span> @(!PlayMode ? "Configure Stratagems" : "Stratagems Overview")</span>
         <span class="collapse-icon">@(IsOpen ? "â–¾" : "â–¸")</span>
     </div>
     @if (IsOpen)

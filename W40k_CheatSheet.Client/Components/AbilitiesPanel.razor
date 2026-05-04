@@ -2,7 +2,7 @@
 
 <div id="abilities-panel" class="abilities-panel">
     <div class="abilities-panel-header" @onclick="ToggleOpen">
-        <span>⚜ @(!PlayMode ? "Configure Abilities" : "Abilities Overview")</span>
+        <span><span class="icon-symbol">⚜</span> @(!PlayMode ? "Configure Abilities" : "Abilities Overview")</span>
         <span class="collapse-icon">@(IsOpen ? "â–¾" : "â–¸")</span>
     </div>
     @if (IsOpen)
