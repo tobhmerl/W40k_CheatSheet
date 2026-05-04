@@ -954,6 +954,9 @@
                 <div class="stratagems-panel-body">
                     @if (!playMode)
                     {
+                        <div class="setup-wipe-row">
+                            <button class="wipe-btn" @onclick="WipeAllStratagemConfigs">🗑 Reset all stratagem checkboxes</button>
+                        </div>
                         @* ── Setup mode: all stratagems with config checkboxes ── *@
                         var sDetachment = army!.Detachment ?? "";
                         var allStrats = CoreStratagems.All
@@ -1069,6 +1072,9 @@
                 <div class="abilities-panel-body">
                     @if (!playMode)
                     {
+                        <div class="setup-wipe-row">
+                            <button class="wipe-btn" @onclick="WipeAllAbilityConfigs">🗑 Reset all ability checkboxes</button>
+                        </div>
                         @* ── Setup mode: detachment rule config ── *@
                         @if (!string.IsNullOrEmpty(army!.DetachmentRule))
                         {
@@ -2779,7 +2785,17 @@
             army = parser.Parse(rawJson);
             activeDetachmentEffects = await DetachmentEffects.GetEffectsForDetachment(army.Detachment);
             abilityConfigs.Clear();
+            // Preserve core stratagem configs (no detachment) across imports
+            var coreStratNames = CoreStratagems.All
+                .Where(s => string.IsNullOrEmpty(s.Detachment))
+                .Select(s => s.Name)
+                .ToHashSet();
+            var preservedCoreStrats = stratagemConfigs
+                .Where(kv => coreStratNames.Contains(kv.Key))
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
             stratagemConfigs.Clear();
+            foreach (var (k, v) in preservedCoreStrats)
+                stratagemConfigs[k] = v;
             detachmentConfig = new DetachmentSetupEntry();
             InitAbilityConfigs();
             InitStratagemConfigs();
@@ -3882,6 +3898,20 @@
                 JsonSerializer.Serialize(abilityConfigs));
         }
         catch { }
+    }
+
+    private async Task WipeAllAbilityConfigs()
+    {
+        foreach (var key in abilityConfigs.Keys.ToList())
+            abilityConfigs[key] = new AbilitySetupEntry();
+        await SaveAbilityConfigs();
+    }
+
+    private async Task WipeAllStratagemConfigs()
+    {
+        foreach (var key in stratagemConfigs.Keys.ToList())
+            stratagemConfigs[key] = new StratagemSetupEntry();
+        await SaveStratagemConfigs();
     }
 
     private async Task SaveDetachmentConfig()

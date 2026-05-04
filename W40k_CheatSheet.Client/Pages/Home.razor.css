@@ -2969,6 +2969,28 @@
     margin-bottom: 0.5rem;
 }
 
+/* Setup wipe buttons */
+.setup-wipe-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+.wipe-btn {
+    background: rgba(233, 69, 96, 0.1);
+    border: 1px solid #e94560;
+    color: #e94560;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.wipe-btn:hover {
+    background: rgba(233, 69, 96, 0.25);
+}
+
 /* Inline reset-filters in unit-jump-buttons */
 .corner-btn.reset-filters.inline {
     font-size: 0.6rem;
