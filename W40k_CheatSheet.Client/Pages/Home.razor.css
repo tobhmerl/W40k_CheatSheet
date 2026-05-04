@@ -2961,6 +2961,24 @@
     color: #ccc;
 }
 
+/* Top action buttons (duplicated from footer) */
+.top-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Inline reset-filters in unit-jump-buttons */
+.corner-btn.reset-filters.inline {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    height: auto;
+    width: auto;
+    min-width: unset;
+}
+
 /* Footer action buttons (setup, save, home) */
 .footer-actions {
     display: flex;

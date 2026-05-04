@@ -159,6 +159,19 @@
             </div>
         }
 
+        <div class="top-actions">
+            <button class="corner-btn play @(playMode ? "active" : "")" @onclick="TogglePlayMode">@(playMode ? "☰" : "⚔")</button>
+            @if (!playMode)
+            {
+                <button class="corner-btn save @(saveTick ? "tick" : "")" @onclick="SaveCurrentArmy">@(saveTick ? "✓" : "💾")</button>
+            }
+            @if (playMode)
+            {
+                <button class="corner-btn reset-filters" @onclick="ResetAllFilters" title="Remove all filters">✕</button>
+            }
+            <button class="corner-btn home" @onclick="ClearRoster">⌂</button>
+        </div>
+
         <div id="roster-top" class="roster-header">
             <h1>@army.Name</h1>
             <div class="turn-buttons">
@@ -243,6 +256,7 @@
             @if (playMode)
             {
                 <button class="unit-jump-btn toggle-all" @onclick="ToggleAllUnits">@(visiblePlayUnits.Count == AliveUnits.Count ? "⊘" : "✦")</button>
+                <button class="corner-btn reset-filters inline" @onclick="ResetAllFilters" title="Remove all filters">✕</button>
             }
             @foreach (var u in AliveUnits)
             {
