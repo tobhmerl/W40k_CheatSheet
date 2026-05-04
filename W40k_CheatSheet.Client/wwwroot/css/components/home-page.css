@@ -1,4 +1,4 @@
-﻿.roster-app {
+.roster-app {
     max-width: 1100px;
     margin: 0 auto;
     padding: 1.5rem 0.5rem 2.5rem 0.5rem;
@@ -6,14 +6,14 @@
     position: relative;
 }
 
-/* Top-left login corner + top-right corner action buttons â€”
+/* Top-left login corner + top-right corner action buttons —
    moved to wwwroot/css/components/corner-ui.css */
 
 /* Login dropdown / cloud auth form (.cloud-input / .cloud-btn / .cloud-error)
    also moved to corner-ui.css since the markup now lives in
    Components/LoginCorner.razor. */
 
-/* Welcome / import card + saved-armies â€” moved to
+/* Welcome / import card + saved-armies — moved to
    wwwroot/css/components/welcome-hero.css */
 
 /* Ability Setup + Stratagem Setup pages — moved to
@@ -21,12 +21,12 @@
 
 
 /* ============================================================
-   Pre-Game Reminders banner â€” moved to
+   Pre-Game Reminders banner — moved to
    wwwroot/css/components/pregame-banner.css
    ============================================================ */
 
 
-/* Import / welcome screen â€” moved to
+/* Import / welcome screen — moved to
    wwwroot/css/components/welcome-hero.css */
 
 /* Turn filter buttons */
@@ -105,7 +105,7 @@
     color: #00b4d8;
 }
 
-/* .error-msg â€” moved to wwwroot/css/components/welcome-hero.css */
+/* .error-msg — moved to wwwroot/css/components/welcome-hero.css */
 
 /* Roster header */
 .roster-header {
@@ -218,7 +218,7 @@
     letter-spacing: 0.2px;
 }
 
-/* â”€â”€ each ability is a card â€” identical base to .strat-item â”€â”€ */
+/* ── each ability is a card — identical base to .strat-item ── */
 .abilities-panel-item {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid #2a2a2a;
@@ -232,7 +232,7 @@
     border-color: #444;
 }
 
-/* â”€â”€ name: always visible â€” mirrors .strat-name â”€â”€ */
+/* ── name: always visible — mirrors .strat-name ── */
 .ability-name {
     display: block;
     font-size: 0.75rem;
@@ -240,7 +240,7 @@
     color: #ccc;
 }
 
-/* â”€â”€ description: always visible â€” mirrors .strat-field â”€â”€ */
+/* ── description: always visible — mirrors .strat-field ── */
 .ability-desc {
     font-size: 0.65rem;
     line-height: 1.5;
@@ -249,19 +249,19 @@
     transition: all 0.2s ease;
 }
 
-/* â”€â”€ expanded (zoomed): mirrors .strat-item.zoomed â”€â”€ */
+/* ── expanded (zoomed): mirrors .strat-item.zoomed ── */
 .abilities-panel-item.expanded {
     background: rgba(0, 180, 216, 0.06);
     border-color: #00b4d8;
 }
 
-/* â”€â”€ expanded name: mirrors .strat-item.zoomed .strat-name â”€â”€ */
+/* ── expanded name: mirrors .strat-item.zoomed .strat-name ── */
 .abilities-panel-item.expanded .ability-name {
     color: #00b4d8;
     font-size: 0.85rem;
 }
 
-/* â”€â”€ expanded desc: mirrors .strat-details.zoomed .strat-field â”€â”€ */
+/* ── expanded desc: mirrors .strat-details.zoomed .strat-field ── */
 .abilities-panel-item.expanded .ability-desc {
     font-size: 0.9rem;
     line-height: 1.6;
@@ -525,7 +525,7 @@
     letter-spacing: 0.3px;
 }
 
-/* Score tracker (CP counter + scores) â€” moved to
+/* Score tracker (CP counter + scores) — moved to
    wwwroot/css/components/score-tracker.css */
 
 /* Play mode */
@@ -839,7 +839,7 @@
     border-style: dashed;
 }
 
-/* Grid â€” responsive auto-fill columns */
+/* Grid — responsive auto-fill columns */
 .unit-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -896,7 +896,7 @@
     box-shadow: 0 0 10px rgba(0, 180, 216, 0.35);
 }
 
-/* Unit header â€” clickable for collapse/expand */
+/* Unit header — clickable for collapse/expand */
 .unit-header {
     display: flex;
     justify-content: space-between;
@@ -1216,7 +1216,7 @@
     background: rgba(233, 69, 96, 0.22);
 }
 
-/* Unit body â€” collapsible content */
+/* Unit body — collapsible content */
 .unit-body {
     margin-top: 0.3rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1319,7 +1319,7 @@
 }
 
 /* Inline ability + stratagem setup checkboxes (rendered inside unit cards
-   in setup mode) and detachment-effect sub-rows â€” moved to
+   in setup mode) and detachment-effect sub-rows — moved to
    wwwroot/css/components/setup-page.css */
 
 /* In-card stratagems */
@@ -1898,7 +1898,7 @@
     color: #ff6b6b;
 }
 
-/* Stat row â€” clickable to highlight owned weapons */
+/* Stat row — clickable to highlight owned weapons */
 .stat-row {
     cursor: pointer;
     transition: all 0.15s ease;
@@ -1999,7 +1999,7 @@
     margin-bottom: 0.5rem;
 }
 
-/* Setup wipe buttons (.setup-wipe-row / .wipe-btn) â€” moved to
+/* Setup wipe buttons (.setup-wipe-row / .wipe-btn) — moved to
    wwwroot/css/components/setup-page.css */
 
 /* Inline reset-filters in unit-jump-buttons */
@@ -2041,11 +2041,11 @@
     color: #666;
 }
 
-/* Changelog modal â€” moved to wwwroot/css/components/changelog.css
+/* Changelog modal — moved to wwwroot/css/components/changelog.css
    so it can be reused outside the Home page without dragging the rest
    of this stylesheet along. */
 
-/* â”€â”€ Light mode: abilities panel â€” mirrors light strat-item â”€â”€ */
+/* ── Light mode: abilities panel — mirrors light strat-item ── */
 .roster-app.light .abilities-panel-item {
     background: #f9fafb;
     border-color: #e5e7eb;

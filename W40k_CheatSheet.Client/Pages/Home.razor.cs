@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -52,7 +52,7 @@ public partial class Home : ComponentBase
     private bool playMode;
     private bool setupConfirmed;
     private bool stratagemSetupConfirmed;
-    // â”€â”€ Setup state is owned by RosterStateService; these aliases keep existing call sites working. â”€â”€
+    // ── Setup state is owned by RosterStateService; these aliases keep existing call sites working. ──
     private Dictionary<string, StratagemSetupEntry> stratagemConfigs => RosterState.StratagemConfigs;
     private Dictionary<string, AbilitySetupEntry> abilityConfigs => RosterState.AbilityConfigs;
     private DetachmentSetupEntry detachmentConfig
@@ -60,9 +60,9 @@ public partial class Home : ComponentBase
         get => RosterState.DetachmentConfig;
         set => RosterState.SetDetachmentConfig(value);
     }
-    // Per detachment effect (keyed by "<detachment>::<index>") â€” explicit opt-in for "Apply to stats directly"
+    // Per detachment effect (keyed by "<detachment>::<index>") — explicit opt-in for "Apply to stats directly"
     private Dictionary<string, DetachmentEffectSetupEntry> detachmentEffectConfigs => RosterState.DetachmentEffectConfigs;
-    // Per army rule (keyed by rule name) â€” explicit opt-in for visibility/turn/phase/stats
+    // Per army rule (keyed by rule name) — explicit opt-in for visibility/turn/phase/stats
     private Dictionary<string, ArmyRuleSetupEntry> armyRuleConfigs => RosterState.ArmyRuleConfigs;
     private readonly HashSet<string> focusedDetachmentEffects = new(StringComparer.Ordinal);
     private readonly HashSet<string> focusedArmyRules = new(StringComparer.Ordinal);
@@ -101,7 +101,7 @@ public partial class Home : ComponentBase
         set => RosterState.SetActiveDetachmentEffects(value);
     }
 
-    // â”€â”€ Cloud sync fields â”€â”€
+    // ── Cloud sync fields ──
     private string? welcomeBg = null;
 
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
@@ -783,7 +783,7 @@ public partial class Home : ComponentBase
         bool opponentActing = description.Contains("your opponent", StringComparison.OrdinalIgnoreCase);
 
         // Strip references where "enemy" is just the TARGET (enemy unit/model), not the actor,
-        // then check if "you/your" appears â€” indicating it's YOUR ability
+        // then check if "you/your" appears — indicating it's YOUR ability
         var stripped = description
             .Replace("your opponent", "", StringComparison.OrdinalIgnoreCase)
             .Replace("enemy unit", "", StringComparison.OrdinalIgnoreCase)
@@ -795,9 +795,9 @@ public partial class Home : ComponentBase
                          stripped.Contains(" you,", StringComparison.OrdinalIgnoreCase) ||
                          stripped.Contains(" you.", StringComparison.OrdinalIgnoreCase);
 
-        // No clear indicator â†’ show for both turns
+        // No clear indicator → show for both turns
         if (!opponentActing && !youActing) return true;
-        // Appears in both contexts â†’ show for both turns
+        // Appears in both contexts → show for both turns
         if (opponentActing && youActing) return true;
 
         return turn switch
@@ -813,7 +813,7 @@ public partial class Home : ComponentBase
         var name = ability.Name;
         var desc = ability.Description;
 
-        // Skip leader auras â€” handled by the "add to unit" mechanism
+        // Skip leader auras — handled by the "add to unit" mechanism
         if (IsLeaderAuraDescription(desc))
             return false;
 
@@ -1020,10 +1020,10 @@ public partial class Home : ComponentBase
         var s = name;
         // Strip common prefixes
         s = s.Replace("Canoptek ", "", StringComparison.OrdinalIgnoreCase);
-        // Strip "the <Title>" suffixes: "Imotekh the Stormlord" â†’ "Imotekh"
+        // Strip "the <Title>" suffixes: "Imotekh the Stormlord" → "Imotekh"
         var theIdx = s.IndexOf(" the ", StringComparison.OrdinalIgnoreCase);
         if (theIdx > 0) s = s[..theIdx];
-        // 3+ words â†’ initials: "Lokhust Heavy Destroyer" â†’ "LHD"
+        // 3+ words → initials: "Lokhust Heavy Destroyer" → "LHD"
         var words = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (words.Length >= 3)
             s = string.Concat(words.Select(w => char.ToUpperInvariant(w[0])));
@@ -1433,7 +1433,7 @@ public partial class Home : ComponentBase
         }
     }
 
-    // â”€â”€ Stratagem setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Stratagem setup ──────────────────────────────────────────────────────
 
     private StratagemSetupEntry GetOrCreateStratConfig(Stratagem s)
     {
@@ -1530,7 +1530,7 @@ public partial class Home : ComponentBase
         catch { }
     }
 
-    // â”€â”€ Ability setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Ability setup ────────────────────────────────────────────────────────
 
     private static string AbilityKey(AbilityEntry a) => a.Name;
 
@@ -1562,7 +1562,7 @@ public partial class Home : ComponentBase
     // Both turns unchecked = explicitly hidden from the abilities panel
     private bool IsHiddenAbility(AbilityEntry a) => Resolver.IsHiddenAbility(a, abilityConfigs);
 
-    // "Apply to stats directly" â€” inject the keyword onto weapon rows / stats instead of just showing in the panel
+    // "Apply to stats directly" — inject the keyword onto weapon rows / stats instead of just showing in the panel
     private bool IsAddedToUnit(AbilityEntry a) => Resolver.IsAddedToUnit(a, abilityConfigs);
 
     // Check if an "added to unit" ability is visible given current turn/phase filters
@@ -1643,7 +1643,7 @@ public partial class Home : ComponentBase
     private static bool IsReflectableAsUnitStat(AbilityEntry a) =>
         ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderUnitKeyword(a) is not null || ParseLeaderCritModifier(a) is not null || ParseBearerKeyword(a) is not null;
 
-    // True only for abilities reflected on weapon rows or defensive stats (invuln, FnP, weapon keywords, crit) â€” NOT unit-level keywords or generic auras
+    // True only for abilities reflected on weapon rows or defensive stats (invuln, FnP, weapon keywords, crit) — NOT unit-level keywords or generic auras
     private static bool IsReflectableAsWeaponOrDefStat(AbilityEntry a) =>
         ParseLeaderWeaponAbility(a) is not null || ParseLeaderDefensiveAura(a) is not null || ParseLeaderCritModifier(a) is not null;
 
@@ -1858,7 +1858,7 @@ public partial class Home : ComponentBase
         }
     }
 
-    // Keep this for weapon stats modification â€” data-driven via detachment_effects.json,
+    // Keep this for weapon stats modification — data-driven via detachment_effects.json,
     // but ONLY active when the user has opted in per effect via the setup checkbox.
     private bool IsDetachmentRuleReflectedInStats =>
         Resolver.IsDetachmentRuleReflectedInStats(army, activeDetachmentEffects, IsDetachmentEffectActive);
@@ -2030,7 +2030,7 @@ public partial class Home : ComponentBase
                     (target == WeaponTarget.Melee && isMelee) ||
                     (target == WeaponTarget.Ranged && !isMelee))
                 {
-                    sources.Add($"{leader.Name} â€” {ability.Name}");
+                    sources.Add($"{leader.Name} — {ability.Name}");
                     var kwDesc = LookupKeywordDescription(kw);
                     if (!string.IsNullOrEmpty(kwDesc))
                         kwDescs.Add($"{kw}: {kwDesc}");
@@ -2055,7 +2055,7 @@ public partial class Home : ComponentBase
                 if (target == WeaponTarget.Both ||
                     (target == WeaponTarget.Melee && isMelee) ||
                     (target == WeaponTarget.Ranged && !isMelee))
-                    return $"{leader.Name} â€” {ability.Name}";
+                    return $"{leader.Name} — {ability.Name}";
             }
         }
         return "";
@@ -2090,9 +2090,9 @@ public partial class Home : ComponentBase
                 if (parsed is null) continue;
                 var (type, _) = parsed.Value;
                 if (type == DefensiveAuraType.Invulnerable && string.IsNullOrEmpty(invulnSrc))
-                    invulnSrc = $"{leader.Name} â€” {ability.Name}";
+                    invulnSrc = $"{leader.Name} — {ability.Name}";
                 else if (type == DefensiveAuraType.FeelNoPain && string.IsNullOrEmpty(fnpSrc))
-                    fnpSrc = $"{leader.Name} â€” {ability.Name}";
+                    fnpSrc = $"{leader.Name} — {ability.Name}";
             }
         }
         return (invulnSrc, fnpSrc);
@@ -2193,7 +2193,7 @@ public partial class Home : ComponentBase
         return (invuln, fnp);
     }
 
-    // All main checkboxes checked â†’ "always active" group (shown regardless of phase filter)
+    // All main checkboxes checked → "always active" group (shown regardless of phase filter)
     private bool IsAlwaysActive(AbilityEntry a)
     {
         if (!abilityConfigs.TryGetValue(AbilityKey(a), out var c)) return false;
@@ -2318,7 +2318,7 @@ public partial class Home : ComponentBase
         catch { }
     }
 
-    // â”€â”€ Detachment-effect / army-rule setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Detachment-effect / army-rule setup ──────────────────────────────────
 
     private static string DetachmentEffectKey(string detachment, int idx) => $"{detachment}::{idx}";
 
@@ -2420,15 +2420,15 @@ public partial class Home : ComponentBase
         var cond = e.Condition switch
         {
             "always" => "",
-            "has_leader_character" => " â€” when led by a Character",
-            "charged" => " â€” when charged this turn",
-            "battle_shocked_and_charged" => " â€” when battle-shocked and charged",
-            _ => $" â€” {e.Condition}"
+            "has_leader_character" => " — when led by a Character",
+            "charged" => " — when charged this turn",
+            "battle_shocked_and_charged" => " — when battle-shocked and charged",
+            _ => $" — {e.Condition}"
         };
         return $"{sign}{e.Modifier} {stat}{weapon}{cond}";
     }
 
-    // â”€â”€ Saved armies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Saved armies ─────────────────────────────────────────────────────────
 
     private async Task LoadSavedArmiesIndex()
     {
@@ -2572,7 +2572,7 @@ public partial class Home : ComponentBase
         await JS.InvokeVoidAsync("localStorage.setItem", "saved-armies-index", JsonSerializer.Serialize(savedArmies));
     }
 
-    // â”€â”€ Cloud sync methods â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Cloud sync methods ──────────────────────────────────────────────────
 
     private async Task PrefillFromCloudConfigs()
     {

@@ -1,9 +1,9 @@
-﻿@using W40k_CheatSheet.Client.Models
+@using W40k_CheatSheet.Client.Models
 
 <div id="abilities-panel" class="abilities-panel">
     <div class="abilities-panel-header" @onclick="ToggleOpen">
         <span><span class="icon-symbol">⚜</span> @(!PlayMode ? "Configure Abilities" : "Abilities Overview")</span>
-        <span class="collapse-icon">@(IsOpen ? "â–¾" : "â–¸")</span>
+        <span class="collapse-icon">@(IsOpen ? "▾" : "▸")</span>
     </div>
     @if (IsOpen)
     {
@@ -13,11 +13,11 @@
                 <div class="setup-wipe-row">
                     <button class="wipe-btn" @onclick="OnWipeAllAbilityConfigs">ðŸ—‘ Reset all ability checkboxes</button>
                 </div>
-                @* â”€â”€ Setup mode: detachment rule config â”€â”€ *@
+                @* ── Setup mode: detachment rule config ── *@
                 @if (Army is not null && !string.IsNullOrEmpty(Army.DetachmentRule))
                 {
                     <div class="abilities-panel-unit">
-                        <div class="abilities-panel-unit-name">âš” Detachment: @Army.Detachment</div>
+                        <div class="abilities-panel-unit-name">⚔ Detachment: @Army.Detachment</div>
                         <div class="abilities-panel-item @(FocusedDetachmentRule ? "expanded" : "")"
                              @onclick="ToggleDetachmentRuleFocus" @onclick:stopPropagation="true">
                             <span class="ability-name">@Army.Detachment</span>
@@ -66,7 +66,7 @@
                                     {
                                         <div class="detachment-effect-item @(effCfg.ApplyToStats ? "added-to-unit" : "")"
                                              @onclick:stopPropagation="true">
-                                            <span class="ability-name">â†³ @DescribeDetachmentEffect!(eff)</span>
+                                            <span class="ability-name">↳ @DescribeDetachmentEffect!(eff)</span>
                                             <div class="setup-checks">
                                                 <div class="setup-checks-row">
                                                     <label class="setup-lbl unit-lbl" title="Apply this effect directly to weapon stats"><input type="checkbox" @bind="effCfg.ApplyToStats" @bind:after="saveDetachmentEffects" /> Apply to stats</label>
@@ -77,8 +77,8 @@
                                     else
                                     {
                                         <div class="detachment-effect-item" @onclick:stopPropagation="true">
-                                            <span class="ability-name">â†³ @DescribeDetachmentEffect!(eff)</span>
-                                            <span class="setup-lbl disabled-lbl">Reminder â€” shown in detachment rule text</span>
+                                            <span class="ability-name">↳ @DescribeDetachmentEffect!(eff)</span>
+                                            <span class="setup-lbl disabled-lbl">Reminder — shown in detachment rule text</span>
                                         </div>
                                     }
                                 }
@@ -87,7 +87,7 @@
                     </div>
                 }
 
-                @* â”€â”€ Setup mode: army (faction) rules â”€â”€ *@
+                @* ── Setup mode: army (faction) rules ── *@
                 @if (Army is not null && Army.ArmyRules.Count > 0)
                 {
                     <div class="abilities-panel-unit">
@@ -113,7 +113,7 @@
                     </div>
                 }
 
-                @* â”€â”€ Setup mode: all abilities by unit with config checkboxes â”€â”€ *@
+                @* ── Setup mode: all abilities by unit with config checkboxes ── *@
                 @if (Army is not null)
                 {
                     @foreach (var sUnit in Army.Units)
@@ -170,11 +170,11 @@
             }
             else
             {
-                @* â”€â”€ Detachment rule in abilities panel â”€â”€ *@
+                @* ── Detachment rule in abilities panel ── *@
                 @if (Army is not null && !string.IsNullOrEmpty(Army.DetachmentRule) && HasDetachmentPhasesConfigured)
                 {
                     <div class="abilities-panel-unit">
-                        <div class="abilities-panel-unit-name">âš” @Army.Detachment</div>
+                        <div class="abilities-panel-unit-name">⚔ @Army.Detachment</div>
                         <div class="abilities-panel-item @(FocusedDetachmentRule ? "expanded" : "")"
                              @onclick="ToggleDetachmentRuleFocus" @onclick:stopPropagation="true">
                             <span class="ability-name">@Army.Detachment</span>
@@ -183,7 +183,7 @@
                     </div>
                 }
 
-                @* â”€â”€ All abilities grouped by unit (no filtering â€” reference only) â”€â”€ *@
+                @* ── All abilities grouped by unit (no filtering — reference only) ── *@
                 @foreach (var entry in PanelUnits)
                 {
                     var allAbilities = entry.Abilities;

@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using W40k_CheatSheet.Client.Models
 @using W40k_CheatSheet.Client.Services
 @using System.Text.Json
@@ -11,7 +11,7 @@
 <PageTitle>Segmentum Ultima</PageTitle>
 
 <div class="roster-app @FactionClass">
-    @* â”€â”€ Top-left login corner â”€â”€ *@
+    @* ── Top-left login corner ── *@
     <LoginCorner OnAuthChanged="OnAuthChanged" />
 
     @if (!loaded)

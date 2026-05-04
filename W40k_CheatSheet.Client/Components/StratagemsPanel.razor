@@ -1,9 +1,9 @@
-﻿@using W40k_CheatSheet.Client.Models
+@using W40k_CheatSheet.Client.Models
 
 <div id="stratagems-panel" class="stratagems-panel">
     <div class="stratagems-panel-header" @onclick="ToggleOpen">
         <span><span class="icon-symbol">⚑</span> @(!PlayMode ? "Configure Stratagems" : "Stratagems Overview")</span>
-        <span class="collapse-icon">@(IsOpen ? "â–¾" : "â–¸")</span>
+        <span class="collapse-icon">@(IsOpen ? "▾" : "▸")</span>
     </div>
     @if (IsOpen)
     {
@@ -13,7 +13,7 @@
                 <div class="setup-wipe-row">
                     <button class="wipe-btn" @onclick="OnWipeAllStratagemConfigs">ðŸ—‘ Reset all stratagem checkboxes</button>
                 </div>
-                @* â”€â”€ Setup mode: all stratagems with config checkboxes â”€â”€ *@
+                @* ── Setup mode: all stratagems with config checkboxes ── *@
                 @foreach (var strat in AllSetupStratagems)
                 {
                     var sCfg = GetStratConfig!(strat);
