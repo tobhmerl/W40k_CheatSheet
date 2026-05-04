@@ -52,60 +52,19 @@
                     OnResetAllFilters="ResetAllFilters"
                     OnClearRoster="ClearRoster" />
 
-        <div id="roster-top" class="roster-header">
-            <h1>@army.Name</h1>
-            <div class="turn-buttons">
-                <button class="turn-btn my-turn @(activeTurn == TurnFilter.MyTurn ? "active" : "")" @onclick="() => ToggleTurn(TurnFilter.MyTurn)">My turn</button>
-                <button class="turn-btn enemy-turn @(activeTurn == TurnFilter.EnemyTurn ? "active" : "")" @onclick="() => ToggleTurn(TurnFilter.EnemyTurn)">Enemy turn</button>
-            </div>
-            <div class="phase-buttons">
-                <button class="phase-btn @(activePhase == GamePhase.Command ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Command)">Command</button>
-                <button class="phase-btn @(activePhase == GamePhase.Move ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Move)">Move</button>
-                <button class="phase-btn @(activePhase == GamePhase.Shoot ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Shoot)">Shoot</button>
-                <button class="phase-btn @(activePhase == GamePhase.Charge ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Charge)">Charge</button>
-                <button class="phase-btn @(activePhase == GamePhase.Fight ? "active" : "")" @onclick="() => TogglePhase(GamePhase.Fight)">Fight</button>
-            </div>
-            @if (!string.IsNullOrEmpty(army.DetachmentRule) && IsDetachmentReminderVisible)
-            {
-                <div class="detachment-rule">
-                    <strong>@army.Detachment:</strong> @army.DetachmentRule
-                    @if (!playMode)
-                    {
-                        <div class="setup-checks" style="margin-top:0.4rem" @onclick:stopPropagation="true">
-                            <div class="setup-checks-row" style="justify-content:center">
-                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyTurn" @bind:after="SaveDetachmentConfig" /> My</label>
-                                <label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyTurn" @bind:after="SaveDetachmentConfig" /> Enem</label>
-                                <label class="setup-lbl disable"><input type="checkbox" @bind="detachmentConfig.Reminder" @bind:after="SaveDetachmentConfig" /> Reminder</label>
-                            </div>
-                            <div class="setup-checks-row" style="justify-content:center">
-                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Command" @bind:after="SaveDetachmentConfig" /> Cmd</label>
-                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Move" @bind:after="SaveDetachmentConfig" /> Mov</label>
-                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Shoot" @bind:after="SaveDetachmentConfig" /> Sht</label>
-                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Charge" @bind:after="SaveDetachmentConfig" /> Chg</label>
-                                <label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.Fight" @bind:after="SaveDetachmentConfig" /> Fgt</label>
-                            </div>
-                            @if (detachmentConfig.Command || detachmentConfig.Move || detachmentConfig.Shoot || detachmentConfig.Charge || detachmentConfig.Fight)
-                            {
-                                <div class="setup-checks-row" style="justify-content:center">
-                                    @if (detachmentConfig.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyCommand" @bind:after="SaveDetachmentConfig" /> eCmd</label>}
-                                    @if (detachmentConfig.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyMove" @bind:after="SaveDetachmentConfig" /> eMov</label>}
-                                    @if (detachmentConfig.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyShoot" @bind:after="SaveDetachmentConfig" /> eSht</label>}
-                                    @if (detachmentConfig.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyCharge" @bind:after="SaveDetachmentConfig" /> eChg</label>}
-                                    @if (detachmentConfig.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="detachmentConfig.EnemyFight" @bind:after="SaveDetachmentConfig" /> eFgt</label>}
-                                </div>
-                                <div class="setup-checks-row" style="justify-content:center">
-                                    @if (detachmentConfig.Command){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyCommand" @bind:after="SaveDetachmentConfig" /> myCmd</label>}
-                                    @if (detachmentConfig.Move){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyMove" @bind:after="SaveDetachmentConfig" /> myMov</label>}
-                                    @if (detachmentConfig.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyShooting" @bind:after="SaveDetachmentConfig" /> mySht</label>}
-                                    @if (detachmentConfig.Charge){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyCharge" @bind:after="SaveDetachmentConfig" /> myChg</label>}
-                                    @if (detachmentConfig.Fight){<label class="setup-lbl"><input type="checkbox" @bind="detachmentConfig.MyFight" @bind:after="SaveDetachmentConfig" /> myFgt</label>}
-                                </div>
-                            }
-                        </div>
-                    }
-                </div>
-            }
-        </div>
+        <RosterHeader ArmyName="@army.Name"
+                      Detachment="@army.Detachment"
+                      DetachmentRule="@army.DetachmentRule"
+                      DetachmentReminderVisible="IsDetachmentReminderVisible"
+                      MyTurnActive="activeTurn == TurnFilter.MyTurn"
+                      EnemyTurnActive="activeTurn == TurnFilter.EnemyTurn"
+                      ActivePhase="activePhase"
+                      PlayMode="playMode"
+                      DetachmentConfig="detachmentConfig"
+                      OnToggleMyTurn="() => ToggleTurn(TurnFilter.MyTurn)"
+                      OnToggleEnemyTurn="() => ToggleTurn(TurnFilter.EnemyTurn)"
+                      OnTogglePhase="TogglePhase"
+                      OnSaveDetachmentConfig="SaveDetachmentConfig" />
 
         @if (playMode && !preGameDismissed)
         {
@@ -1142,20 +1101,10 @@
                           @bind-AggressorSecondary="aggressorSecondary" />
         }
 
-        <div class="roster-footer">
-            <hr class="footer-divider" />
-            <div class="roster-meta">
-                @if (!string.IsNullOrEmpty(army.Faction))
-                {
-                    <span class="meta-badge faction">@army.Faction</span>
-                }
-                @if (!string.IsNullOrEmpty(army.Detachment))
-                {
-                    <span class="meta-badge detachment">@army.Detachment</span>
-                }
-                <span class="meta-badge points">@army.TotalPoints / @army.PointLimit pts</span>
-            </div>
-        </div>
+        <RosterFooter Faction="@army.Faction"
+                      Detachment="@army.Detachment"
+                      TotalPoints="army.TotalPoints"
+                      PointLimit="army.PointLimit" />
     }
     <TopActions WrapperClass="footer-actions"
                 PlayMode="playMode"

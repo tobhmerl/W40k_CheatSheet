@@ -1,0 +1,26 @@
+@* ──────────────────────────────────────────────────────────────
+   Bottom-of-roster meta badges: faction, detachment, points.
+   Pure presentation.
+   ────────────────────────────────────────────────────────────── *@
+
+<div class="roster-footer">
+    <hr class="footer-divider" />
+    <div class="roster-meta">
+        @if (!string.IsNullOrEmpty(Faction))
+        {
+            <span class="meta-badge faction">@Faction</span>
+        }
+        @if (!string.IsNullOrEmpty(Detachment))
+        {
+            <span class="meta-badge detachment">@Detachment</span>
+        }
+        <span class="meta-badge points">@TotalPoints / @PointLimit pts</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Faction { get; set; }
+    [Parameter] public string? Detachment { get; set; }
+    [Parameter] public int TotalPoints { get; set; }
+    [Parameter] public int PointLimit { get; set; }
+}

@@ -1,0 +1,84 @@
+@* ──────────────────────────────────────────────────────────────
+   Roster header: army name, turn buttons, phase buttons, and the
+   detachment-rule reminder banner (with the inline detachment
+   setup-checks shown in setup mode). Pure presentation; the
+   parent owns activeTurn / activePhase / detachmentConfig and
+   exposes save and toggle callbacks.
+   ────────────────────────────────────────────────────────────── *@
+
+@using W40k_CheatSheet.Client.Models
+
+<div id="roster-top" class="roster-header">
+    <h1>@ArmyName</h1>
+    <div class="turn-buttons">
+        <button class="turn-btn my-turn @(MyTurnActive ? "active" : "")" @onclick="OnToggleMyTurn">My turn</button>
+        <button class="turn-btn enemy-turn @(EnemyTurnActive ? "active" : "")" @onclick="OnToggleEnemyTurn">Enemy turn</button>
+    </div>
+    <div class="phase-buttons">
+        <button class="phase-btn @(ActivePhase == GamePhase.Command ? "active" : "")" @onclick="() => OnTogglePhase.InvokeAsync(GamePhase.Command)">Command</button>
+        <button class="phase-btn @(ActivePhase == GamePhase.Move ? "active" : "")" @onclick="() => OnTogglePhase.InvokeAsync(GamePhase.Move)">Move</button>
+        <button class="phase-btn @(ActivePhase == GamePhase.Shoot ? "active" : "")" @onclick="() => OnTogglePhase.InvokeAsync(GamePhase.Shoot)">Shoot</button>
+        <button class="phase-btn @(ActivePhase == GamePhase.Charge ? "active" : "")" @onclick="() => OnTogglePhase.InvokeAsync(GamePhase.Charge)">Charge</button>
+        <button class="phase-btn @(ActivePhase == GamePhase.Fight ? "active" : "")" @onclick="() => OnTogglePhase.InvokeAsync(GamePhase.Fight)">Fight</button>
+    </div>
+    @if (!string.IsNullOrEmpty(DetachmentRule) && DetachmentReminderVisible)
+    {
+        <div class="detachment-rule">
+            <strong>@Detachment:</strong> @DetachmentRule
+            @if (!PlayMode && DetachmentConfig is not null)
+            {
+                Action saveCfg = () => OnSaveDetachmentConfig.InvokeAsync();
+                <div class="setup-checks" style="margin-top:0.4rem" @onclick:stopPropagation="true">
+                    <div class="setup-checks-row" style="justify-content:center">
+                        <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyTurn" @bind:after="saveCfg" /> My</label>
+                        <label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyTurn" @bind:after="saveCfg" /> Enem</label>
+                        <label class="setup-lbl disable"><input type="checkbox" @bind="DetachmentConfig.Reminder" @bind:after="saveCfg" /> Reminder</label>
+                    </div>
+                    <div class="setup-checks-row" style="justify-content:center">
+                        <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Command" @bind:after="saveCfg" /> Cmd</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Move" @bind:after="saveCfg" /> Mov</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Shoot" @bind:after="saveCfg" /> Sht</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Charge" @bind:after="saveCfg" /> Chg</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Fight" @bind:after="saveCfg" /> Fgt</label>
+                    </div>
+                    @if (DetachmentConfig.Command || DetachmentConfig.Move || DetachmentConfig.Shoot || DetachmentConfig.Charge || DetachmentConfig.Fight)
+                    {
+                        <div class="setup-checks-row" style="justify-content:center">
+                            @if (DetachmentConfig.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyCommand" @bind:after="saveCfg" /> eCmd</label>}
+                            @if (DetachmentConfig.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyMove" @bind:after="saveCfg" /> eMov</label>}
+                            @if (DetachmentConfig.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyShoot" @bind:after="saveCfg" /> eSht</label>}
+                            @if (DetachmentConfig.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyCharge" @bind:after="saveCfg" /> eChg</label>}
+                            @if (DetachmentConfig.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyFight" @bind:after="saveCfg" /> eFgt</label>}
+                        </div>
+                        <div class="setup-checks-row" style="justify-content:center">
+                            @if (DetachmentConfig.Command){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyCommand" @bind:after="saveCfg" /> myCmd</label>}
+                            @if (DetachmentConfig.Move){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyMove" @bind:after="saveCfg" /> myMov</label>}
+                            @if (DetachmentConfig.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyShooting" @bind:after="saveCfg" /> mySht</label>}
+                            @if (DetachmentConfig.Charge){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyCharge" @bind:after="saveCfg" /> myChg</label>}
+                            @if (DetachmentConfig.Fight){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyFight" @bind:after="saveCfg" /> myFgt</label>}
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string ArmyName { get; set; } = "";
+    [Parameter] public string? Detachment { get; set; }
+    [Parameter] public string? DetachmentRule { get; set; }
+    [Parameter] public bool DetachmentReminderVisible { get; set; }
+
+    [Parameter] public bool MyTurnActive { get; set; }
+    [Parameter] public bool EnemyTurnActive { get; set; }
+    [Parameter] public GamePhase? ActivePhase { get; set; }
+
+    [Parameter] public bool PlayMode { get; set; }
+    [Parameter] public DetachmentSetupEntry? DetachmentConfig { get; set; }
+
+    [Parameter] public EventCallback OnToggleMyTurn { get; set; }
+    [Parameter] public EventCallback OnToggleEnemyTurn { get; set; }
+    [Parameter] public EventCallback<GamePhase> OnTogglePhase { get; set; }
+    [Parameter] public EventCallback OnSaveDetachmentConfig { get; set; }
+}
