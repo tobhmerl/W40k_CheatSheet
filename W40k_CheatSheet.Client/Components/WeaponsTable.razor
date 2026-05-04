@@ -1,0 +1,106 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (Weapons.Count > 0 && !HideSection)
+{
+    <div class="table-wrapper">
+        <table class="weapons-table">
+            <thead class="weapon-section-header" @onclick="OnToggleSection" @onclick:stopPropagation="true">
+                <tr>
+                    <th>@Title <span class="weapon-collapse-icon">@(Expanded ? "▾" : "▸")</span></th>
+                    <th>Rng</th><th>A</th><th>@SkillLabel</th><th>S</th><th>AP</th><th>D</th>
+                </tr>
+            </thead>
+            @if (Expanded)
+            {
+                <tbody>
+                    @foreach (var w in Weapons)
+                    {
+                        var owned = IsWeaponOwnedByFocused!(w);
+                        var phaseOk = WeaponPhaseRelevant;
+                        var hidden = (CardFocused && StatOwnerFocused && !(owned && phaseOk)) || (FocusedWeapon is not null && FocusedWeapon != w);
+                        if (hidden) { continue; }
+                        var effSkill = HitBonus ? ImproveSkill!(w.Skill) : w.Skill;
+                        var skillBoosted = HitBonus && effSkill != w.Skill;
+                        var models = GetWeaponEffectiveModels!(w);
+                        if (PlayMode && models <= 0) { continue; }
+                        var rowZoomed = FocusedWeapon == w || (CardFocused && owned && phaseOk);
+                        <tr class="weapon-row @(rowZoomed ? "zoomed" : "")" @onclick="() => OnToggleFocusWeapon.InvokeAsync(w)" @onclick:stopPropagation="true">
+                            <td class="name-cell">
+                                @w.Name
+                                @if (PlayMode && models > 1)
+                                {
+                                    <span class="weapon-total-attacks @(models < w.ModelsEquipped ? "reduced" : "")">(@FormatTotalAttacks!(models, w.A))</span>
+                                }
+                            </td>
+                            <td>@ShortRange!(w.Range)</td>
+                            <td>@w.A</td>
+                            <td>
+                                @if (skillBoosted)
+                                {
+                                    <span class="skill-improved buff-source-trigger" @onclick="() => OnShowBuffSource.InvokeAsync((effSkill, HitBonusSource ?? string.Empty, string.Empty))" @onclick:stopPropagation="true">@effSkill</span>
+                                }
+                                else
+                                {
+                                    @effSkill
+                                }
+                                @if (!string.IsNullOrEmpty(ExtraCrit))
+                                {
+                                    <text> </text>
+                                    <span class="crit-extra buff-source-trigger" @onclick="() => OnShowBuffSource.InvokeAsync((ExtraCrit!, ExtraCritSource ?? string.Empty, string.Empty))" @onclick:stopPropagation="true">(@ExtraCrit)</span>
+                                }
+                            </td>
+                            <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
+                        </tr>
+                        @if (!string.IsNullOrEmpty(CombineKeywords!(w.Keywords, ExtraKw ?? string.Empty)))
+                        {
+                            <tr class="weapon-kw-row @(rowZoomed ? "zoomed" : "")">
+                                <td colspan="7" class="kw-cell">
+                                    @w.Keywords
+                                    @if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(ExtraKw))
+                                    {
+                                        <text>, </text>
+                                    }
+                                    @if (!string.IsNullOrEmpty(ExtraKw))
+                                    {
+                                        <span class="kw-extra buff-source-trigger" @onclick="() => OnShowBuffSource.InvokeAsync((ExtraKw!, ExtraKwSource, ExtraKwDescription))" @onclick:stopPropagation="true">@ExtraKw</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            }
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter, EditorRequired] public string SkillLabel { get; set; } = "";
+    [Parameter] public IReadOnlyList<WeaponProfile> Weapons { get; set; } = [];
+    [Parameter] public bool Expanded { get; set; }
+    [Parameter] public bool HideSection { get; set; }
+    [Parameter] public bool PlayMode { get; set; }
+    [Parameter] public bool CardFocused { get; set; }
+    [Parameter] public bool StatOwnerFocused { get; set; }
+    [Parameter] public bool WeaponPhaseRelevant { get; set; }
+    [Parameter] public WeaponProfile? FocusedWeapon { get; set; }
+    [Parameter] public bool HitBonus { get; set; }
+    [Parameter] public string? HitBonusSource { get; set; }
+    [Parameter] public string? ExtraCrit { get; set; }
+    [Parameter] public string? ExtraCritSource { get; set; }
+    [Parameter] public string? ExtraKw { get; set; }
+    [Parameter] public string ExtraKwSource { get; set; } = "";
+    [Parameter] public string ExtraKwDescription { get; set; } = "";
+
+    [Parameter] public EventCallback OnToggleSection { get; set; }
+    [Parameter] public EventCallback<WeaponProfile> OnToggleFocusWeapon { get; set; }
+    [Parameter] public EventCallback<(string Label, string Source, string Description)> OnShowBuffSource { get; set; }
+
+    [Parameter, EditorRequired] public Func<WeaponProfile, bool> IsWeaponOwnedByFocused { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<WeaponProfile, int> GetWeaponEffectiveModels { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<string, string> ImproveSkill { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<string, string> ShortRange { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<int, string, string> FormatTotalAttacks { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<string, string, string> CombineKeywords { get; set; } = default!;
+}

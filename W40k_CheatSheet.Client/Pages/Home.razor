@@ -400,86 +400,64 @@
                             {
                                 var rangedExpanded = IsRangedExpanded(unit);
                                 var hideRangedSection = focusedCard == unit && focusedStatOwner is not null && !ranged.Any(w => IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true));
-                                @if (!hideRangedSection)
-                                {
-                                <div class="table-wrapper">
-                                    <table class="weapons-table">
-                                        <thead class="weapon-section-header" @onclick="() => ToggleRangedSection(unit)" @onclick:stopPropagation="true">
-                                            <tr><th>🎯 Ranged <span class="weapon-collapse-icon">@(rangedExpanded ? "▾" : "▸")</span></th><th>Rng</th><th>A</th><th>BS</th><th>S</th><th>AP</th><th>D</th></tr>
-                                        </thead>
-                                        @if (rangedExpanded)
-                                        {
-                                            <tbody>
-                                                @foreach (var w in ranged)
-                                                {
-                                                    var rOwned = IsWeaponOwnedByFocused(w);
-                                                    var rPhaseOk = IsWeaponPhaseRelevant(true);
-                                                    var rHidden = (focusedCard == unit && focusedStatOwner is not null && !(rOwned && rPhaseOk)) || (focusedWeapon is not null && focusedWeapon != w);
-                                                    if (rHidden) { continue; }
-                                                    var rEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
-                                                    var rSkillBoosted = hitBonus && rEffSkill != w.Skill;
-                                                    var rModels = GetWeaponEffectiveModels(unit, w);
-                                                    if (playMode && rModels <= 0) { continue; }
-                                                    <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && rOwned && rPhaseOk) ? "zoomed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
-                                                        <td class="name-cell">@w.Name@if (playMode && rModels > 1){<span class="weapon-total-attacks @(rModels < w.ModelsEquipped ? "reduced" : "")">(@FormatTotalAttacks(rModels, w.A))</span>}</td>
-                                                        <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (rSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(rEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@rEffSkill</span>}else{@rEffSkill}@if (!string.IsNullOrEmpty(extraCritRanged)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritRanged, srcCritRanged, string.Empty)" @onclick:stopPropagation="true">(@extraCritRanged)</span>}</td>
-                                                        <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
-                                                    </tr>
-                                                    @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraRangedKw)))
-                                                    {
-                                                        <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && rOwned && rPhaseOk) ? "zoomed" : "")">
-                                                            <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraRangedKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraRangedKw)){<span class="kw-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraRangedKw, srcRangedKw.Source, srcRangedKw.KeywordDesc)" @onclick:stopPropagation="true">@extraRangedKw</span>}</td>
-                                                        </tr>
-                                                    }
-                                                }
-                                            </tbody>
-                                        }
-                                    </table>
-                                </div>
-                                }
+                                <WeaponsTable Title="🎯 Ranged"
+                                              SkillLabel="BS"
+                                              Weapons="ranged"
+                                              Expanded="rangedExpanded"
+                                              HideSection="hideRangedSection"
+                                              PlayMode="playMode"
+                                              CardFocused="focusedCard == unit"
+                                              StatOwnerFocused="focusedStatOwner is not null"
+                                              WeaponPhaseRelevant="IsWeaponPhaseRelevant(true)"
+                                              FocusedWeapon="focusedWeapon"
+                                              HitBonus="hitBonus"
+                                              HitBonusSource="@srcHitBonus"
+                                              ExtraCrit="@extraCritRanged"
+                                              ExtraCritSource="@srcCritRanged"
+                                              ExtraKw="@extraRangedKw"
+                                              ExtraKwSource="@srcRangedKw.Source"
+                                              ExtraKwDescription="@srcRangedKw.KeywordDesc"
+                                              OnToggleSection="() => ToggleRangedSection(unit)"
+                                              OnToggleFocusWeapon="ToggleFocusWeapon"
+                                              OnShowBuffSource="ShowBuffSourceTuple"
+                                              IsWeaponOwnedByFocused="IsWeaponOwnedByFocused"
+                                              GetWeaponEffectiveModels="w => GetWeaponEffectiveModels(unit, w)"
+                                              ImproveSkill="ImproveSkill"
+                                              ShortRange="ShortRange"
+                                              FormatTotalAttacks="FormatTotalAttacks"
+                                              CombineKeywords="CombineKeywords" />
                             }
 
                             @if (melee.Count > 0)
                             {
                                 var meleeExpanded = IsMeleeExpanded(unit);
                                 var hideMeleeSection = focusedCard == unit && focusedStatOwner is not null && !melee.Any(w => IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false));
-                                @if (!hideMeleeSection)
-                                {
-                                <div class="table-wrapper">
-                                    <table class="weapons-table">
-                                        <thead class="weapon-section-header" @onclick="() => ToggleMeleeSection(unit)" @onclick:stopPropagation="true">
-                                            <tr><th>⚔️ Melee <span class="weapon-collapse-icon">@(meleeExpanded ? "▾" : "▸")</span></th><th>Rng</th><th>A</th><th>WS</th><th>S</th><th>AP</th><th>D</th></tr>
-                                        </thead>
-                                        @if (meleeExpanded)
-                                        {
-                                            <tbody>
-                                                @foreach (var w in melee)
-                                                {
-                                                    var mOwned = IsWeaponOwnedByFocused(w);
-                                                    var mPhaseOk = IsWeaponPhaseRelevant(false);
-                                                    var mHidden = (focusedCard == unit && focusedStatOwner is not null && !(mOwned && mPhaseOk)) || (focusedWeapon is not null && focusedWeapon != w);
-                                                    if (mHidden) { continue; }
-                                                    var mEffSkill = hitBonus ? ImproveSkill(w.Skill) : w.Skill;
-                                                    var mSkillBoosted = hitBonus && mEffSkill != w.Skill;
-                                                    var mModels = GetWeaponEffectiveModels(unit, w);
-                                                    if (playMode && mModels <= 0) { continue; }
-                                                    <tr class="weapon-row @(focusedWeapon == w || (focusedCard == unit && mOwned && mPhaseOk) ? "zoomed" : "")" @onclick="() => ToggleFocusWeapon(w)" @onclick:stopPropagation="true">
-                                                        <td class="name-cell">@w.Name@if (playMode && mModels > 1){<span class="weapon-total-attacks @(mModels < w.ModelsEquipped ? "reduced" : "")">(@FormatTotalAttacks(mModels, w.A))</span>}</td>
-                                                        <td>@ShortRange(w.Range)</td><td>@w.A</td><td>@if (mSkillBoosted){<span class="skill-improved buff-source-trigger" @onclick="() => ShowBuffSource(mEffSkill, srcHitBonus, string.Empty)" @onclick:stopPropagation="true">@mEffSkill</span>}else{@mEffSkill}@if (!string.IsNullOrEmpty(extraCritMelee)){<text> </text><span class="crit-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraCritMelee, srcCritMelee, string.Empty)" @onclick:stopPropagation="true">(@extraCritMelee)</span>}</td>
-                                                        <td>@w.S</td><td>@w.AP</td><td>@w.D</td>
-                                                    </tr>
-                                                    @if (!string.IsNullOrEmpty(CombineKeywords(w.Keywords, extraMeleeKw)))
-                                                    {
-                                                        <tr class="weapon-kw-row @(focusedWeapon == w || (focusedCard == unit && mOwned && mPhaseOk) ? "zoomed" : "")">
-                                                            <td colspan="7" class="kw-cell">@w.Keywords@if (!string.IsNullOrEmpty(w.Keywords) && !string.IsNullOrEmpty(extraMeleeKw)){<text>, </text>}@if (!string.IsNullOrEmpty(extraMeleeKw)){<span class="kw-extra buff-source-trigger" @onclick="() => ShowBuffSource(extraMeleeKw, srcMeleeKw.Source, srcMeleeKw.KeywordDesc)" @onclick:stopPropagation="true">@extraMeleeKw</span>}</td>
-                                                        </tr>
-                                                    }
-                                                }
-                                            </tbody>
-                                        }
-                                    </table>
-                                </div>
-                                }
+                                <WeaponsTable Title="⚔️ Melee"
+                                              SkillLabel="WS"
+                                              Weapons="melee"
+                                              Expanded="meleeExpanded"
+                                              HideSection="hideMeleeSection"
+                                              PlayMode="playMode"
+                                              CardFocused="focusedCard == unit"
+                                              StatOwnerFocused="focusedStatOwner is not null"
+                                              WeaponPhaseRelevant="IsWeaponPhaseRelevant(false)"
+                                              FocusedWeapon="focusedWeapon"
+                                              HitBonus="hitBonus"
+                                              HitBonusSource="@srcHitBonus"
+                                              ExtraCrit="@extraCritMelee"
+                                              ExtraCritSource="@srcCritMelee"
+                                              ExtraKw="@extraMeleeKw"
+                                              ExtraKwSource="@srcMeleeKw.Source"
+                                              ExtraKwDescription="@srcMeleeKw.KeywordDesc"
+                                              OnToggleSection="() => ToggleMeleeSection(unit)"
+                                              OnToggleFocusWeapon="ToggleFocusWeapon"
+                                              OnShowBuffSource="ShowBuffSourceTuple"
+                                              IsWeaponOwnedByFocused="IsWeaponOwnedByFocused"
+                                              GetWeaponEffectiveModels="w => GetWeaponEffectiveModels(unit, w)"
+                                              ImproveSkill="ImproveSkill"
+                                              ShortRange="ShortRange"
+                                              FormatTotalAttacks="FormatTotalAttacks"
+                                              CombineKeywords="CombineKeywords" />
                             }
 
                             @if (keywords.Count > 0)
@@ -2670,6 +2648,9 @@
         else
             buffSourcePopup = (label, source, keywordDesc);
     }
+
+    private void ShowBuffSourceTuple((string Label, string Source, string Description) args)
+        => ShowBuffSource(args.Label, args.Source, args.Description);
 
     private (string Source, string KeywordDesc) GetExtraWeaponKeywordsSource(UnitEntry unit, bool isMelee)
     {
