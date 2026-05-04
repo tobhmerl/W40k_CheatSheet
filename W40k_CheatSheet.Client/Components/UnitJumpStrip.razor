@@ -1,0 +1,33 @@
+@* ──────────────────────────────────────────────────────────────
+   Horizontal strip of per-unit "jump" buttons used at the top
+   and bottom of the play / setup unit grid. In play mode the
+   strip also shows the toggle-all (✦/⊘) and reset-filters (✕)
+   buttons. The id is exposed as a parameter so the existing
+   "nav-top" / "nav-bottom" anchors keep working.
+   ────────────────────────────────────────────────────────────── *@
+
+@using W40k_CheatSheet.Client.Models
+
+<div id="@ElementId" class="unit-jump-buttons">
+    @if (PlayMode)
+    {
+        <button class="unit-jump-btn toggle-all" @onclick="OnToggleAllUnits">@(VisiblePlayUnits.Count == AliveUnits.Count ? "⊘" : "✦")</button>
+        <button class="corner-btn reset-filters inline" @onclick="OnResetAllFilters" title="Remove all filters">✕</button>
+    }
+    @foreach (var u in AliveUnits)
+    {
+        var btnUnit = u;
+        <button class="unit-jump-btn @(PlayMode && VisiblePlayUnits.Contains(btnUnit) ? "active" : "")"
+                @onclick="() => OnUnitButton.InvokeAsync(btnUnit)">@btnUnit.Name</button>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string ElementId { get; set; } = "";
+    [Parameter] public bool PlayMode { get; set; }
+    [Parameter] public IReadOnlyCollection<UnitEntry> AliveUnits { get; set; } = [];
+    [Parameter] public IReadOnlyCollection<UnitEntry> VisiblePlayUnits { get; set; } = [];
+    [Parameter] public EventCallback<UnitEntry> OnUnitButton { get; set; }
+    [Parameter] public EventCallback OnToggleAllUnits { get; set; }
+    [Parameter] public EventCallback OnResetAllFilters { get; set; }
+}

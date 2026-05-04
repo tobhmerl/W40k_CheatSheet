@@ -112,18 +112,13 @@
             <PreGameBanner Reminders="PreGameReminders" OnDismiss="() => preGameDismissed = true" />
         }
 
-        <div id="nav-top" class="unit-jump-buttons">
-            @if (playMode)
-            {
-                <button class="unit-jump-btn toggle-all" @onclick="ToggleAllUnits">@(visiblePlayUnits.Count == AliveUnits.Count ? "⊘" : "✦")</button>
-                <button class="corner-btn reset-filters inline" @onclick="ResetAllFilters" title="Remove all filters">✕</button>
-            }
-            @foreach (var u in AliveUnits)
-            {
-                var btnUnit = u;
-                <button class="unit-jump-btn @(playMode && visiblePlayUnits.Contains(btnUnit) ? "active" : "")" @onclick="() => HandleUnitButton(btnUnit)">@btnUnit.Name</button>
-            }
-        </div>
+        <UnitJumpStrip ElementId="nav-top"
+                       PlayMode="playMode"
+                       AliveUnits="AliveUnits"
+                       VisiblePlayUnits="visiblePlayUnits"
+                       OnUnitButton="HandleUnitButton"
+                       OnToggleAllUnits="ToggleAllUnits"
+                       OnResetAllFilters="ResetAllFilters" />
 
         @if (selectedLeader is not null)
         {
@@ -1131,72 +1126,20 @@
             }
         </div>
 
-        <div id="nav-bottom" class="unit-jump-buttons">
-            @if (playMode)
-            {
-                <button class="unit-jump-btn toggle-all" @onclick="ToggleAllUnits">@(visiblePlayUnits.Count == AliveUnits.Count ? "⊘" : "✦")</button>
-                <button class="corner-btn reset-filters inline" @onclick="ResetAllFilters" title="Remove all filters">✕</button>
-            }
-            @foreach (var u in AliveUnits)
-            {
-                var btnUnit2 = u;
-                <button class="unit-jump-btn @(playMode && visiblePlayUnits.Contains(btnUnit2) ? "active" : "")" @onclick="() => HandleUnitButton(btnUnit2)">@btnUnit2.Name</button>
-            }
-        </div>
+        <UnitJumpStrip ElementId="nav-bottom"
+                       PlayMode="playMode"
+                       AliveUnits="AliveUnits"
+                       VisiblePlayUnits="visiblePlayUnits"
+                       OnUnitButton="HandleUnitButton"
+                       OnToggleAllUnits="ToggleAllUnits"
+                       OnResetAllFilters="ResetAllFilters" />
 
         @if (playMode)
         {
-        <hr class="footer-divider" />
-
-        <div class="score-tracker">
-            <div class="score-total-row">
-                <span class="score-total">@(defenderPrimary + defenderSecondary)</span>
-                <span class="score-total-label">Total</span>
-                <span class="score-total">@(aggressorPrimary + aggressorSecondary)</span>
-            </div>
-            <div class="score-section">
-                <div class="score-section-label">Primary</div>
-                <div class="score-row">
-                    <div class="score-player">
-                        <div class="score-label">🛡️ Defender</div>
-                        <div class="score-controls">
-                            <button class="score-btn" @onclick="() => defenderPrimary = Math.Max(0, defenderPrimary - 1)">−</button>
-                            <span class="score-value">@defenderPrimary</span>
-                            <button class="score-btn" @onclick="() => defenderPrimary++">+</button>
-                        </div>
-                    </div>
-                    <div class="score-divider"></div>
-                    <div class="score-player">
-                        <div class="score-label">⚔️ Aggressor</div>
-                        <div class="score-controls">
-                            <button class="score-btn" @onclick="() => aggressorPrimary = Math.Max(0, aggressorPrimary - 1)">−</button>
-                            <span class="score-value">@aggressorPrimary</span>
-                            <button class="score-btn" @onclick="() => aggressorPrimary++">+</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="score-section">
-                <div class="score-section-label">Secondary</div>
-                <div class="score-row">
-                    <div class="score-player">
-                        <div class="score-controls">
-                            <button class="score-btn" @onclick="() => defenderSecondary = Math.Max(0, defenderSecondary - 1)">−</button>
-                            <span class="score-value">@defenderSecondary</span>
-                            <button class="score-btn" @onclick="() => defenderSecondary++">+</button>
-                        </div>
-                    </div>
-                    <div class="score-divider"></div>
-                    <div class="score-player">
-                        <div class="score-controls">
-                            <button class="score-btn" @onclick="() => aggressorSecondary = Math.Max(0, aggressorSecondary - 1)">−</button>
-                            <span class="score-value">@aggressorSecondary</span>
-                            <button class="score-btn" @onclick="() => aggressorSecondary++">+</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <ScoreTracker @bind-DefenderPrimary="defenderPrimary"
+                          @bind-AggressorPrimary="aggressorPrimary"
+                          @bind-DefenderSecondary="defenderSecondary"
+                          @bind-AggressorSecondary="aggressorSecondary" />
         }
 
         <div class="roster-footer">

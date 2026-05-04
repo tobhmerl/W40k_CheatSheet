@@ -1,0 +1,84 @@
+@* ──────────────────────────────────────────────────────────────
+   Play-mode score tracker: primary + secondary scores for both
+   players, plus the running totals row. Pure presentation; the
+   parent owns the four counters via @bind-* parameters.
+   ────────────────────────────────────────────────────────────── *@
+
+<hr class="footer-divider" />
+
+<div class="score-tracker">
+    <div class="score-total-row">
+        <span class="score-total">@(DefenderPrimary + DefenderSecondary)</span>
+        <span class="score-total-label">Total</span>
+        <span class="score-total">@(AggressorPrimary + AggressorSecondary)</span>
+    </div>
+    <div class="score-section">
+        <div class="score-section-label">Primary</div>
+        <div class="score-row">
+            <div class="score-player">
+                <div class="score-label">🛡️ Defender</div>
+                <div class="score-controls">
+                    <button class="score-btn" @onclick="() => Update(nameof(DefenderPrimary), DefenderPrimary - 1)">−</button>
+                    <span class="score-value">@DefenderPrimary</span>
+                    <button class="score-btn" @onclick="() => Update(nameof(DefenderPrimary), DefenderPrimary + 1)">+</button>
+                </div>
+            </div>
+            <div class="score-divider"></div>
+            <div class="score-player">
+                <div class="score-label">⚔️ Aggressor</div>
+                <div class="score-controls">
+                    <button class="score-btn" @onclick="() => Update(nameof(AggressorPrimary), AggressorPrimary - 1)">−</button>
+                    <span class="score-value">@AggressorPrimary</span>
+                    <button class="score-btn" @onclick="() => Update(nameof(AggressorPrimary), AggressorPrimary + 1)">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="score-section">
+        <div class="score-section-label">Secondary</div>
+        <div class="score-row">
+            <div class="score-player">
+                <div class="score-controls">
+                    <button class="score-btn" @onclick="() => Update(nameof(DefenderSecondary), DefenderSecondary - 1)">−</button>
+                    <span class="score-value">@DefenderSecondary</span>
+                    <button class="score-btn" @onclick="() => Update(nameof(DefenderSecondary), DefenderSecondary + 1)">+</button>
+                </div>
+            </div>
+            <div class="score-divider"></div>
+            <div class="score-player">
+                <div class="score-controls">
+                    <button class="score-btn" @onclick="() => Update(nameof(AggressorSecondary), AggressorSecondary - 1)">−</button>
+                    <span class="score-value">@AggressorSecondary</span>
+                    <button class="score-btn" @onclick="() => Update(nameof(AggressorSecondary), AggressorSecondary + 1)">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int DefenderPrimary { get; set; }
+    [Parameter] public EventCallback<int> DefenderPrimaryChanged { get; set; }
+
+    [Parameter] public int AggressorPrimary { get; set; }
+    [Parameter] public EventCallback<int> AggressorPrimaryChanged { get; set; }
+
+    [Parameter] public int DefenderSecondary { get; set; }
+    [Parameter] public EventCallback<int> DefenderSecondaryChanged { get; set; }
+
+    [Parameter] public int AggressorSecondary { get; set; }
+    [Parameter] public EventCallback<int> AggressorSecondaryChanged { get; set; }
+
+    private Task Update(string field, int value)
+    {
+        var clamped = Math.Max(0, value);
+        return field switch
+        {
+            nameof(DefenderPrimary) => DefenderPrimaryChanged.InvokeAsync(clamped),
+            nameof(AggressorPrimary) => AggressorPrimaryChanged.InvokeAsync(clamped),
+            nameof(DefenderSecondary) => DefenderSecondaryChanged.InvokeAsync(clamped),
+            nameof(AggressorSecondary) => AggressorSecondaryChanged.InvokeAsync(clamped),
+            _ => Task.CompletedTask
+        };
+    }
+}
