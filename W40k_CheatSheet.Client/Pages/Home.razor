@@ -1123,26 +1123,26 @@
                                         {
                                             var effIdx = idx;
                                             var eff = activeDetachmentEffects[effIdx];
-                                            var effKey = DetachmentEffectKey(army.Detachment, effIdx);
                                             var effCfg = GetOrCreateDetachmentEffectConfig(army.Detachment, effIdx);
-                                            var canApply = eff.ReflectedInStats;
-                                            <div class="detachment-effect-item @(effCfg.ApplyToStats ? "added-to-unit" : "")"
-                                                 @onclick:stopPropagation="true">
-                                                <span class="ability-name">↳ @DescribeDetachmentEffect(eff)</span>
-                                                <div class="setup-checks">
-                                                    <div class="setup-checks-row">
-                                                        <label class="setup-lbl"><input type="checkbox" @bind="effCfg.Enabled" @bind:after="SaveDetachmentEffectConfigs" /> Active</label>
-                                                        @if (canApply)
-                                                        {
-                                                            <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="effCfg.ApplyToStats" @bind:after="SaveDetachmentEffectConfigs" /> Stats</label>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="setup-lbl disabled-lbl" title="This effect is not eligible for direct stat application">Reminder only</span>
-                                                        }
+                                            @if (eff.ReflectedInStats)
+                                            {
+                                                <div class="detachment-effect-item @(effCfg.ApplyToStats ? "added-to-unit" : "")"
+                                                     @onclick:stopPropagation="true">
+                                                    <span class="ability-name">↳ @DescribeDetachmentEffect(eff)</span>
+                                                    <div class="setup-checks">
+                                                        <div class="setup-checks-row">
+                                                            <label class="setup-lbl unit-lbl" title="Apply this effect directly to weapon stats"><input type="checkbox" @bind="effCfg.ApplyToStats" @bind:after="SaveDetachmentEffectConfigs" /> Apply to stats</label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="detachment-effect-item" @onclick:stopPropagation="true">
+                                                    <span class="ability-name">↳ @DescribeDetachmentEffect(eff)</span>
+                                                    <span class="setup-lbl disabled-lbl">Reminder — shown in detachment rule text</span>
+                                                </div>
+                                            }
                                         }
                                     </div>
                                 }
@@ -4083,7 +4083,7 @@
     {
         try
         {
-            const string marker = "migration-v2.4-applied";
+            const string marker = "migration-v2.4b-applied";
             var done = await JS.InvokeAsync<string?>("localStorage.getItem", marker);
             if (!string.IsNullOrEmpty(done)) return;
 
@@ -4092,6 +4092,8 @@
             await JS.InvokeVoidAsync("localStorage.removeItem", "detachment-config");
             await JS.InvokeVoidAsync("localStorage.removeItem", "detachment-effect-configs-v2");
             await JS.InvokeVoidAsync("localStorage.removeItem", "army-rule-configs-v2");
+            // Wipe stale custom detachment-effects from localStorage (admin overrides)
+            await JS.InvokeVoidAsync("localStorage.removeItem", "detachment-effects-custom");
 
             await JS.InvokeVoidAsync("localStorage.setItem", marker, "1");
         }
