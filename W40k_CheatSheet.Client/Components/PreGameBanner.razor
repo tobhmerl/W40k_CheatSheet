@@ -1,0 +1,32 @@
+@* Pre-Game Reminders banner — extracted from Pages/Home.razor.
+   Pure presentation: the parent computes the reminder list (Scout / Infiltrator /
+   Deep Strike etc.) and owns the "dismissed" flag. The banner renders the items
+   and raises OnDismiss when the user clicks ✓ Done. *@
+
+@using W40k_CheatSheet.Client.Models
+
+@if (Reminders is { Count: > 0 })
+{
+    <div class="pregame-banner">
+        <div class="pregame-banner-header">
+            <span>🏁 Pre-Game Reminders</span>
+            <button class="pregame-dismiss" @onclick="OnDismiss">✓ Done</button>
+        </div>
+        @foreach (var (unit, label, desc) in Reminders)
+        {
+            <div class="pregame-item">
+                <span class="pregame-unit">@unit.Name</span>
+                <span class="pregame-ability">@label</span>
+                @if (!string.IsNullOrEmpty(desc))
+                {
+                    <span class="pregame-desc">@desc</span>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<(UnitEntry Unit, string Label, string Description)> Reminders { get; set; } = [];
+    [Parameter] public EventCallback OnDismiss { get; set; }
+}

@@ -1,0 +1,70 @@
+/* Pre-Game Reminders banner — extracted from Pages/Home.razor.css.
+   Used by Components/PreGameBanner.razor. Global because the banner is rendered
+   from a child component but needs no scope isolation. */
+
+.pregame-banner {
+    background: rgba(255, 152, 0, 0.08);
+    border: 1px solid rgba(255, 152, 0, 0.35);
+    border-radius: 8px;
+    padding: 0.5rem 0.6rem;
+    margin-bottom: 0.6rem;
+    animation: pregame-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pregame-pulse {
+    0%, 100% { border-color: rgba(255, 152, 0, 0.35); }
+    50%      { border-color: rgba(255, 152, 0, 0.7); }
+}
+
+.pregame-banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ff9800;
+    margin-bottom: 0.3rem;
+}
+
+.pregame-dismiss {
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid #4caf50;
+    color: #4caf50;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.pregame-dismiss:hover {
+    background: rgba(76, 175, 80, 0.3);
+}
+
+.pregame-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3rem;
+    padding: 0.2rem 0;
+    border-top: 1px solid rgba(255, 152, 0, 0.12);
+    font-size: 0.65rem;
+}
+
+.pregame-unit {
+    font-weight: 700;
+    color: #ff9800;
+    white-space: nowrap;
+}
+
+.pregame-ability {
+    font-weight: 700;
+    color: #ccc;
+    white-space: nowrap;
+}
+
+.pregame-desc {
+    color: #888;
+    font-size: 0.6rem;
+}

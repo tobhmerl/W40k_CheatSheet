@@ -122,27 +122,7 @@
 
         @if (playMode && !preGameDismissed)
         {
-            var preGame = PreGameReminders;
-            if (preGame.Count > 0)
-            {
-                <div class="pregame-banner">
-                    <div class="pregame-banner-header">
-                        <span>🏁 Pre-Game Reminders</span>
-                        <button class="pregame-dismiss" @onclick="() => preGameDismissed = true">✓ Done</button>
-                    </div>
-                    @foreach (var (unit, label, desc) in preGame)
-                    {
-                        <div class="pregame-item">
-                            <span class="pregame-unit">@unit.Name</span>
-                            <span class="pregame-ability">@label</span>
-                            @if (!string.IsNullOrEmpty(desc))
-                            {
-                                <span class="pregame-desc">@desc</span>
-                            }
-                        </div>
-                    }
-                </div>
-            }
+            <PreGameBanner Reminders="PreGameReminders" OnDismiss="() => preGameDismissed = true" />
         }
 
         <div id="nav-top" class="unit-jump-buttons">
