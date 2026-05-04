@@ -37,12 +37,15 @@
             <CpCounter @bind-Value="cpCounter" />
         }
 
-        <TopActions PlayMode="playMode"
-                    SaveTick="saveTick"
-                    OnTogglePlayMode="TogglePlayMode"
-                    OnSaveCurrentArmy="SaveCurrentArmy"
-                    OnResetAllFilters="ResetAllFilters"
-                    OnClearRoster="ClearRoster" />
+        @if (!playMode)
+        {
+            <TopActions PlayMode="playMode"
+                        SaveTick="saveTick"
+                        OnTogglePlayMode="TogglePlayMode"
+                        OnSaveCurrentArmy="SaveCurrentArmy"
+                        OnResetAllFilters="ResetAllFilters"
+                        OnClearRoster="ClearRoster" />
+        }
 
         <RosterHeader ArmyName="@army.Name"
                       Detachment="@army.Detachment"
@@ -396,7 +399,7 @@
     }
     @if (playMode)
     {
-        <button class="play-footer-btn @(footerVisible ? "visible" : "")" @onclick="TogglePlayMode">☰ Setup</button>
+        <button class="play-footer-btn @(footerVisible ? "visible" : "")" @onclick="TogglePlayMode">☰</button>
     }
     else
     {
