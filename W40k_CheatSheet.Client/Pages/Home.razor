@@ -1310,7 +1310,7 @@
         }
         <button class="corner-btn home" @onclick="ClearRoster">⌂</button>
     </div>
-    <div class="version-tag" @onclick="() => showChangelog = true">v2.2</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v2.3</div>
 
     @if (showChangelog)
     {
@@ -1321,6 +1321,18 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v2.3 🎉</div>
+                    <ul class="changelog-list">
+                        <li class="cl-new">Top action buttons — play / save / reset filters / home buttons duplicated at the top of the page for quicker access</li>
+                        <li class="cl-new">Inline reset-filters ✕ button added to both the top and bottom unit jump bars in play mode</li>
+                        <li class="cl-new">Setup mode wipe buttons — 🗑 reset all ability checkboxes and 🗑 reset all stratagem checkboxes (one click clears every config)</li>
+                        <li class="cl-changed">Reset filters ✕ button now only clears unit/weapon selections — phase, turn, pre-game banner and targeted/charged states are preserved</li>
+                        <li class="cl-changed">Stratagems &amp; Abilities Overview panels always show every item — no longer affected by phase, turn, unit focus or CP filters</li>
+                        <li class="cl-changed">Ability-derived invulnerable saves (e.g. Dispersion Shield 4+) only appear in the unit’s stat line when the ability has “Unit” checked</li>
+                        <li class="cl-changed">New imports start with all ability and detachment-stratagem checkboxes empty — only core stratagems persist their configuration across armies</li>
+                        <li class="cl-removed">Cleanup — removed dead methods, unused fields, leftover backup snapshots, empty Api/scripts folders for a leaner codebase</li>
+                    </ul>
 
                     <div class="changelog-version">v2.2 🎉</div>
                     <ul class="changelog-list">
@@ -1582,8 +1594,6 @@
     private GamePhase? activePhase;
     private TurnFilter? activeTurn;
     private bool abilitiesPanelOpen;
-    private bool showAllAbilities;
-    private bool showAllStratagems;
     private bool stratagemsPanelOpen;
     private Stratagem? focusedStratagem;
     private UnitEntry? focusedStratagemUnit;
@@ -1607,7 +1617,6 @@
     private int cpCounter;
     private readonly HashSet<UnitEntry> expandedUnits = [];
     private List<SavedArmyMeta> savedArmies = [];
-    private string? activeJumpUnit;
     private UnitEntry? extraKwExpandedUnit;
     private readonly HashSet<UnitEntry> stratHiddenUnits = [];
     private readonly HashSet<UnitEntry> visiblePlayUnits = [];
@@ -1819,25 +1828,6 @@
             available = available.Where(s => IsStratConfiguredForPhase(s, activePhase.Value));
 
         return available
-            .OrderBy(s => LowestPhaseOrder(s))
-            .ThenBy(s => TurnColorOrder(s.TurnColor))
-            .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
-            .ThenBy(s => s.Name)
-            .ToList();
-    }
-
-    private List<Stratagem> GetAllCardStratagems(UnitEntry unit)
-    {
-        var detachment = army?.Detachment ?? "";
-        var unitKeywords = GetAllKeywords(unit);
-
-        return CoreStratagems.All
-            .Where(s => string.IsNullOrEmpty(s.Detachment) ||
-                        s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
-            .Where(s => s.RequiredKeywords.Count == 0 ||
-                        s.RequiredKeywords.Any(rk =>
-                            unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase))))
-            .Where(s => !UnitMatchesExclusion(unitKeywords, s))
             .OrderBy(s => LowestPhaseOrder(s))
             .ThenBy(s => TurnColorOrder(s.TurnColor))
             .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
@@ -2211,14 +2201,6 @@
         stratDetailsZoomed = false;
     }
 
-    private void ToggleCardExtraAbility(UnitEntry unit, string label, string description)
-    {
-        if (focusedExtraAbility is var (u, l, _) && u == unit && l == label)
-            focusedExtraAbility = null;
-        else
-            focusedExtraAbility = (unit, label, description);
-    }
-
     private List<Stratagem> AllOverviewStratagems
     {
         get
@@ -2425,26 +2407,6 @@
         if (!string.IsNullOrEmpty(unit.InvulnerableSaveAura)) return true;
         return unit.AttachedLeaders.Any(l =>
             !string.IsNullOrEmpty(l.InvulnerableSave) || !string.IsNullOrEmpty(l.InvulnerableSaveAura));
-    }
-
-    private bool HasUnitFocus => focusedUnit is not null || focusedStatOwner is not null;
-
-    private bool CanFocusedUnitUse(Stratagem strat)
-    {
-        if (!HasUnitFocus) return true;
-
-        var unitKeywords = focusedUnit is not null
-            ? GetAllKeywords(focusedUnit)
-            : focusedCard is not null
-                ? GetAllKeywords(focusedCard)
-                : focusedStatOwner!.Keywords;
-
-        if (UnitMatchesExclusion(unitKeywords, strat)) return false;
-
-        if (strat.RequiredKeywords.Count == 0) return true;
-
-        return strat.RequiredKeywords.Any(rk =>
-            unitKeywords.Any(uk => uk.Contains(rk, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static List<string> ParseExcludedKeywords(Stratagem s)
@@ -3161,10 +3123,6 @@
         }
         return cfg;
     }
-
-    private bool HasPhasesConfigured(AbilityEntry a) =>
-        abilityConfigs.TryGetValue(AbilityKey(a), out var c) &&
-        (c.Command || c.Move || c.Shoot || c.Charge || c.Fight);
 
     // Both turns unchecked = explicitly hidden from the abilities panel
     private bool IsHiddenAbility(AbilityEntry a) =>
