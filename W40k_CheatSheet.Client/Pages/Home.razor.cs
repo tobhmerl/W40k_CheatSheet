@@ -230,6 +230,10 @@ public partial class Home : ComponentBase
             .Where(a => !IsStatReflectedAbility(a, unit))
             .ToList();
 
+        // In play mode, hide abilities that have no checkboxes ticked at all
+        if (playMode)
+            all = all.Where(a => HasAnyConfigEnabled(a)).ToList();
+
         if (activeTurn is not null)
             all = all.Where(a => IsConfiguredForTurn(a, activeTurn.Value)).ToList();
 
@@ -2202,6 +2206,13 @@ public partial class Home : ComponentBase
         int count = (c.Command ? 1 : 0) + (c.Move ? 1 : 0) + (c.Shoot ? 1 : 0)
                   + (c.Charge ? 1 : 0) + (c.Fight ? 1 : 0);
         return count >= 5;
+    }
+
+    // True if at least one turn or phase checkbox is ticked — abilities with nothing ticked are unconfigured
+    private bool HasAnyConfigEnabled(AbilityEntry a)
+    {
+        if (!abilityConfigs.TryGetValue(AbilityKey(a), out var c)) return false;
+        return c.MyTurn || c.EnemyTurn || c.Command || c.Move || c.Shoot || c.Charge || c.Fight;
     }
 
     private bool IsStratAlwaysActive(Stratagem s)
