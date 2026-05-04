@@ -5,6 +5,8 @@
 @inject IJSRuntime JS
 @inject CloudRosterService Cloud
 @inject DetachmentEffectsService DetachmentEffects
+@inject RosterStateService RosterState
+@inject EffectResolverService Resolver
 
 <PageTitle>Segmentum Ultima</PageTitle>
 
@@ -1378,6 +1380,14 @@
                 </div>
                 <div class="changelog-body">
 
+                    <div class="changelog-version">v2.5 🎉</div>
+                    <ul class="changelog-list">
+                        <li class="cl-changed">Internal: roster + setup state moved into a shared <code>RosterStateService</code> so the page no longer owns the dictionaries directly</li>
+                        <li class="cl-changed">Internal: ability / detachment-effect / army-rule resolution centralized in a new <code>EffectResolverService</code> — single source of truth, no more auto-apply scattered across the page</li>
+                        <li class="cl-changed">Internal: setup-config models extracted from <code>Home.razor</code> into <code>Models/SetupConfigs.cs</code> so other components can consume them</li>
+                        <li class="cl-changed">Internal: started splitting <code>Home.razor.css</code> — changelog modal moved to <code>wwwroot/css/components/changelog.css</code></li>
+                    </ul>
+
                     <div class="changelog-version">v2.4 🎉</div>
                     <ul class="changelog-list">
                         <li class="cl-changed">Nothing is auto-applied on import anymore — detachment rules, army rules, abilities and stratagems all stay neutral until you tick them in setup</li>
@@ -1640,9 +1650,17 @@
 </div>
 
 @code {
-    private ArmyRoster? army;
+    private ArmyRoster? army
+    {
+        get => RosterState.Army;
+        set => RosterState.SetArmy(value, RosterState.RawJson);
+    }
     private string? errorMessage;
-    private string? rawJson;
+    private string? rawJson
+    {
+        get => RosterState.RawJson;
+        set => RosterState.SetArmy(RosterState.Army, value);
+    }
     private bool loaded;
     private readonly RosterParserService parser = new();
     private UnitEntry? draggedUnit;
@@ -1668,13 +1686,18 @@
     private bool playMode;
     private bool setupConfirmed;
     private bool stratagemSetupConfirmed;
-    private readonly Dictionary<string, StratagemSetupEntry> stratagemConfigs = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, AbilitySetupEntry> abilityConfigs = new(StringComparer.Ordinal);
-    private DetachmentSetupEntry detachmentConfig = new();
+    // ── Setup state is owned by RosterStateService; these aliases keep existing call sites working. ──
+    private Dictionary<string, StratagemSetupEntry> stratagemConfigs => RosterState.StratagemConfigs;
+    private Dictionary<string, AbilitySetupEntry> abilityConfigs => RosterState.AbilityConfigs;
+    private DetachmentSetupEntry detachmentConfig
+    {
+        get => RosterState.DetachmentConfig;
+        set => RosterState.SetDetachmentConfig(value);
+    }
     // Per detachment effect (keyed by "<detachment>::<index>") — explicit opt-in for "Apply to stats directly"
-    private readonly Dictionary<string, DetachmentEffectSetupEntry> detachmentEffectConfigs = new(StringComparer.Ordinal);
+    private Dictionary<string, DetachmentEffectSetupEntry> detachmentEffectConfigs => RosterState.DetachmentEffectConfigs;
     // Per army rule (keyed by rule name) — explicit opt-in for visibility/turn/phase/stats
-    private readonly Dictionary<string, ArmyRuleSetupEntry> armyRuleConfigs = new(StringComparer.Ordinal);
+    private Dictionary<string, ArmyRuleSetupEntry> armyRuleConfigs => RosterState.ArmyRuleConfigs;
     private readonly HashSet<string> focusedDetachmentEffects = new(StringComparer.Ordinal);
     private readonly HashSet<string> focusedArmyRules = new(StringComparer.Ordinal);
     private bool focusedDetachmentRule;
@@ -1706,7 +1729,11 @@
     private (UnitEntry Unit, int Delta)? weaponRemovePopup;
     private bool saveTick;
     private CancellationTokenSource? saveTickCts;
-    private List<DetachmentEffect> activeDetachmentEffects = [];
+    private List<DetachmentEffect> activeDetachmentEffects
+    {
+        get => RosterState.ActiveDetachmentEffects;
+        set => RosterState.SetActiveDetachmentEffects(value);
+    }
 
     // ── Cloud sync fields ──
     private string cloudEmail = "";
@@ -3025,41 +3052,7 @@
         }
     }
 
-    private class RosterState
-    {
-        public List<string> UnitOrder { get; set; } = [];
-        public List<AttachmentInfo> Attachments { get; set; } = [];
-    }
-
-    private class AttachmentInfo
-    {
-        public string Leader { get; set; } = "";
-        public string Host { get; set; } = "";
-    }
-
     // ── Stratagem setup ──────────────────────────────────────────────────────
-
-    private sealed class StratagemSetupEntry
-    {
-        public bool MyTurn    { get; set; }
-        public bool EnemyTurn { get; set; }
-        public bool Command   { get; set; }
-        public bool Move      { get; set; }
-        public bool Shoot     { get; set; }
-        public bool Charge    { get; set; }
-        public bool Fight     { get; set; }
-        public bool EnemyCommand { get; set; }
-        public bool EnemyMove    { get; set; }
-        public bool EnemyShoot   { get; set; }
-        public bool EnemyCharge  { get; set; }
-        public bool EnemyFight   { get; set; }
-        public bool MyCommand  { get; set; }
-        public bool MyMove     { get; set; }
-        public bool MyShooting { get; set; }
-        public bool MyCharge   { get; set; }
-        public bool MyFight    { get; set; }
-        public bool Disabled  { get; set; }
-    }
 
     private StratagemSetupEntry GetOrCreateStratConfig(Stratagem s)
     {
@@ -3158,65 +3151,6 @@
 
     // ── Ability setup ────────────────────────────────────────────────────────
 
-    private sealed class AbilitySetupEntry
-    {
-        public bool MyTurn    { get; set; }
-        public bool EnemyTurn { get; set; }
-        public bool Command   { get; set; }
-        public bool Move      { get; set; }
-        public bool Shoot     { get; set; }
-        public bool Charge    { get; set; }
-        public bool Fight     { get; set; }
-        public bool EnemyCommand { get; set; }
-        public bool EnemyMove    { get; set; }
-        public bool EnemyShoot   { get; set; }
-        public bool EnemyCharge  { get; set; }
-        public bool EnemyFight   { get; set; }
-        public bool MyCommand  { get; set; }
-        public bool MyMove     { get; set; }
-        public bool MyShooting { get; set; }
-        public bool MyCharge   { get; set; }
-        public bool MyFight    { get; set; }
-        public bool ApplyToStats { get; set; }
-    }
-
-    private sealed class DetachmentSetupEntry
-    {
-        public bool MyTurn    { get; set; }
-        public bool EnemyTurn { get; set; }
-        public bool Command   { get; set; }
-        public bool Move      { get; set; }
-        public bool Shoot     { get; set; }
-        public bool Charge    { get; set; }
-        public bool Fight     { get; set; }
-        public bool EnemyCommand { get; set; }
-        public bool EnemyMove    { get; set; }
-        public bool EnemyShoot   { get; set; }
-        public bool EnemyCharge  { get; set; }
-        public bool EnemyFight   { get; set; }
-        public bool MyCommand  { get; set; }
-        public bool MyMove     { get; set; }
-        public bool MyShooting { get; set; }
-        public bool MyCharge   { get; set; }
-        public bool MyFight    { get; set; }
-        public bool Reminder  { get; set; }
-    }
-
-    /// <summary>Per detachment-rule effect (one row per entry in detachment_effects.json). Default: nothing applied.</summary>
-    private sealed class DetachmentEffectSetupEntry
-    {
-        public bool Enabled      { get; set; }   // show as reminder in play view
-        public bool ApplyToStats { get; set; }   // actually modify weapon/unit stats
-    }
-
-    /// <summary>Per faction/army rule (e.g. Reanimation Protocols). Default: nothing applied.</summary>
-    private sealed class ArmyRuleSetupEntry
-    {
-        public bool Enabled      { get; set; }
-        public bool ApplyToStats { get; set; }
-        public bool Reminder     { get; set; }
-    }
-
     private static string AbilityKey(AbilityEntry a) => a.Name;
 
     private async Task OnApplyToStatsChanged(AbilitySetupEntry cfg)
@@ -3245,12 +3179,10 @@
     }
 
     // Both turns unchecked = explicitly hidden from the abilities panel
-    private bool IsHiddenAbility(AbilityEntry a) =>
-        abilityConfigs.TryGetValue(AbilityKey(a), out var c) && !c.MyTurn && !c.EnemyTurn;
+    private bool IsHiddenAbility(AbilityEntry a) => Resolver.IsHiddenAbility(a, abilityConfigs);
 
     // "Apply to stats directly" — inject the keyword onto weapon rows / stats instead of just showing in the panel
-    private bool IsAddedToUnit(AbilityEntry a) =>
-        abilityConfigs.TryGetValue(AbilityKey(a), out var c) && c.ApplyToStats;
+    private bool IsAddedToUnit(AbilityEntry a) => Resolver.IsAddedToUnit(a, abilityConfigs);
 
     // Check if an "added to unit" ability is visible given current turn/phase filters
     private bool IsAddedToUnitVisible(AbilityEntry a)
@@ -3547,44 +3479,14 @@
 
     // Keep this for weapon stats modification — data-driven via detachment_effects.json,
     // but ONLY active when the user has opted in per effect via the setup checkbox.
-    private bool IsDetachmentRuleReflectedInStats
-    {
-        get
-        {
-            if (army is null || string.IsNullOrEmpty(army.DetachmentRule)) return false;
-            for (int i = 0; i < activeDetachmentEffects.Count; i++)
-            {
-                if (activeDetachmentEffects[i].ReflectedInStats && IsDetachmentEffectActive(i))
-                    return true;
-            }
-            return false;
-        }
-    }
+    private bool IsDetachmentRuleReflectedInStats =>
+        Resolver.IsDetachmentRuleReflectedInStats(army, activeDetachmentEffects, IsDetachmentEffectActive);
 
-    private bool UnitHasDetachmentHitBonus(UnitEntry unit)
-    {
-        if (army is null) return false;
-        for (int i = 0; i < activeDetachmentEffects.Count; i++)
-        {
-            var e = activeDetachmentEffects[i];
-            if (!e.ReflectedInStats || !IsDetachmentEffectActive(i)) continue;
-            if (e.Stat != "bs" && e.Stat != "ws") continue;
-            if (EvaluateCondition(e.Condition, unit))
-                return true;
-        }
-        return false;
-    }
+    private bool UnitHasDetachmentHitBonus(UnitEntry unit) =>
+        Resolver.UnitHasDetachmentHitBonus(army, unit, activeDetachmentEffects, IsDetachmentEffectActive, IsKilled);
 
-    private bool EvaluateCondition(string condition, UnitEntry unit) => condition switch
-    {
-        "always" => true,
-        "has_leader_character" => unit.AttachedLeaders.Any(l =>
-            !IsKilled(l) &&
-            l.Keywords.Any(k => k.Equals("Character", StringComparison.OrdinalIgnoreCase))),
-        "charged" => true, // condition shown contextually, always applies when relevant
-        "battle_shocked_and_charged" => true, // conditional display handled separately
-        _ => false
-    };
+    private bool EvaluateCondition(string condition, UnitEntry unit) =>
+        Resolver.EvaluateCondition(condition, unit, IsKilled);
 
     private static string ImproveSkill(string skill)
     {
@@ -4134,25 +4036,6 @@
     }
 
     // ── Saved armies ─────────────────────────────────────────────────────────
-
-    private class SavedArmyMeta
-    {
-        public string Name { get; set; } = "";
-        public string Faction { get; set; } = "";
-        public string Detachment { get; set; } = "";
-        public int Points { get; set; }
-    }
-
-    private class SavedArmyData
-    {
-        public string RawJson { get; set; } = "";
-        public RosterState? State { get; set; }
-        public Dictionary<string, AbilitySetupEntry> AbilityConfigs { get; set; } = new();
-        public Dictionary<string, StratagemSetupEntry> StratagemConfigs { get; set; } = new();
-        public DetachmentSetupEntry? DetachmentConfig { get; set; }
-        public Dictionary<string, DetachmentEffectSetupEntry> DetachmentEffectConfigs { get; set; } = new();
-        public Dictionary<string, ArmyRuleSetupEntry> ArmyRuleConfigs { get; set; } = new();
-    }
 
     private async Task LoadSavedArmiesIndex()
     {

@@ -3061,96 +3061,9 @@
     color: #666;
 }
 
-/* Changelog modal */
-.changelog-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-}
-
-.changelog-modal {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 10px;
-    max-width: 480px;
-    width: 100%;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.changelog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.6rem 0.8rem;
-    border-bottom: 1px solid #2a2a2a;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #ccc;
-}
-
-.changelog-close {
-    background: none;
-    border: 1px solid #444;
-    color: #888;
-    border-radius: 4px;
-    padding: 0.1rem 0.4rem;
-    cursor: pointer;
-    font-size: 0.7rem;
-}
-
-.changelog-close:hover {
-    color: #e94560;
-    border-color: #e94560;
-}
-
-.changelog-body {
-    padding: 0.6rem 0.8rem;
-    overflow-y: auto;
-}
-
-.changelog-version {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #00b4d8;
-    margin-top: 0.6rem;
-    margin-bottom: 0.2rem;
-}
-
-.changelog-version:first-child {
-    margin-top: 0;
-}
-
-.changelog-list {
-    margin: 0;
-    padding-left: 1.2rem;
-    list-style: disc;
-}
-
-.changelog-list li {
-    font-size: 0.65rem;
-    color: #999;
-    line-height: 1.6;
-}
-
-.changelog-list li.cl-new {
-    color: #4caf50;
-}
-
-.changelog-list li.cl-changed {
-    color: #ff9800;
-}
-
-.changelog-list li.cl-removed {
-    color: #e94560;
-}
+/* Changelog modal — moved to wwwroot/css/components/changelog.css
+   so it can be reused outside the Home page without dragging the rest
+   of this stylesheet along. */
 
 /* ── Light mode: abilities panel — mirrors light strat-item ── */
 .roster-app.light .abilities-panel-item {

@@ -20,5 +20,7 @@ builder.Services.AddScoped(sp =>
         sp.GetRequiredService<HttpClient>(),
         sp.GetRequiredService<IJSRuntime>(),
         supabaseUrl, supabaseKey));
+builder.Services.AddScoped<RosterStateService>();
+builder.Services.AddScoped<EffectResolverService>();
 
 await builder.Build().RunAsync();
