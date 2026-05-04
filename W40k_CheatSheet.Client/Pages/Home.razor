@@ -1218,6 +1218,7 @@
             @if (playMode)
             {
                 <button class="unit-jump-btn toggle-all" @onclick="ToggleAllUnits">@(visiblePlayUnits.Count == AliveUnits.Count ? "⊘" : "✦")</button>
+                <button class="corner-btn reset-filters inline" @onclick="ResetAllFilters" title="Remove all filters">✕</button>
             }
             @foreach (var u in AliveUnits)
             {
