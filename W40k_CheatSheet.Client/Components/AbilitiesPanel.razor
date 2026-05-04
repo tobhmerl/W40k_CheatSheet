@@ -1,0 +1,269 @@
+@using W40k_CheatSheet.Client.Models
+
+<div id="abilities-panel" class="abilities-panel">
+    <div class="abilities-panel-header" @onclick="ToggleOpen">
+        <span>📜 @(!PlayMode ? "Configure Abilities" : "Abilities Overview")</span>
+        <span class="collapse-icon">@(IsOpen ? "▾" : "▸")</span>
+    </div>
+    @if (IsOpen)
+    {
+        <div class="abilities-panel-body">
+            @if (!PlayMode)
+            {
+                <div class="setup-wipe-row">
+                    <button class="wipe-btn" @onclick="OnWipeAllAbilityConfigs">🗑 Reset all ability checkboxes</button>
+                </div>
+                @* ── Setup mode: detachment rule config ── *@
+                @if (Army is not null && !string.IsNullOrEmpty(Army.DetachmentRule))
+                {
+                    <div class="abilities-panel-unit">
+                        <div class="abilities-panel-unit-name">⚔ Detachment: @Army.Detachment</div>
+                        <div class="abilities-panel-item @(FocusedDetachmentRule ? "expanded" : "")"
+                             @onclick="ToggleDetachmentRuleFocus" @onclick:stopPropagation="true">
+                            <span class="ability-name">@Army.Detachment</span>
+                            <div class="ability-desc">@Army.DetachmentRule</div>
+                            <div class="setup-checks" @onclick:stopPropagation="true">
+                                <div class="setup-checks-row">
+                                    <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig!.MyTurn" @bind:after="saveDetachment" /> My</label>
+                                    <label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyTurn" @bind:after="saveDetachment" /> Enem</label>
+                                    <label class="setup-lbl disable"><input type="checkbox" @bind="DetachmentConfig.Reminder" @bind:after="saveDetachment" /> Reminder</label>
+                                </div>
+                                <div class="setup-checks-row">
+                                    <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Command" @bind:after="saveDetachment" /> Cmd</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Move" @bind:after="saveDetachment" /> Mov</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Shoot" @bind:after="saveDetachment" /> Sht</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Charge" @bind:after="saveDetachment" /> Chg</label>
+                                    <label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.Fight" @bind:after="saveDetachment" /> Fgt</label>
+                                </div>
+                                @if (DetachmentConfig.Command || DetachmentConfig.Move || DetachmentConfig.Shoot || DetachmentConfig.Charge || DetachmentConfig.Fight)
+                                {
+                                    <div class="setup-checks-row">
+                                        @if (DetachmentConfig.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyCommand" @bind:after="saveDetachment" /> eCmd</label>}
+                                        @if (DetachmentConfig.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyMove" @bind:after="saveDetachment" /> eMov</label>}
+                                        @if (DetachmentConfig.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyShoot" @bind:after="saveDetachment" /> eSht</label>}
+                                        @if (DetachmentConfig.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyCharge" @bind:after="saveDetachment" /> eChg</label>}
+                                        @if (DetachmentConfig.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="DetachmentConfig.EnemyFight" @bind:after="saveDetachment" /> eFgt</label>}
+                                    </div>
+                                    <div class="setup-checks-row">
+                                        @if (DetachmentConfig.Command){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyCommand" @bind:after="saveDetachment" /> myCmd</label>}
+                                        @if (DetachmentConfig.Move){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyMove" @bind:after="saveDetachment" /> myMov</label>}
+                                        @if (DetachmentConfig.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyShooting" @bind:after="saveDetachment" /> mySht</label>}
+                                        @if (DetachmentConfig.Charge){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyCharge" @bind:after="saveDetachment" /> myChg</label>}
+                                        @if (DetachmentConfig.Fight){<label class="setup-lbl"><input type="checkbox" @bind="DetachmentConfig.MyFight" @bind:after="saveDetachment" /> myFgt</label>}
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        @if (ActiveDetachmentEffects.Count > 0)
+                        {
+                            <div class="detachment-effects-list">
+                                @for (int idx = 0; idx < ActiveDetachmentEffects.Count; idx++)
+                                {
+                                    var effIdx = idx;
+                                    var eff = ActiveDetachmentEffects[effIdx];
+                                    var effCfg = GetDetachmentEffectConfig!(Army.Detachment, effIdx);
+                                    @if (eff.ReflectedInStats)
+                                    {
+                                        <div class="detachment-effect-item @(effCfg.ApplyToStats ? "added-to-unit" : "")"
+                                             @onclick:stopPropagation="true">
+                                            <span class="ability-name">↳ @DescribeDetachmentEffect!(eff)</span>
+                                            <div class="setup-checks">
+                                                <div class="setup-checks-row">
+                                                    <label class="setup-lbl unit-lbl" title="Apply this effect directly to weapon stats"><input type="checkbox" @bind="effCfg.ApplyToStats" @bind:after="saveDetachmentEffects" /> Apply to stats</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="detachment-effect-item" @onclick:stopPropagation="true">
+                                            <span class="ability-name">↳ @DescribeDetachmentEffect!(eff)</span>
+                                            <span class="setup-lbl disabled-lbl">Reminder — shown in detachment rule text</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                @* ── Setup mode: army (faction) rules ── *@
+                @if (Army is not null && Army.ArmyRules.Count > 0)
+                {
+                    <div class="abilities-panel-unit">
+                        <div class="abilities-panel-unit-name">🏳 Army Rules: @Army.Faction</div>
+                        @foreach (var rule in Army.ArmyRules)
+                        {
+                            var arCfg = GetArmyRuleConfig!(rule);
+                            var arFocused = FocusedArmyRules.Contains(rule.Name);
+                            <div class="abilities-panel-item @(arCfg.ApplyToStats ? "added-to-unit" : "") @(arFocused ? "expanded" : "")"
+                                 @onclick="() => OnToggleArmyRuleFocus.InvokeAsync(rule.Name)"
+                                 @onclick:stopPropagation="true">
+                                <span class="ability-name">@rule.Name</span>
+                                <div class="ability-desc">@rule.Description</div>
+                                <div class="setup-checks" @onclick:stopPropagation="true">
+                                    <div class="setup-checks-row">
+                                        <label class="setup-lbl"><input type="checkbox" @bind="arCfg.Enabled" @bind:after="saveArmyRules" /> Active</label>
+                                        <label class="setup-lbl disable"><input type="checkbox" @bind="arCfg.Reminder" @bind:after="saveArmyRules" /> Reminder</label>
+                                        <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="arCfg.ApplyToStats" @bind:after="saveArmyRules" /> Stats</label>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @* ── Setup mode: all abilities by unit with config checkboxes ── *@
+                @if (Army is not null)
+                {
+                    @foreach (var sUnit in Army.Units)
+                    {
+                        var setupAbilities = sUnit.Abilities.Where(a => !IsSetupOnlyAbility!(a)).ToList();
+                        @if (setupAbilities.Count > 0)
+                        {
+                            <div class="abilities-panel-unit">
+                                <div class="abilities-panel-unit-name">@sUnit.Name@(sUnit.IsLeader ? " (Leader)" : "")</div>
+                                @foreach (var ability in setupAbilities)
+                                {
+                                    var cfg = GetAbilityConfig!(ability);
+                                    <div class="abilities-panel-item @(cfg.ApplyToStats ? "added-to-unit" : "") @(FocusedAbility == ability ? "expanded" : "")"
+                                         @onclick="() => OnToggleFocusAbility.InvokeAsync(ability)" @onclick:stopPropagation="true">
+                                        <span class="ability-name">@ability.Name</span>
+                                        <div class="ability-desc">@ability.Description</div>
+                                        <div class="setup-checks" @onclick:stopPropagation="true">
+                                            <div class="setup-checks-row">
+                                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" @bind:after="saveAbilities" /> My</label>
+                                                <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" @bind:after="saveAbilities" /> Enem</label>
+                                                <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="cfg.ApplyToStats" @bind:after="() => OnApplyToStatsChanged.InvokeAsync(cfg)" /> Stats</label>
+                                            </div>
+                                            <div class="setup-checks-row">
+                                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" @bind:after="saveAbilities" /> Cmd</label>
+                                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Move" @bind:after="saveAbilities" /> Mov</label>
+                                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Shoot" @bind:after="saveAbilities" /> Sht</label>
+                                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Charge" @bind:after="saveAbilities" /> Chg</label>
+                                                <label class="setup-lbl"><input type="checkbox" @bind="cfg.Fight" @bind:after="saveAbilities" /> Fgt</label>
+                                            </div>
+                                            @if (cfg.Command || cfg.Move || cfg.Shoot || cfg.Charge || cfg.Fight)
+                                            {
+                                                <div class="setup-checks-row">
+                                                    @if (cfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyCommand" @bind:after="saveAbilities" /> eCmd</label>}
+                                                    @if (cfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyMove" @bind:after="saveAbilities" /> eMov</label>}
+                                                    @if (cfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyShoot" @bind:after="saveAbilities" /> eSht</label>}
+                                                    @if (cfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyCharge" @bind:after="saveAbilities" /> eChg</label>}
+                                                    @if (cfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyFight" @bind:after="saveAbilities" /> eFgt</label>}
+                                                </div>
+                                                <div class="setup-checks-row">
+                                                    @if (cfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyCommand" @bind:after="saveAbilities" /> myCmd</label>}
+                                                    @if (cfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyMove" @bind:after="saveAbilities" /> myMov</label>}
+                                                    @if (cfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyShooting" @bind:after="saveAbilities" /> mySht</label>}
+                                                    @if (cfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyCharge" @bind:after="saveAbilities" /> myChg</label>}
+                                                    @if (cfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="cfg.MyFight" @bind:after="saveAbilities" /> myFgt</label>}
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                }
+            }
+            else
+            {
+                @* ── Detachment rule in abilities panel ── *@
+                @if (Army is not null && !string.IsNullOrEmpty(Army.DetachmentRule) && HasDetachmentPhasesConfigured)
+                {
+                    <div class="abilities-panel-unit">
+                        <div class="abilities-panel-unit-name">⚔ @Army.Detachment</div>
+                        <div class="abilities-panel-item @(FocusedDetachmentRule ? "expanded" : "")"
+                             @onclick="ToggleDetachmentRuleFocus" @onclick:stopPropagation="true">
+                            <span class="ability-name">@Army.Detachment</span>
+                            <div class="ability-desc">@Army.DetachmentRule</div>
+                        </div>
+                    </div>
+                }
+
+                @* ── All abilities grouped by unit (no filtering — reference only) ── *@
+                @foreach (var entry in PanelUnits)
+                {
+                    var allAbilities = entry.Abilities;
+                    if (allAbilities.Count == 0) { continue; }
+
+                    <div class="abilities-panel-unit">
+                        <div class="abilities-panel-unit-name">@entry.Unit.Name</div>
+                        @foreach (var ability in allAbilities)
+                        {
+                            var aUsed = UsedAbilities.Contains(ability);
+                            <div class="abilities-panel-item @(FocusedAbility == ability ? "expanded" : "") @(aUsed ? "once-used" : "")"
+                                 @onclick="() => OnToggleFocusAbility.InvokeAsync(ability)" @onclick:stopPropagation="true"
+                                 @onpointerdown="() => OnceAbilityPointerDown.InvokeAsync(ability)"
+                                 @onpointerup="() => OncePointerUp.InvokeAsync()" @onpointerleave="() => OncePointerUp.InvokeAsync()"
+                                 @oncontextmenu:preventDefault>
+                                <span class="ability-name">@ability.Name</span>
+                                <div class="ability-desc">@ability.Description</div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    public record struct PanelUnitItem(UnitEntry Unit, IReadOnlyList<AbilityEntry> Abilities);
+
+    [Parameter, EditorRequired] public bool PlayMode { get; set; }
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter, EditorRequired] public ArmyRoster? Army { get; set; }
+
+    // Setup mode dependencies
+    [Parameter] public DetachmentSetupEntry? DetachmentConfig { get; set; }
+    [Parameter] public EventCallback OnSaveDetachmentConfig { get; set; }
+    [Parameter] public IReadOnlyList<DetachmentEffect> ActiveDetachmentEffects { get; set; } = [];
+    [Parameter] public Func<string, int, DetachmentEffectSetupEntry>? GetDetachmentEffectConfig { get; set; }
+    [Parameter] public EventCallback OnSaveDetachmentEffectConfigs { get; set; }
+    [Parameter] public Func<DetachmentEffect, string>? DescribeDetachmentEffect { get; set; }
+
+    [Parameter] public Func<RuleEntry, ArmyRuleSetupEntry>? GetArmyRuleConfig { get; set; }
+    [Parameter] public EventCallback OnSaveArmyRuleConfigs { get; set; }
+    [Parameter] public IReadOnlyCollection<string> FocusedArmyRules { get; set; } = Array.Empty<string>();
+    [Parameter] public EventCallback<string> OnToggleArmyRuleFocus { get; set; }
+
+    [Parameter] public Func<AbilityEntry, AbilitySetupEntry>? GetAbilityConfig { get; set; }
+    [Parameter] public EventCallback OnSaveAbilityConfigs { get; set; }
+    [Parameter] public EventCallback OnWipeAllAbilityConfigs { get; set; }
+    [Parameter] public EventCallback<AbilitySetupEntry> OnApplyToStatsChanged { get; set; }
+    [Parameter] public Func<AbilityEntry, bool>? IsSetupOnlyAbility { get; set; }
+
+    // Focus state
+    [Parameter] public AbilityEntry? FocusedAbility { get; set; }
+    [Parameter] public EventCallback<AbilityEntry> OnToggleFocusAbility { get; set; }
+    [Parameter] public bool FocusedDetachmentRule { get; set; }
+    [Parameter] public EventCallback<bool> FocusedDetachmentRuleChanged { get; set; }
+
+    // Play mode
+    [Parameter] public bool HasDetachmentPhasesConfigured { get; set; }
+    [Parameter] public IReadOnlyList<PanelUnitItem> PanelUnits { get; set; } = [];
+    [Parameter] public IReadOnlyCollection<AbilityEntry> UsedAbilities { get; set; } = Array.Empty<AbilityEntry>();
+    [Parameter] public EventCallback<AbilityEntry> OnceAbilityPointerDown { get; set; }
+    [Parameter] public EventCallback OncePointerUp { get; set; }
+
+    private Action saveDetachment = default!;
+    private Action saveDetachmentEffects = default!;
+    private Action saveArmyRules = default!;
+    private Action saveAbilities = default!;
+
+    protected override void OnInitialized()
+    {
+        saveDetachment = () => OnSaveDetachmentConfig.InvokeAsync();
+        saveDetachmentEffects = () => OnSaveDetachmentEffectConfigs.InvokeAsync();
+        saveArmyRules = () => OnSaveArmyRuleConfigs.InvokeAsync();
+        saveAbilities = () => OnSaveAbilityConfigs.InvokeAsync();
+    }
+
+    private Task ToggleOpen() => IsOpenChanged.InvokeAsync(!IsOpen);
+    private Task ToggleDetachmentRuleFocus() => FocusedDetachmentRuleChanged.InvokeAsync(!FocusedDetachmentRule);
+}
