@@ -1,8 +1,5 @@
-<Solution>
+﻿<Solution>
   <Project Path="W40k_CheatSheet.Client/W40k_CheatSheet.Client.csproj">
-    <BuildType Project="Release" />
-  </Project>
-  <Project Path="W40k_CheatSheet/W40k_CheatSheet.csproj">
     <BuildType Project="Release" />
   </Project>
 </Solution>
