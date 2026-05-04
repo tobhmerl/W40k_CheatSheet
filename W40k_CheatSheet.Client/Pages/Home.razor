@@ -340,22 +340,9 @@
 
                             @if (focusedWeapon is not null && (ranged.Contains(focusedWeapon) || melee.Contains(focusedWeapon)))
                             {
-                                var kwEntries = GetWeaponKeywordEntries(focusedWeapon);
-                                if (kwEntries.Count > 0)
-                                {
-                                    <div class="card-abilities">
-                                        @foreach (var kw in kwEntries)
-                                        {
-                                            <div class="card-ability-item">
-                                                <span class="card-ability-name">@kw.Name</span>
-                                                @if (!string.IsNullOrEmpty(kw.Description))
-                                                {
-                                                    <div class="card-ability-desc">@kw.Description</div>
-                                                }
-                                            </div>
-                                        }
-                                    </div>
-                                }
+                                <WeaponKeywordsPanel FocusedWeapon="focusedWeapon"
+                                                     IsKnownWeapon="true"
+                                                     Entries="GetWeaponKeywordEntries(focusedWeapon)" />
                             }
 
                             @if (unit.IsLeader && unit.AttachedLeaders.Count == 0)
@@ -365,25 +352,10 @@
                                 </button>
                             }
 
-                            @if (!string.IsNullOrEmpty(extraUnitKw))
-                            {
-                                var extraKwCss = "unit-extra-keywords" + (extraKwExpandedUnit == unit ? " expanded" : "");
-                                <div class="@extraKwCss" @onclick="() => { extraKwExpandedUnit = extraKwExpandedUnit == unit ? null : unit; }" @onclick:stopPropagation="true">
-                                    <span class="kw-extra">@extraUnitKw</span>
-                                    @if (extraKwExpandedUnit == unit)
-                                    {
-                                        <div class="extra-kw-details">
-                                            @foreach (var kwa in GetExtraUnitAbilities(unit))
-                                            {
-                                                <div class="extra-kw-item">
-                                                    <span class="extra-kw-name">@kwa.Label</span>
-                                                    <span class="extra-kw-desc">@kwa.Description</span>
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            }
+                            <UnitExtraKeywords ExtraUnitKw="@extraUnitKw"
+                                               Expanded="extraKwExpandedUnit == unit"
+                                               Abilities="GetExtraUnitAbilities(unit)"
+                                               OnToggle="() => { extraKwExpandedUnit = extraKwExpandedUnit == unit ? null : unit; }" />
 
                             @if (!playMode)
                             {

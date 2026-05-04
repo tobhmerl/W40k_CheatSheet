@@ -1,0 +1,26 @@
+@if (!string.IsNullOrEmpty(ExtraUnitKw))
+{
+    var extraKwCss = "unit-extra-keywords" + (Expanded ? " expanded" : "");
+    <div class="@extraKwCss" @onclick="() => OnToggle.InvokeAsync()" @onclick:stopPropagation="true">
+        <span class="kw-extra">@ExtraUnitKw</span>
+        @if (Expanded)
+        {
+            <div class="extra-kw-details">
+                @foreach (var kwa in Abilities)
+                {
+                    <div class="extra-kw-item">
+                        <span class="extra-kw-name">@kwa.Label</span>
+                        <span class="extra-kw-desc">@kwa.Description</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string ExtraUnitKw { get; set; } = string.Empty;
+    [Parameter] public bool Expanded { get; set; }
+    [Parameter] public IReadOnlyList<(string Label, string Description)> Abilities { get; set; } = [];
+    [Parameter] public EventCallback OnToggle { get; set; }
+}

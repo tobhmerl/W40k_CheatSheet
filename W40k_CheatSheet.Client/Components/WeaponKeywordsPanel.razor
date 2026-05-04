@@ -1,0 +1,23 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (FocusedWeapon is not null && IsKnownWeapon && Entries.Count > 0)
+{
+    <div class="card-abilities">
+        @foreach (var kw in Entries)
+        {
+            <div class="card-ability-item">
+                <span class="card-ability-name">@kw.Name</span>
+                @if (!string.IsNullOrEmpty(kw.Description))
+                {
+                    <div class="card-ability-desc">@kw.Description</div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public WeaponProfile? FocusedWeapon { get; set; }
+    [Parameter] public bool IsKnownWeapon { get; set; }
+    [Parameter] public IReadOnlyList<(string Name, string Description)> Entries { get; set; } = [];
+}
