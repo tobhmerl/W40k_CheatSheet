@@ -1,0 +1,123 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (Stats.Count > 0)
+{
+    <div class="table-wrapper">
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Stats)
+                {
+                    var effectiveInvuln = BetterFnp!(s.InvulnSave, ExtraInvuln);
+                    var effectiveFnp = BetterFnp!(s.FeelNoPain, ExtraFnp);
+                    var invulnIsExtra = !string.IsNullOrEmpty(ExtraInvuln) && effectiveInvuln == ExtraInvuln && string.IsNullOrEmpty(s.InvulnSave);
+                    var fnpIsExtra = !string.IsNullOrEmpty(ExtraFnp) && effectiveFnp == ExtraFnp && string.IsNullOrEmpty(s.FeelNoPain);
+                    <tr class="stat-row @(FocusedStatOwner == s.Owner ? "focused" : "") @(FocusedWeapon is not null ? "dimmed" : "")"
+                        @onclick="() => OnToggleFocusStatOwner.InvokeAsync((s.Owner, Unit!))" @onclick:stopPropagation="true">
+                        <td class="name-cell">
+                            <span class="stat-name-text">@ShortStatName!(s.Stat.Name)</span>
+                            @if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
+                            {
+                                <span class="stat-saves">(
+                                    @if (invulnIsExtra)
+                                    {
+                                        <span class="invuln-extra buff-source-trigger" @onclick="() => OnShowBuffSource.InvokeAsync((effectiveInvuln, InvulnSource ?? string.Empty, string.Empty))" @onclick:stopPropagation="true">@effectiveInvuln</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(effectiveInvuln))
+                                    {
+                                        <span class="invuln">@effectiveInvuln</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp))
+                                    {
+                                        <text>, </text>
+                                    }
+                                    @if (fnpIsExtra)
+                                    {
+                                        <span class="fnp-extra buff-source-trigger" @onclick="() => OnShowBuffSource.InvokeAsync((effectiveFnp, FnpSource ?? string.Empty, string.Empty))" @onclick:stopPropagation="true">@(effectiveFnp.Replace("+", "++"))</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(effectiveFnp))
+                                    {
+                                        <span class="fnp">@(effectiveFnp.Replace("+", "++"))</span>
+                                    }
+                                    )</span>
+                            }
+                            @if (PlayMode && s.Owner.ModelCount > 1)
+                            {
+                                <span class="model-counter" @onclick:stopPropagation="true">
+                                    <button class="model-btn" @onclick="() => OnAdjustModelCount.InvokeAsync((s.Owner, -1))">−</button>
+                                    <span class="model-count @(GetModelCount!(s.Owner) < s.Owner.ModelCount ? "model-reduced" : "")">@GetModelCount!(s.Owner)</span>
+                                    <button class="model-btn" @onclick="() => OnAdjustModelCount.InvokeAsync((s.Owner, 1))">+</button>
+                                </span>
+                            }
+                            else if (PlayMode)
+                            {
+                                <button class="model-kill-btn" @onclick="() => OnAdjustModelCount.InvokeAsync((s.Owner, -1))" @onclick:stopPropagation="true">☠</button>
+                            }
+                        </td>
+                        <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
+                        <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
+                    </tr>
+                    @if (PlayMode && Targeted && DefensiveModifiers.Count > 0)
+                    {
+                        <tr class="def-mod-row">
+                            <td colspan="7">
+                                @foreach (var mod in DefensiveModifiers)
+                                {
+                                    var prefix = mod.AttackType == "melee" ? "⚔ " : mod.AttackType == "ranged" ? "🎯 " : "";
+                                    var label = $"{prefix}{char.ToUpper(mod.Roll[0])}{mod.Roll[1..]} {mod.Value:+#;-#}";
+                                    var tipText = string.IsNullOrEmpty(mod.Condition) ? mod.Source : $"{mod.Source} ({mod.Condition})";
+                                    var descText = string.IsNullOrEmpty(mod.Condition) ? "" : $"Condition: {mod.Condition}";
+                                    <span class="def-mod-pill buff-source-trigger" title="@tipText" @onclick="() => OnShowBuffSource.InvokeAsync((label, mod.Source, descText))" @onclick:stopPropagation="true">
+                                        @label
+                                        @if (!string.IsNullOrEmpty(mod.Condition)) { <span class="def-mod-cond">@mod.Condition</span> }
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (PlayMode && Charged && ChargeEffects.Count > 0)
+                    {
+                        <tr class="def-mod-row">
+                            <td colspan="7">
+                                @foreach (var ce in ChargeEffects)
+                                {
+                                    <span class="charge-pill buff-source-trigger" title="@ce.Source" @onclick="() => OnShowBuffSource.InvokeAsync((ce.Summary, ce.Source, ce.Description))" @onclick:stopPropagation="true">
+                                        ⚡ @ce.Summary
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public UnitEntry? Unit { get; set; }
+    [Parameter] public IReadOnlyList<(StatLine Stat, string InvulnSave, string FeelNoPain, UnitEntry Owner)> Stats { get; set; } = [];
+    [Parameter] public string ExtraInvuln { get; set; } = string.Empty;
+    [Parameter] public string ExtraFnp { get; set; } = string.Empty;
+    [Parameter] public string? InvulnSource { get; set; }
+    [Parameter] public string? FnpSource { get; set; }
+    [Parameter] public bool PlayMode { get; set; }
+    [Parameter] public UnitEntry? FocusedStatOwner { get; set; }
+    [Parameter] public WeaponProfile? FocusedWeapon { get; set; }
+    [Parameter] public bool Targeted { get; set; }
+    [Parameter] public bool Charged { get; set; }
+    [Parameter] public IReadOnlyList<DefensiveModifier> DefensiveModifiers { get; set; } = [];
+    [Parameter] public IReadOnlyList<ChargeEffect> ChargeEffects { get; set; } = [];
+
+    [Parameter] public EventCallback<(UnitEntry Owner, UnitEntry Card)> OnToggleFocusStatOwner { get; set; }
+    [Parameter] public EventCallback<(UnitEntry Owner, int Delta)> OnAdjustModelCount { get; set; }
+    [Parameter] public EventCallback<(string Label, string Source, string Description)> OnShowBuffSource { get; set; }
+
+    [Parameter, EditorRequired] public Func<string, string, string>? BetterFnp { get; set; }
+    [Parameter, EditorRequired] public Func<string, string>? ShortStatName { get; set; }
+    [Parameter, EditorRequired] public Func<UnitEntry, int>? GetModelCount { get; set; }
+}

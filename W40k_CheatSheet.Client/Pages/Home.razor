@@ -293,107 +293,25 @@
 
                             @if (stats.Count > 0)
                             {
-                                <div class="table-wrapper">
-                                    <table class="stats-table">
-                                        <thead>
-                                            <tr>
-                                                <th></th><th>M</th><th>T</th><th>SV</th><th>W</th><th>LD</th><th>OC</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var s in stats)
-                                            {
-                                                var effectiveInvuln = BetterFnp(s.InvulnSave, extraDef.ExtraInvuln);
-                                                var effectiveFnp = BetterFnp(s.FeelNoPain, extraDef.ExtraFnp);
-                                                var invulnIsExtra = !string.IsNullOrEmpty(extraDef.ExtraInvuln) && effectiveInvuln == extraDef.ExtraInvuln && string.IsNullOrEmpty(s.InvulnSave);
-                                                var fnpIsExtra = !string.IsNullOrEmpty(extraDef.ExtraFnp) && effectiveFnp == extraDef.ExtraFnp && string.IsNullOrEmpty(s.FeelNoPain);
-                                                <tr class="stat-row @(focusedStatOwner == s.Owner ? "focused" : "") @(focusedWeapon is not null ? "dimmed" : "")" @onclick="() => ToggleFocusStatOwner(s.Owner, unit)" @onclick:stopPropagation="true">
-                                                    <td class="name-cell">
-                                                        <span class="stat-name-text">@ShortStatName(s.Stat.Name)</span>
-                                                        @if (!string.IsNullOrEmpty(effectiveInvuln) || !string.IsNullOrEmpty(effectiveFnp))
-                                                        {
-                                                            <span class="stat-saves">(
-                                                                @if (invulnIsExtra)
-                                                                {
-                                                                    <span class="invuln-extra buff-source-trigger" @onclick="() => ShowBuffSource(effectiveInvuln, srcDef.InvulnSource, string.Empty)" @onclick:stopPropagation="true">@effectiveInvuln</span>
-                                                                }
-                                                                else if (!string.IsNullOrEmpty(effectiveInvuln))
-                                                                {
-                                                                    <span class="invuln">@effectiveInvuln</span>
-                                                                }
-                                                                @if (!string.IsNullOrEmpty(effectiveInvuln) && !string.IsNullOrEmpty(effectiveFnp))
-                                                                {
-                                                                    <text>, </text>
-                                                                }
-                                                                @if (fnpIsExtra)
-                                                                {
-                                                                    <span class="fnp-extra buff-source-trigger" @onclick="() => ShowBuffSource(effectiveFnp, srcDef.FnpSource, string.Empty)" @onclick:stopPropagation="true">@(effectiveFnp.Replace("+", "++"))</span>
-                                                                }
-                                                                else if (!string.IsNullOrEmpty(effectiveFnp))
-                                                                {
-                                                                    <span class="fnp">@(effectiveFnp.Replace("+", "++"))</span>
-                                                                }
-                                                                     )</span>
-                                                                }
-                                                                @if (playMode && s.Owner.ModelCount > 1)
-                                                                {
-                                                                    <span class="model-counter" @onclick:stopPropagation="true">
-                                                                        <button class="model-btn" @onclick="() => AdjustModelCount(s.Owner, -1)">−</button>
-                                                                        <span class="model-count @(GetModelCount(s.Owner) < s.Owner.ModelCount ? "model-reduced" : "")">@GetModelCount(s.Owner)</span>
-                                                                        <button class="model-btn" @onclick="() => AdjustModelCount(s.Owner, 1)">+</button>
-                                                                    </span>
-                                                                }
-                                                                else if (playMode)
-                                                                {
-                                                                    <button class="model-kill-btn" @onclick="() => AdjustModelCount(s.Owner, -1)" @onclick:stopPropagation="true">☠</button>
-                                                                }
-                                                            </td>
-                                                    <td>@s.Stat.M</td><td>@s.Stat.T</td><td>@s.Stat.SV</td>
-                                                    <td>@s.Stat.W</td><td>@s.Stat.LD</td><td>@s.Stat.OC</td>
-                                                </tr>
-                                                @if (playMode && targetedUnits.Contains(unit))
-                                                {
-                                                    var mods = GetAllDefensiveModifiers(unit);
-                                                    if (mods.Count > 0)
-                                                    {
-                                                        <tr class="def-mod-row">
-                                                            <td colspan="7">
-                                                                @foreach (var mod in mods)
-                                                                                {
-                                                                                    var prefix = mod.AttackType == "melee" ? "⚔ " : mod.AttackType == "ranged" ? "🎯 " : "";
-                                                                                    var label = $"{prefix}{char.ToUpper(mod.Roll[0])}{mod.Roll[1..]} {mod.Value:+#;-#}";
-                                                                                    var tipText = string.IsNullOrEmpty(mod.Condition) ? mod.Source : $"{mod.Source} ({mod.Condition})";
-                                                                                    var descText = string.IsNullOrEmpty(mod.Condition) ? "" : $"Condition: {mod.Condition}";
-                                                                                    <span class="def-mod-pill buff-source-trigger" title="@tipText" @onclick="() => ShowBuffSource(label, mod.Source, descText)" @onclick:stopPropagation="true">
-                                                                                        @label
-                                                                                        @if (!string.IsNullOrEmpty(mod.Condition)) { <span class="def-mod-cond">@mod.Condition</span> }
-                                                                                    </span>
-                                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                }
-                                                @if (playMode && chargedUnits.Contains(unit))
-                                                {
-                                                    var cEffects = GetAllChargeEffects(unit);
-                                                    if (cEffects.Count > 0)
-                                                    {
-                                                        <tr class="def-mod-row">
-                                                            <td colspan="7">
-                                                                @foreach (var ce in cEffects)
-                                                                {
-                                                                    <span class="charge-pill buff-source-trigger" title="@ce.Source" @onclick="() => ShowBuffSource(ce.Summary, ce.Source, ce.Description)" @onclick:stopPropagation="true">
-                                                                        ⚡ @ce.Summary
-                                                                    </span>
-                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                }
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <StatsTable Unit="unit"
+                                            Stats="stats"
+                                            ExtraInvuln="@extraDef.ExtraInvuln"
+                                            ExtraFnp="@extraDef.ExtraFnp"
+                                            InvulnSource="@srcDef.InvulnSource"
+                                            FnpSource="@srcDef.FnpSource"
+                                            PlayMode="playMode"
+                                            FocusedStatOwner="focusedStatOwner"
+                                            FocusedWeapon="focusedWeapon"
+                                            Targeted="targetedUnits.Contains(unit)"
+                                            Charged="chargedUnits.Contains(unit)"
+                                            DefensiveModifiers="GetAllDefensiveModifiers(unit)"
+                                            ChargeEffects="GetAllChargeEffects(unit)"
+                                            OnToggleFocusStatOwner="ToggleFocusStatOwnerTuple"
+                                            OnAdjustModelCount="AdjustModelCountTuple"
+                                            OnShowBuffSource="ShowBuffSourceTuple"
+                                            BetterFnp="BetterFnp"
+                                            ShortStatName="ShortStatName"
+                                            GetModelCount="GetModelCount" />
                             }
 
                             @if (ranged.Count > 0)
@@ -2651,6 +2569,12 @@
 
     private void ShowBuffSourceTuple((string Label, string Source, string Description) args)
         => ShowBuffSource(args.Label, args.Source, args.Description);
+
+    private void ToggleFocusStatOwnerTuple((UnitEntry Owner, UnitEntry Card) args)
+        => ToggleFocusStatOwner(args.Owner, args.Card);
+
+    private void AdjustModelCountTuple((UnitEntry Owner, int Delta) args)
+        => AdjustModelCount(args.Owner, args.Delta);
 
     private (string Source, string KeywordDesc) GetExtraWeaponKeywordsSource(UnitEntry unit, bool isMelee)
     {
