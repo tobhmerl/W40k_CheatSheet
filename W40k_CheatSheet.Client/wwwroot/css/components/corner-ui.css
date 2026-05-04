@@ -76,10 +76,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Visual centering tweak — the artwork's label area sits slightly above
-       the geometric center of the image. */
-    padding-bottom: 6%;
-    font-size: 0.7rem;
+    /* The artwork has a decorative cog/seal on the left ~22% of the image,
+       so the actual label plate is offset to the right. Pad the left side
+       to visually center the username inside the plate, not the whole PNG. */
+    padding-left: 22%;
+    padding-right: 4%;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     color: #f1f1f1;
