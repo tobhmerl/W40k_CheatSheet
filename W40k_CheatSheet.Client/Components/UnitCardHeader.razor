@@ -1,0 +1,76 @@
+@using W40k_CheatSheet.Client.Models
+
+<div class="unit-header @(Collapsed ? "" : "expanded")"
+     @onclick="e => OnHeaderClick.InvokeAsync((Unit!, e))"
+     @onpointerdown="() => OnHeaderPointerDown.InvokeAsync(Unit!)"
+     @onpointerup="() => OnHeaderPointerUp.InvokeAsync()"
+     @onpointerleave="() => OnHeaderPointerUp.InvokeAsync()"
+     @oncontextmenu:preventDefault>
+    <div class="unit-name">
+        @Unit!.Name
+        @if (IsWarlord)
+        {
+            <span class="warlord-badge">⭐</span>
+        }
+        @if (HasStrats)
+        {
+            <span class="strat-toggle @(!StratHidden ? "expanded" : "")"
+                  @onclick="() => OnToggleStratDots.InvokeAsync(Unit!)" @onclick:stopPropagation="true">@(!StratHidden ? "▾" : "▸")</span>
+        }
+        @if (PlayMode)
+        {
+            @foreach (var badge in KeywordBadges)
+            {
+                <span class="header-kw-badge buff-source-trigger"
+                      @onclick="() => OnShowBuffSource.InvokeAsync((badge.Keyword, badge.Source, badge.Description))"
+                      @onclick:stopPropagation="true">[@badge.Keyword]</span>
+            }
+        }
+    </div>
+    <div class="header-right">
+        <button class="move-handle" @onclick="() => OnStartMove.InvokeAsync(Unit!)" @onclick:stopPropagation="true">☰</button>
+        @if (!PlayMode)
+        {
+            <span class="collapse-icon">@(Collapsed ? "▸" : "▾")</span>
+        }
+        @if (PlayMode && HasDefensiveModifiers)
+        {
+            <button class="targeted-btn @(Targeted ? "active" : "")"
+                    @onclick="() => OnToggleTargeted.InvokeAsync(Unit!)" @onclick:stopPropagation="true">🎯</button>
+        }
+        @if (PlayMode && HasChargeEffects)
+        {
+            <button class="charged-btn @(Charged ? "active" : "")"
+                    @onclick="() => OnToggleCharged.InvokeAsync(Unit!)" @onclick:stopPropagation="true">⚡</button>
+        }
+        @if (PlayMode && Killed)
+        {
+            <button class="revive-btn" @onclick="() => OnReviveUnit.InvokeAsync(Unit!)" @onclick:stopPropagation="true">↩</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public UnitEntry? Unit { get; set; }
+    [Parameter] public bool Collapsed { get; set; }
+    [Parameter] public bool IsWarlord { get; set; }
+    [Parameter] public bool HasStrats { get; set; }
+    [Parameter] public bool StratHidden { get; set; }
+    [Parameter] public bool PlayMode { get; set; }
+    [Parameter] public bool Targeted { get; set; }
+    [Parameter] public bool Charged { get; set; }
+    [Parameter] public bool Killed { get; set; }
+    [Parameter] public bool HasDefensiveModifiers { get; set; }
+    [Parameter] public bool HasChargeEffects { get; set; }
+    [Parameter] public IReadOnlyList<(string Keyword, string Source, string Description)> KeywordBadges { get; set; } = [];
+
+    [Parameter] public EventCallback<(UnitEntry Unit, MouseEventArgs Args)> OnHeaderClick { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnHeaderPointerDown { get; set; }
+    [Parameter] public EventCallback OnHeaderPointerUp { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnToggleStratDots { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnStartMove { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnToggleTargeted { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnToggleCharged { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnReviveUnit { get; set; }
+    [Parameter] public EventCallback<(string Label, string Source, string Description)> OnShowBuffSource { get; set; }
+}

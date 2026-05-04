@@ -174,53 +174,27 @@
                      @ondragover:preventDefault
                      @ondrop="() => Drop(unit)">
 
-                    <div class="unit-header @(collapsed ? "" : "expanded")"
-                         @onclick="e => HandleHeaderClick(unit, e)"
-                         @onpointerdown="() => HeaderPointerDown(unit)"
-                         @onpointerup="HeaderPointerUp"
-                         @onpointerleave="HeaderPointerUp"
-                         @oncontextmenu:preventDefault>
-                        <div class="unit-name">
-                            @unit.Name
-                            @if (isWarlord)
-                            {
-                                <span class="warlord-badge">⭐</span>
-                            }
-                            @{
-                                var hasStrats = abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0;
-                            }
-                            @if (hasStrats)
-                            {
-                                <span class="strat-toggle @(!stratHiddenUnits.Contains(unit) ? "expanded" : "")" @onclick="() => ToggleStratDots(unit)" @onclick:stopPropagation="true">@(!stratHiddenUnits.Contains(unit) ? "▾" : "▸")</span>
-                            }
-                            @if (playMode)
-                            {
-                                @foreach (var badge in GetUnitKeywordBadgesWithSource(unit))
-                                {
-                                    <span class="header-kw-badge buff-source-trigger" @onclick="() => ShowBuffSource(badge.Keyword, badge.Source, badge.Description)" @onclick:stopPropagation="true">[@badge.Keyword]</span>
-                                }
-                            }
-                        </div>
-                        <div class="header-right">
-                                <button class="move-handle" @onclick="() => StartMove(unit)" @onclick:stopPropagation="true">☰</button>
-                            @if (!playMode)
-                            {
-                                <span class="collapse-icon">@(collapsed ? "▸" : "▾")</span>
-                            }
-                            @if (playMode && GetAllDefensiveModifiers(unit).Count > 0)
-                            {
-                                <button class="targeted-btn @(targetedUnits.Contains(unit) ? "active" : "")" @onclick="() => ToggleTargeted(unit)" @onclick:stopPropagation="true">🎯</button>
-                            }
-                            @if (playMode && GetAllChargeEffects(unit).Count > 0)
-                            {
-                                <button class="charged-btn @(chargedUnits.Contains(unit) ? "active" : "")" @onclick="() => ToggleCharged(unit)" @onclick:stopPropagation="true">⚡</button>
-                            }
-                            @if (playMode && IsKilled(unit))
-                            {
-                                <button class="revive-btn" @onclick="() => ReviveUnit(unit)" @onclick:stopPropagation="true">↩</button>
-                            }
-                        </div>
-                    </div>
+                    <UnitCardHeader Unit="unit"
+                                    Collapsed="collapsed"
+                                    IsWarlord="isWarlord"
+                                    HasStrats="abilityCount > 0 || headerStrats.Count > 0 || alwaysActiveAbilities.Count > 0 || alwaysActiveStrats.Count > 0"
+                                    StratHidden="stratHiddenUnits.Contains(unit)"
+                                    PlayMode="playMode"
+                                    Targeted="targetedUnits.Contains(unit)"
+                                    Charged="chargedUnits.Contains(unit)"
+                                    Killed="IsKilled(unit)"
+                                    HasDefensiveModifiers="playMode && GetAllDefensiveModifiers(unit).Count > 0"
+                                    HasChargeEffects="playMode && GetAllChargeEffects(unit).Count > 0"
+                                    KeywordBadges="playMode ? GetUnitKeywordBadgesWithSource(unit).Select(b => (b.Keyword, b.Source, b.Description)).ToList() : new List<(string, string, string)>()"
+                                    OnHeaderClick="HandleHeaderClickTuple"
+                                    OnHeaderPointerDown="HeaderPointerDown"
+                                    OnHeaderPointerUp="HeaderPointerUp"
+                                    OnToggleStratDots="ToggleStratDots"
+                                    OnStartMove="StartMove"
+                                    OnToggleTargeted="ToggleTargeted"
+                                    OnToggleCharged="ToggleCharged"
+                                    OnReviveUnit="ReviveUnit"
+                                    OnShowBuffSource="ShowBuffSourceTuple" />
 
                     @{
                         var showDetachmentInCard = playMode && !string.IsNullOrEmpty(army?.DetachmentRule) &&
@@ -2575,6 +2549,9 @@
 
     private void AdjustModelCountTuple((UnitEntry Owner, int Delta) args)
         => AdjustModelCount(args.Owner, args.Delta);
+
+    private Task HandleHeaderClickTuple((UnitEntry Unit, MouseEventArgs Args) args)
+        => HandleHeaderClick(args.Unit, args.Args);
 
     private (string Source, string KeywordDesc) GetExtraWeaponKeywordsSource(UnitEntry unit, bool isMelee)
     {
