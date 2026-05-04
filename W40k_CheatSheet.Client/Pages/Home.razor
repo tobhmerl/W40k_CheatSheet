@@ -311,12 +311,9 @@
                                                      Entries="GetWeaponKeywordEntries(focusedWeapon)" />
                             }
 
-                            @if (unit.IsLeader && unit.AttachedLeaders.Count == 0)
-                            {
-                                <button class="attach-link" @onclick="() => StartAttach(unit)" @onclick:stopPropagation="true">
-                                    🔗 Attach to unit
-                                </button>
-                            }
+                            <AttachLeaderButton UnitIsLeader="unit.IsLeader"
+                                                HasAttached="unit.AttachedLeaders.Count > 0"
+                                                OnStartAttach="() => StartAttach(unit)" />
 
                             <UnitExtraKeywords ExtraUnitKw="@extraUnitKw"
                                                Expanded="extraKwExpandedUnit == unit"
@@ -326,68 +323,15 @@
                             @if (!playMode)
                             {
                                 var cardAbilities = GetAllAbilities(unit).Where(a => !IsSetupOnlyAbility(a)).ToList();
-                                @if (cardAbilities.Count > 0)
-                                {
-                                    <div class="card-abilities">
-                                        @foreach (var ability in cardAbilities)
-                                        {
-                                            var aCfg = GetOrCreateConfig(ability);
-                                            <div class="card-ability-item @(aCfg.ApplyToStats == true ? "added-to-unit" : "") @(focusedAbility == ability ? "expanded" : "")"
-                                                 @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
-                                                <span class="card-ability-name">@ability.Name</span>
-                                                <div class="card-ability-desc">@ability.Description</div>
-                                                <div class="setup-checks" @onclick:stopPropagation="true">
-                                                    <div class="setup-checks-row">
-                                                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyTurn" @bind:after="SaveAbilityConfigs" /> My</label>
-                                                        <label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyTurn" @bind:after="SaveAbilityConfigs" /> Enem</label>
-                                                        <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="aCfg.ApplyToStats" @bind:after="() => OnApplyToStatsChanged(aCfg)" /> Stats</label>
-                                                    </div>
-                                                    <div class="setup-checks-row">
-                                                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Command" @bind:after="SaveAbilityConfigs" /> Cmd</label>
-                                                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Move" @bind:after="SaveAbilityConfigs" /> Mov</label>
-                                                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Shoot" @bind:after="SaveAbilityConfigs" /> Sht</label>
-                                                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Charge" @bind:after="SaveAbilityConfigs" /> Chg</label>
-                                                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Fight" @bind:after="SaveAbilityConfigs" /> Fgt</label>
-                                                    </div>
-                                                    @if (aCfg.Command || aCfg.Move || aCfg.Shoot || aCfg.Charge || aCfg.Fight)
-                                                    {
-                                                        <div class="setup-checks-row">
-                                                            @if (aCfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyCommand" @bind:after="SaveAbilityConfigs" /> eCmd</label>}
-                                                            @if (aCfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyMove" @bind:after="SaveAbilityConfigs" /> eMov</label>}
-                                                            @if (aCfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyShoot" @bind:after="SaveAbilityConfigs" /> eSht</label>}
-                                                            @if (aCfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyCharge" @bind:after="SaveAbilityConfigs" /> eChg</label>}
-                                                            @if (aCfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyFight" @bind:after="SaveAbilityConfigs" /> eFgt</label>}
-                                                        </div>
-                                                        <div class="setup-checks-row">
-                                                            @if (aCfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyCommand" @bind:after="SaveAbilityConfigs" /> myCmd</label>}
-                                                            @if (aCfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyMove" @bind:after="SaveAbilityConfigs" /> myMov</label>}
-                                                            @if (aCfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyShooting" @bind:after="SaveAbilityConfigs" /> mySht</label>}
-                                                            @if (aCfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyCharge" @bind:after="SaveAbilityConfigs" /> myChg</label>}
-                                                            @if (aCfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyFight" @bind:after="SaveAbilityConfigs" /> myFgt</label>}
-                                                        </div>
-                                                    }
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-                                }
+                                <UnitCardSetupAbilities CardAbilities="cardAbilities"
+                                                        FocusedAbility="focusedAbility"
+                                                        GetAbilityConfig="GetOrCreateConfig"
+                                                        OnToggleFocusAbility="ToggleFocusAbility"
+                                                        OnSaveAbilityConfigs="SaveAbilityConfigs"
+                                                        OnApplyToStatsChanged="OnApplyToStatsChanged" />
                             }
 
-                            <div class="card-footer-row">
-                                @if (!playMode && keywords.Count > 0)
-                                {
-                                    <div class="unit-keywords">
-                                        @foreach (var kw in keywords)
-                                        {
-                                            <span class="keyword">@kw</span>
-                                        }
-                                    </div>
-                                }
-                                <div class="card-nav-buttons">
-                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("stratagems-panel")' @onclick:stopPropagation="true">S</button>
-                                    <button class="card-nav-btn" @onclick='() => ScrollToAsync("abilities-panel")' @onclick:stopPropagation="true">A</button>
-                                </div>
-                            </div>
+                            <UnitCardFooter ShowKeywords="!playMode" Keywords="keywords" OnScrollTo="ScrollToAsync" />
                         </div>
                     }
                 </div>

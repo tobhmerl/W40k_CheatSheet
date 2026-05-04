@@ -1,0 +1,59 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (CardAbilities.Count > 0)
+{
+    Action saveCfg = () => OnSaveAbilityConfigs.InvokeAsync();
+    <div class="card-abilities">
+        @foreach (var ability in CardAbilities)
+        {
+            var capturedAbility = ability;
+            var aCfg = GetAbilityConfig!(capturedAbility);
+            Action applyChanged = () => OnApplyToStatsChanged.InvokeAsync(aCfg);
+            <div class="card-ability-item @(aCfg.ApplyToStats == true ? "added-to-unit" : "") @(FocusedAbility == capturedAbility ? "expanded" : "")"
+                 @onclick="() => OnToggleFocusAbility.InvokeAsync(capturedAbility)" @onclick:stopPropagation="true">
+                <span class="card-ability-name">@capturedAbility.Name</span>
+                <div class="card-ability-desc">@capturedAbility.Description</div>
+                <div class="setup-checks" @onclick:stopPropagation="true">
+                    <div class="setup-checks-row">
+                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyTurn" @bind:after="saveCfg" /> My</label>
+                        <label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyTurn" @bind:after="saveCfg" /> Enem</label>
+                        <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="aCfg.ApplyToStats" @bind:after="applyChanged" /> Stats</label>
+                    </div>
+                    <div class="setup-checks-row">
+                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Command" @bind:after="saveCfg" /> Cmd</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Move" @bind:after="saveCfg" /> Mov</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Shoot" @bind:after="saveCfg" /> Sht</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Charge" @bind:after="saveCfg" /> Chg</label>
+                        <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Fight" @bind:after="saveCfg" /> Fgt</label>
+                    </div>
+                    @if (aCfg.Command || aCfg.Move || aCfg.Shoot || aCfg.Charge || aCfg.Fight)
+                    {
+                        <div class="setup-checks-row">
+                            @if (aCfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyCommand" @bind:after="saveCfg" /> eCmd</label>}
+                            @if (aCfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyMove" @bind:after="saveCfg" /> eMov</label>}
+                            @if (aCfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyShoot" @bind:after="saveCfg" /> eSht</label>}
+                            @if (aCfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyCharge" @bind:after="saveCfg" /> eChg</label>}
+                            @if (aCfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyFight" @bind:after="saveCfg" /> eFgt</label>}
+                        </div>
+                        <div class="setup-checks-row">
+                            @if (aCfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyCommand" @bind:after="saveCfg" /> myCmd</label>}
+                            @if (aCfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyMove" @bind:after="saveCfg" /> myMov</label>}
+                            @if (aCfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyShooting" @bind:after="saveCfg" /> mySht</label>}
+                            @if (aCfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyCharge" @bind:after="saveCfg" /> myChg</label>}
+                            @if (aCfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyFight" @bind:after="saveCfg" /> myFgt</label>}
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<AbilityEntry> CardAbilities { get; set; } = [];
+    [Parameter] public AbilityEntry? FocusedAbility { get; set; }
+    [Parameter, EditorRequired] public Func<AbilityEntry, AbilitySetupEntry>? GetAbilityConfig { get; set; }
+    [Parameter] public EventCallback<AbilityEntry> OnToggleFocusAbility { get; set; }
+    [Parameter] public EventCallback OnSaveAbilityConfigs { get; set; }
+    [Parameter] public EventCallback<AbilitySetupEntry> OnApplyToStatsChanged { get; set; }
+}

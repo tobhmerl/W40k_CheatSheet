@@ -1,0 +1,21 @@
+<div class="card-footer-row">
+    @if (ShowKeywords && Keywords.Count > 0)
+    {
+        <div class="unit-keywords">
+            @foreach (var kw in Keywords)
+            {
+                <span class="keyword">@kw</span>
+            }
+        </div>
+    }
+    <div class="card-nav-buttons">
+        <button class="card-nav-btn" @onclick='() => OnScrollTo.InvokeAsync("stratagems-panel")' @onclick:stopPropagation="true">S</button>
+        <button class="card-nav-btn" @onclick='() => OnScrollTo.InvokeAsync("abilities-panel")' @onclick:stopPropagation="true">A</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool ShowKeywords { get; set; }
+    [Parameter] public IReadOnlyList<string> Keywords { get; set; } = [];
+    [Parameter] public EventCallback<string> OnScrollTo { get; set; }
+}

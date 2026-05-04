@@ -1,0 +1,12 @@
+@if (UnitIsLeader && !HasAttached)
+{
+    <button class="attach-link" @onclick="() => OnStartAttach.InvokeAsync()" @onclick:stopPropagation="true">
+        🔗 Attach to unit
+    </button>
+}
+
+@code {
+    [Parameter] public bool UnitIsLeader { get; set; }
+    [Parameter] public bool HasAttached { get; set; }
+    [Parameter] public EventCallback OnStartAttach { get; set; }
+}
