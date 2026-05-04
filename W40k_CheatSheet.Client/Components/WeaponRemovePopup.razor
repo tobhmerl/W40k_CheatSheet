@@ -1,0 +1,23 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (Popup is not null)
+{
+    var p = Popup.Value;
+    var weapons = GetMixedLoadoutWeapons!(p.Unit, p.Delta);
+    <div class="weapon-remove-popup" @onclick:stopPropagation="true">
+        <div class="weapon-remove-title">@(p.Delta < 0 ? "Which model to remove?" : "Which model to restore?")</div>
+        @foreach (var w in weapons)
+        {
+            var capturedW = w;
+            <div class="weapon-remove-option" @onclick="() => OnConfirm.InvokeAsync(capturedW)">@capturedW.Name</div>
+        }
+        <div class="weapon-remove-cancel" @onclick="() => OnCancel.InvokeAsync()">Cancel</div>
+    </div>
+}
+
+@code {
+    [Parameter] public (UnitEntry Unit, int Delta)? Popup { get; set; }
+    [Parameter, EditorRequired] public Func<UnitEntry, int, IReadOnlyList<WeaponProfile>>? GetMixedLoadoutWeapons { get; set; }
+    [Parameter] public EventCallback<WeaponProfile> OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+}

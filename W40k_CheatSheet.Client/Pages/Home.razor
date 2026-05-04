@@ -87,39 +87,17 @@
             </div>
         }
 
-        @if (movingUnit is not null)
-        {
-            <div class="move-hint">
-                Tap a unit to move <strong>@movingUnit.Name</strong> there ·
-                <span class="cancel-link" @onclick="() => movingUnit = null">Cancel</span>
-            </div>
-        }
+        <MoveHint MovingUnit="movingUnit" OnCancel="() => movingUnit = null" />
 
-        @if (buffSourcePopup is var (bsLabel, bsSource, bsKwDesc) && bsLabel is not null)
-        {
-            <div class="buff-source-popup" @onclick="() => buffSourcePopup = null">
-                <span class="buff-source-label">@bsLabel</span>
-                <span class="buff-source-from">from @bsSource</span>
-                @if (!string.IsNullOrEmpty(bsKwDesc))
-                {
-                    <div class="buff-source-kw-desc">@bsKwDesc</div>
-                }
-            </div>
-        }
+        <BuffSourcePopup Label="@buffSourcePopup?.Label"
+                         Source="@buffSourcePopup?.Source"
+                         KeywordDescription="@buffSourcePopup?.KeywordDesc"
+                         OnDismiss="() => buffSourcePopup = null" />
 
-        @if (weaponRemovePopup is { } wrp)
-        {
-            var wrWeapons = GetMixedLoadoutWeapons(wrp.Unit, wrp.Delta);
-            <div class="weapon-remove-popup" @onclick:stopPropagation="true">
-                <div class="weapon-remove-title">@(wrp.Delta < 0 ? "Which model to remove?" : "Which model to restore?")</div>
-                @foreach (var wrW in wrWeapons)
-                {
-                    var capturedW = wrW;
-                    <div class="weapon-remove-option" @onclick="() => ConfirmWeaponModelRemoval(capturedW)">@capturedW.Name</div>
-                }
-                <div class="weapon-remove-cancel" @onclick="() => weaponRemovePopup = null">Cancel</div>
-            </div>
-        }
+        <WeaponRemovePopup Popup="weaponRemovePopup"
+                           GetMixedLoadoutWeapons="(u, d) => GetMixedLoadoutWeapons(u, d)"
+                           OnConfirm="ConfirmWeaponModelRemoval"
+                           OnCancel="() => weaponRemovePopup = null" />
 
         <div class="unit-grid">
             @{

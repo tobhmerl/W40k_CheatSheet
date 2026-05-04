@@ -1,0 +1,14 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (MovingUnit is not null)
+{
+    <div class="move-hint">
+        Tap a unit to move <strong>@MovingUnit.Name</strong> there ·
+        <span class="cancel-link" @onclick="() => OnCancel.InvokeAsync()">Cancel</span>
+    </div>
+}
+
+@code {
+    [Parameter] public UnitEntry? MovingUnit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+}

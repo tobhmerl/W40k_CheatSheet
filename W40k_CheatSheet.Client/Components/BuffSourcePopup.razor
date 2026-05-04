@@ -1,0 +1,18 @@
+@if (Label is not null)
+{
+    <div class="buff-source-popup" @onclick="() => OnDismiss.InvokeAsync()">
+        <span class="buff-source-label">@Label</span>
+        <span class="buff-source-from">from @Source</span>
+        @if (!string.IsNullOrEmpty(KeywordDescription))
+        {
+            <div class="buff-source-kw-desc">@KeywordDescription</div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Source { get; set; }
+    [Parameter] public string? KeywordDescription { get; set; }
+    [Parameter] public EventCallback OnDismiss { get; set; }
+}
