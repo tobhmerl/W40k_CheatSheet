@@ -882,7 +882,7 @@
                                         @foreach (var ability in cardAbilities)
                                         {
                                             var aCfg = GetOrCreateConfig(ability);
-                                            <div class="card-ability-item @(aCfg.AddToUnit == true ? "added-to-unit" : "") @(focusedAbility == ability ? "expanded" : "")"
+                                            <div class="card-ability-item @(aCfg.ApplyToStats == true ? "added-to-unit" : "") @(focusedAbility == ability ? "expanded" : "")"
                                                  @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
                                                 <span class="card-ability-name">@ability.Name</span>
                                                 <div class="card-ability-desc">@ability.Description</div>
@@ -890,7 +890,7 @@
                                                     <div class="setup-checks-row">
                                                         <label class="setup-lbl"><input type="checkbox" @bind="aCfg.MyTurn" @bind:after="SaveAbilityConfigs" /> My</label>
                                                         <label class="setup-lbl enemy"><input type="checkbox" @bind="aCfg.EnemyTurn" @bind:after="SaveAbilityConfigs" /> Enem</label>
-                                                        <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="aCfg.AddToUnit" @bind:after="() => OnAddToUnitChanged(aCfg)" /> Unit</label>
+                                                        <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="aCfg.ApplyToStats" @bind:after="() => OnApplyToStatsChanged(aCfg)" /> Stats</label>
                                                     </div>
                                                     <div class="setup-checks-row">
                                                         <label class="setup-lbl"><input type="checkbox" @bind="aCfg.Command" @bind:after="SaveAbilityConfigs" /> Cmd</label>
@@ -1115,7 +1115,63 @@
                                             </div>
                                         }
                                     </div>
+                                    @if (activeDetachmentEffects.Count > 0)
+                                    {
+                                        <div class="detachment-effects-list">
+                                            @for (int idx = 0; idx < activeDetachmentEffects.Count; idx++)
+                                            {
+                                                var effIdx = idx;
+                                                var eff = activeDetachmentEffects[effIdx];
+                                                var effKey = DetachmentEffectKey(army.Detachment, effIdx);
+                                                var effCfg = GetOrCreateDetachmentEffectConfig(army.Detachment, effIdx);
+                                                var canApply = eff.ReflectedInStats;
+                                                <div class="detachment-effect-item @(effCfg.ApplyToStats ? "added-to-unit" : "")"
+                                                     @onclick:stopPropagation="true">
+                                                    <span class="ability-name">↳ @DescribeDetachmentEffect(eff)</span>
+                                                    <div class="setup-checks">
+                                                        <div class="setup-checks-row">
+                                                            <label class="setup-lbl"><input type="checkbox" @bind="effCfg.Enabled" @bind:after="SaveDetachmentEffectConfigs" /> Active</label>
+                                                            @if (canApply)
+                                                            {
+                                                                <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="effCfg.ApplyToStats" @bind:after="SaveDetachmentEffectConfigs" /> Stats</label>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="setup-lbl disabled-lbl" title="This effect is not eligible for direct stat application">Reminder only</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
                                 </div>
+                            </div>
+                        }
+
+                        @* ── Setup mode: army (faction) rules ── *@
+                        @if (army!.ArmyRules.Count > 0)
+                        {
+                            <div class="abilities-panel-unit">
+                                <div class="abilities-panel-unit-name">🏳 Army Rules: @army.Faction</div>
+                                @foreach (var rule in army.ArmyRules)
+                                {
+                                    var arCfg = GetOrCreateArmyRuleConfig(rule);
+                                    var arFocused = focusedArmyRules.Contains(rule.Name);
+                                    <div class="abilities-panel-item @(arCfg.ApplyToStats ? "added-to-unit" : "") @(arFocused ? "expanded" : "")"
+                                         @onclick="() => { if (focusedArmyRules.Contains(rule.Name)) focusedArmyRules.Remove(rule.Name); else focusedArmyRules.Add(rule.Name); }"
+                                         @onclick:stopPropagation="true">
+                                        <span class="ability-name">@rule.Name</span>
+                                        <div class="ability-desc">@rule.Description</div>
+                                        <div class="setup-checks" @onclick:stopPropagation="true">
+                                            <div class="setup-checks-row">
+                                                <label class="setup-lbl"><input type="checkbox" @bind="arCfg.Enabled" @bind:after="SaveArmyRuleConfigs" /> Active</label>
+                                                <label class="setup-lbl disable"><input type="checkbox" @bind="arCfg.Reminder" @bind:after="SaveArmyRuleConfigs" /> Reminder</label>
+                                                <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="arCfg.ApplyToStats" @bind:after="SaveArmyRuleConfigs" /> Stats</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         }
 
@@ -1130,7 +1186,7 @@
                                     @foreach (var ability in setupAbilities)
                                     {
                                         var cfg = GetOrCreateConfig(ability);
-                                        <div class="abilities-panel-item @(cfg.AddToUnit ? "added-to-unit" : "") @(focusedAbility == ability ? "expanded" : "")"
+                                        <div class="abilities-panel-item @(cfg.ApplyToStats ? "added-to-unit" : "") @(focusedAbility == ability ? "expanded" : "")"
                                              @onclick="() => ToggleFocusAbility(ability)" @onclick:stopPropagation="true">
                                             <span class="ability-name">@ability.Name</span>
                                             <div class="ability-desc">@ability.Description</div>
@@ -1138,7 +1194,7 @@
                                                 <div class="setup-checks-row">
                                                     <label class="setup-lbl"><input type="checkbox" @bind="cfg.MyTurn" @bind:after="SaveAbilityConfigs" /> My</label>
                                                     <label class="setup-lbl enemy"><input type="checkbox" @bind="cfg.EnemyTurn" @bind:after="SaveAbilityConfigs" /> Enem</label>
-                                                    <label class="setup-lbl unit-lbl"><input type="checkbox" @bind="cfg.AddToUnit" @bind:after="() => OnAddToUnitChanged(cfg)" /> Unit</label>
+                                                    <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="cfg.ApplyToStats" @bind:after="() => OnApplyToStatsChanged(cfg)" /> Stats</label>
                                                 </div>
                                                 <div class="setup-checks-row">
                                                     <label class="setup-lbl"><input type="checkbox" @bind="cfg.Command" @bind:after="SaveAbilityConfigs" /> Cmd</label>
@@ -1310,7 +1366,7 @@
         }
         <button class="corner-btn home" @onclick="ClearRoster">⌂</button>
     </div>
-    <div class="version-tag" @onclick="() => showChangelog = true">v2.3</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v2.4</div>
 
     @if (showChangelog)
     {
@@ -1321,6 +1377,15 @@
                     <button class="changelog-close" @onclick="() => showChangelog = false">✕</button>
                 </div>
                 <div class="changelog-body">
+
+                    <div class="changelog-version">v2.4 🎉</div>
+                    <ul class="changelog-list">
+                        <li class="cl-changed">Nothing is auto-applied on import anymore — detachment rules, army rules, abilities and stratagems all stay neutral until you tick them in setup</li>
+                        <li class="cl-new">Detachment rule effects are now configurable individually (one row per effect under the detachment) with a “Stats” toggle to apply them directly to weapon/unit stats</li>
+                        <li class="cl-new">Army Rules section in setup — each faction-wide rule (e.g. Reanimation Protocols, Oath of Moment) gets its own Active / Reminder / Stats checkboxes</li>
+                        <li class="cl-changed">Renamed ability checkbox “Unit” → “Stats” for consistency across abilities, stratagems, detachment effects and army rules (existing checkboxes are reset on first launch)</li>
+                        <li class="cl-removed">Existing per-army setup configs are wiped on upgrade — start fresh and tick what you want active</li>
+                    </ul>
 
                     <div class="changelog-version">v2.3 🎉</div>
                     <ul class="changelog-list">
@@ -1606,6 +1671,12 @@
     private readonly Dictionary<string, StratagemSetupEntry> stratagemConfigs = new(StringComparer.Ordinal);
     private readonly Dictionary<string, AbilitySetupEntry> abilityConfigs = new(StringComparer.Ordinal);
     private DetachmentSetupEntry detachmentConfig = new();
+    // Per detachment effect (keyed by "<detachment>::<index>") — explicit opt-in for "Apply to stats directly"
+    private readonly Dictionary<string, DetachmentEffectSetupEntry> detachmentEffectConfigs = new(StringComparer.Ordinal);
+    // Per army rule (keyed by rule name) — explicit opt-in for visibility/turn/phase/stats
+    private readonly Dictionary<string, ArmyRuleSetupEntry> armyRuleConfigs = new(StringComparer.Ordinal);
+    private readonly HashSet<string> focusedDetachmentEffects = new(StringComparer.Ordinal);
+    private readonly HashSet<string> focusedArmyRules = new(StringComparer.Ordinal);
     private bool focusedDetachmentRule;
     private readonly HashSet<UnitEntry> killedUnits = [];
     private readonly HashSet<UnitEntry> targetedUnits = [];
@@ -1685,6 +1756,8 @@
                     "last=y;" +
                     "},{passive:true})" +
                     "})()");
+
+                await MigrateToV24Async();
 
                 await LoadFromStorage();
 
@@ -2487,7 +2560,7 @@
         var unitWideFnp = unit.FeelNoPain;
         var unitWideInvuln = unit.InvulnerableSave;
 
-        // Include ability-derived invuln only if the ability has AddToUnit checked
+        // Include ability-derived invuln only if the ability has "Apply to stats directly" checked
         if (!string.IsNullOrEmpty(unit.InvulnerableSaveFromAbility))
         {
             var invulnAbility = unit.Abilities.FirstOrDefault(a =>
@@ -2506,7 +2579,7 @@
             var leaderFnp = BetterFnp(unitWideFnp, leader.FeelNoPain);
             var leaderInvuln = BetterFnp(unitWideInvuln, leader.InvulnerableSave);
 
-            // Include leader's own ability-derived invuln only if AddToUnit checked
+            // Include leader's own ability-derived invuln only if "Apply to stats directly" checked
             if (!string.IsNullOrEmpty(leader.InvulnerableSaveFromAbility))
             {
                 var lInvulnAbility = leader.Abilities.FirstOrDefault(a =>
@@ -2759,6 +2832,8 @@
             foreach (var (k, v) in preservedCoreStrats)
                 stratagemConfigs[k] = v;
             detachmentConfig = new DetachmentSetupEntry();
+            detachmentEffectConfigs.Clear();
+            armyRuleConfigs.Clear();
             InitAbilityConfigs();
             InitStratagemConfigs();
             if (Cloud.IsLoggedIn)
@@ -2772,6 +2847,8 @@
             await SaveToStorage();
             await SaveAbilityConfigs();
             await SaveStratagemConfigs();
+            await SaveDetachmentEffectConfigs();
+            await SaveArmyRuleConfigs();
         }
         catch (Exception ex)
         {
@@ -2793,6 +2870,8 @@
         abilityConfigs.Clear();
         stratagemConfigs.Clear();
         detachmentConfig = new DetachmentSetupEntry();
+        detachmentEffectConfigs.Clear();
+        armyRuleConfigs.Clear();
         setupConfirmed = false;
         stratagemSetupConfirmed = false;
         armyIsSaved = false;
@@ -2802,6 +2881,8 @@
         await JS.InvokeVoidAsync("localStorage.removeItem", "ability-configs");
         await JS.InvokeVoidAsync("localStorage.removeItem", "stratagem-configs");
         await JS.InvokeVoidAsync("localStorage.removeItem", "detachment-config");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "detachment-effect-configs-v2");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "army-rule-configs-v2");
     }
 
     private async Task SaveToStorage()
@@ -2877,6 +2958,30 @@
                 var savedDet = JsonSerializer.Deserialize<DetachmentSetupEntry>(detConfigJson);
                 if (savedDet is not null)
                     detachmentConfig = savedDet;
+            }
+
+            var detEffectsJson = await JS.InvokeAsync<string?>("localStorage.getItem", "detachment-effect-configs-v2");
+            if (!string.IsNullOrEmpty(detEffectsJson))
+            {
+                var savedDe = JsonSerializer.Deserialize<Dictionary<string, DetachmentEffectSetupEntry>>(detEffectsJson);
+                if (savedDe is not null)
+                {
+                    detachmentEffectConfigs.Clear();
+                    foreach (var (k, v) in savedDe)
+                        detachmentEffectConfigs[k] = v;
+                }
+            }
+
+            var armyRulesJson = await JS.InvokeAsync<string?>("localStorage.getItem", "army-rule-configs-v2");
+            if (!string.IsNullOrEmpty(armyRulesJson))
+            {
+                var savedAr = JsonSerializer.Deserialize<Dictionary<string, ArmyRuleSetupEntry>>(armyRulesJson);
+                if (savedAr is not null)
+                {
+                    armyRuleConfigs.Clear();
+                    foreach (var (k, v) in savedAr)
+                        armyRuleConfigs[k] = v;
+                }
             }
 
             InitStratagemConfigs();
@@ -3072,7 +3177,7 @@
         public bool MyShooting { get; set; }
         public bool MyCharge   { get; set; }
         public bool MyFight    { get; set; }
-        public bool AddToUnit { get; set; }
+        public bool ApplyToStats { get; set; }
     }
 
     private sealed class DetachmentSetupEntry
@@ -3097,11 +3202,26 @@
         public bool Reminder  { get; set; }
     }
 
+    /// <summary>Per detachment-rule effect (one row per entry in detachment_effects.json). Default: nothing applied.</summary>
+    private sealed class DetachmentEffectSetupEntry
+    {
+        public bool Enabled      { get; set; }   // show as reminder in play view
+        public bool ApplyToStats { get; set; }   // actually modify weapon/unit stats
+    }
+
+    /// <summary>Per faction/army rule (e.g. Reanimation Protocols). Default: nothing applied.</summary>
+    private sealed class ArmyRuleSetupEntry
+    {
+        public bool Enabled      { get; set; }
+        public bool ApplyToStats { get; set; }
+        public bool Reminder     { get; set; }
+    }
+
     private static string AbilityKey(AbilityEntry a) => a.Name;
 
-    private async Task OnAddToUnitChanged(AbilitySetupEntry cfg)
+    private async Task OnApplyToStatsChanged(AbilitySetupEntry cfg)
     {
-        if (cfg.AddToUnit)
+        if (cfg.ApplyToStats)
         {
             cfg.MyTurn    = true;
             cfg.EnemyTurn = true;
@@ -3128,9 +3248,9 @@
     private bool IsHiddenAbility(AbilityEntry a) =>
         abilityConfigs.TryGetValue(AbilityKey(a), out var c) && !c.MyTurn && !c.EnemyTurn;
 
-    // "Add to unit" — inject the keyword onto weapon rows instead of showing in panel
+    // "Apply to stats directly" — inject the keyword onto weapon rows / stats instead of just showing in the panel
     private bool IsAddedToUnit(AbilityEntry a) =>
-        abilityConfigs.TryGetValue(AbilityKey(a), out var c) && c.AddToUnit;
+        abilityConfigs.TryGetValue(AbilityKey(a), out var c) && c.ApplyToStats;
 
     // Check if an "added to unit" ability is visible given current turn/phase filters
     private bool IsAddedToUnitVisible(AbilityEntry a)
@@ -3425,24 +3545,31 @@
         }
     }
 
-    // Keep this for weapon stats modification — data-driven via detachment_effects.json
+    // Keep this for weapon stats modification — data-driven via detachment_effects.json,
+    // but ONLY active when the user has opted in per effect via the setup checkbox.
     private bool IsDetachmentRuleReflectedInStats
     {
         get
         {
             if (army is null || string.IsNullOrEmpty(army.DetachmentRule)) return false;
-            return activeDetachmentEffects.Any(e => e.ReflectedInStats);
+            for (int i = 0; i < activeDetachmentEffects.Count; i++)
+            {
+                if (activeDetachmentEffects[i].ReflectedInStats && IsDetachmentEffectActive(i))
+                    return true;
+            }
+            return false;
         }
     }
 
     private bool UnitHasDetachmentHitBonus(UnitEntry unit)
     {
         if (army is null) return false;
-        var hitEffects = activeDetachmentEffects.Where(e =>
-            e.ReflectedInStats && (e.Stat == "bs" || e.Stat == "ws"));
-        foreach (var effect in hitEffects)
+        for (int i = 0; i < activeDetachmentEffects.Count; i++)
         {
-            if (EvaluateCondition(effect.Condition, unit))
+            var e = activeDetachmentEffects[i];
+            if (!e.ReflectedInStats || !IsDetachmentEffectActive(i)) continue;
+            if (e.Stat != "bs" && e.Stat != "ws") continue;
+            if (EvaluateCondition(e.Condition, unit))
                 return true;
         }
         return false;
@@ -3642,9 +3769,15 @@
     private string GetHitBonusSource(UnitEntry unit)
     {
         if (army is null || !UnitHasDetachmentHitBonus(unit)) return "";
-        var effect = activeDetachmentEffects.FirstOrDefault(e =>
-            e.ReflectedInStats && (e.Stat == "bs" || e.Stat == "ws") && EvaluateCondition(e.Condition, unit));
-        return effect?.SourceLabel ?? army.Detachment ?? "Detachment";
+        for (int i = 0; i < activeDetachmentEffects.Count; i++)
+        {
+            var e = activeDetachmentEffects[i];
+            if (!e.ReflectedInStats || !IsDetachmentEffectActive(i)) continue;
+            if (e.Stat != "bs" && e.Stat != "ws") continue;
+            if (EvaluateCondition(e.Condition, unit))
+                return e.SourceLabel ?? army.Detachment ?? "Detachment";
+        }
+        return army.Detachment ?? "Detachment";
     }
 
     private (string InvulnSource, string FnpSource) GetExtraDefensiveAuraSources(UnitEntry unit)
@@ -3862,14 +3995,22 @@
     {
         foreach (var key in abilityConfigs.Keys.ToList())
             abilityConfigs[key] = new AbilitySetupEntry();
+        foreach (var key in armyRuleConfigs.Keys.ToList())
+            armyRuleConfigs[key] = new ArmyRuleSetupEntry();
         await SaveAbilityConfigs();
+        await SaveArmyRuleConfigs();
     }
 
     private async Task WipeAllStratagemConfigs()
     {
         foreach (var key in stratagemConfigs.Keys.ToList())
             stratagemConfigs[key] = new StratagemSetupEntry();
+        foreach (var key in detachmentEffectConfigs.Keys.ToList())
+            detachmentEffectConfigs[key] = new DetachmentEffectSetupEntry();
+        detachmentConfig = new DetachmentSetupEntry();
         await SaveStratagemConfigs();
+        await SaveDetachmentEffectConfigs();
+        await SaveDetachmentConfig();
     }
 
     private async Task SaveDetachmentConfig()
@@ -3880,6 +4021,114 @@
                 JsonSerializer.Serialize(detachmentConfig));
         }
         catch { }
+    }
+
+    // ── Detachment-effect / army-rule setup ──────────────────────────────────
+
+    private static string DetachmentEffectKey(string detachment, int idx) => $"{detachment}::{idx}";
+
+    private DetachmentEffectSetupEntry GetOrCreateDetachmentEffectConfig(string detachment, int idx)
+    {
+        var key = DetachmentEffectKey(detachment, idx);
+        if (!detachmentEffectConfigs.TryGetValue(key, out var cfg))
+        {
+            cfg = new DetachmentEffectSetupEntry();
+            detachmentEffectConfigs[key] = cfg;
+        }
+        return cfg;
+    }
+
+    private bool IsDetachmentEffectActive(int idx)
+    {
+        if (army is null) return false;
+        var key = DetachmentEffectKey(army.Detachment, idx);
+        return detachmentEffectConfigs.TryGetValue(key, out var c) && c.ApplyToStats;
+    }
+
+    private async Task SaveDetachmentEffectConfigs()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "detachment-effect-configs-v2",
+                JsonSerializer.Serialize(detachmentEffectConfigs));
+        }
+        catch { }
+    }
+
+    private ArmyRuleSetupEntry GetOrCreateArmyRuleConfig(RuleEntry rule)
+    {
+        if (!armyRuleConfigs.TryGetValue(rule.Name, out var cfg))
+        {
+            cfg = new ArmyRuleSetupEntry();
+            armyRuleConfigs[rule.Name] = cfg;
+        }
+        return cfg;
+    }
+
+    private async Task SaveArmyRuleConfigs()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "army-rule-configs-v2",
+                JsonSerializer.Serialize(armyRuleConfigs));
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// One-shot wipe of v2.3 setup configs so the v2.4 explicit-only model starts from a clean slate.
+    /// Runs once per browser; sets a marker key when done.
+    /// </summary>
+    private async Task MigrateToV24Async()
+    {
+        try
+        {
+            const string marker = "migration-v2.4-applied";
+            var done = await JS.InvokeAsync<string?>("localStorage.getItem", marker);
+            if (!string.IsNullOrEmpty(done)) return;
+
+            await JS.InvokeVoidAsync("localStorage.removeItem", "ability-configs");
+            await JS.InvokeVoidAsync("localStorage.removeItem", "stratagem-configs");
+            await JS.InvokeVoidAsync("localStorage.removeItem", "detachment-config");
+            await JS.InvokeVoidAsync("localStorage.removeItem", "detachment-effect-configs-v2");
+            await JS.InvokeVoidAsync("localStorage.removeItem", "army-rule-configs-v2");
+
+            await JS.InvokeVoidAsync("localStorage.setItem", marker, "1");
+        }
+        catch { /* storage unavailable */ }
+    }
+
+    private static string DescribeDetachmentEffect(DetachmentEffect e)
+    {
+        if (!string.IsNullOrEmpty(e.DisplayLabel)) return e.DisplayLabel;
+        var sign = e.Modifier > 0 ? "+" : "";
+        var stat = e.Stat switch
+        {
+            "bs" => "BS",
+            "ws" => "WS",
+            "attacks" => "Attacks",
+            "strength" => "Strength",
+            "ap" => "AP",
+            "damage" => "Damage",
+            "toughness" => "Toughness",
+            "save" => "Save",
+            _ => e.Stat
+        };
+        var weapon = e.WeaponType switch
+        {
+            "melee" => " (melee)",
+            "ranged" => " (ranged)",
+            _ => ""
+        };
+        var cond = e.Condition switch
+        {
+            "always" => "",
+            "has_leader_character" => " — when led by a Character",
+            "charged" => " — when charged this turn",
+            "battle_shocked_and_charged" => " — when battle-shocked and charged",
+            _ => $" — {e.Condition}"
+        };
+        return $"{sign}{e.Modifier} {stat}{weapon}{cond}";
     }
 
     // ── Saved armies ─────────────────────────────────────────────────────────
@@ -3899,6 +4148,8 @@
         public Dictionary<string, AbilitySetupEntry> AbilityConfigs { get; set; } = new();
         public Dictionary<string, StratagemSetupEntry> StratagemConfigs { get; set; } = new();
         public DetachmentSetupEntry? DetachmentConfig { get; set; }
+        public Dictionary<string, DetachmentEffectSetupEntry> DetachmentEffectConfigs { get; set; } = new();
+        public Dictionary<string, ArmyRuleSetupEntry> ArmyRuleConfigs { get; set; } = new();
     }
 
     private async Task LoadSavedArmiesIndex()
@@ -3932,7 +4183,9 @@
             State = state,
             AbilityConfigs = new Dictionary<string, AbilitySetupEntry>(abilityConfigs),
             StratagemConfigs = new Dictionary<string, StratagemSetupEntry>(stratagemConfigs),
-            DetachmentConfig = detachmentConfig
+            DetachmentConfig = detachmentConfig,
+            DetachmentEffectConfigs = new Dictionary<string, DetachmentEffectSetupEntry>(detachmentEffectConfigs),
+            ArmyRuleConfigs = new Dictionary<string, ArmyRuleSetupEntry>(armyRuleConfigs)
         };
 
         if (Cloud.IsLoggedIn)
@@ -4005,6 +4258,14 @@
                 stratagemConfigs[k] = v;
 
             detachmentConfig = data.DetachmentConfig ?? new DetachmentSetupEntry();
+
+            detachmentEffectConfigs.Clear();
+            foreach (var (k, v) in data.DetachmentEffectConfigs)
+                detachmentEffectConfigs[k] = v;
+
+            armyRuleConfigs.Clear();
+            foreach (var (k, v) in data.ArmyRuleConfigs)
+                armyRuleConfigs[k] = v;
 
             InitAbilityConfigs();
             InitStratagemConfigs();
@@ -4144,6 +4405,14 @@
                 stratagemConfigs[k] = v;
 
             detachmentConfig = data.DetachmentConfig ?? new DetachmentSetupEntry();
+
+            detachmentEffectConfigs.Clear();
+            foreach (var (k, v) in data.DetachmentEffectConfigs)
+                detachmentEffectConfigs[k] = v;
+
+            armyRuleConfigs.Clear();
+            foreach (var (k, v) in data.ArmyRuleConfigs)
+                armyRuleConfigs[k] = v;
 
             InitAbilityConfigs();
             InitStratagemConfigs();

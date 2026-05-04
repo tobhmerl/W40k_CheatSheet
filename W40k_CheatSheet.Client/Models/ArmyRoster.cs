@@ -9,6 +9,8 @@ public class ArmyRoster
     public int TotalPoints { get; set; }
     public int PointLimit { get; set; }
     public List<UnitEntry> Units { get; set; } = [];
+    /// <summary>Faction/army-wide rules (e.g. Reanimation Protocols, Oath of Moment).</summary>
+    public List<RuleEntry> ArmyRules { get; set; } = [];
 }
 
 public class UnitEntry
@@ -129,10 +131,12 @@ public class DetachmentEffect
     public string WeaponType { get; set; } = "all";
     /// <summary>Condition key: always, has_leader_character, charged, battle_shocked_and_charged, etc.</summary>
     public string Condition { get; set; } = "always";
-    /// <summary>If true, this effect is reflected directly in stats (hides detachment rule text from card)</summary>
+    /// <summary>If true, this effect MAY be reflected directly in stats. Final application is controlled per-army by the user via the setup checkboxes (DetachmentEffectSetupEntry.ApplyToStats).</summary>
     public bool ReflectedInStats { get; set; }
     /// <summary>Short display label for the buff source tooltip</summary>
     public string SourceLabel { get; set; } = "";
+    /// <summary>Optional human-readable label for the effect row in setup (defaults to derived text).</summary>
+    public string DisplayLabel { get; set; } = "";
 }
 
 /// <summary>A parsed defensive modifier from an ability (e.g. "subtract 1 from the Wound roll").</summary>

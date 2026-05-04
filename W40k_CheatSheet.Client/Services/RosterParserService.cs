@@ -26,6 +26,19 @@ public partial class RosterParserService
         {
             army.Faction = force.CatalogueName;
 
+            // Faction/army-wide rules (e.g. Reanimation Protocols, Oath of Moment)
+            foreach (var rule in force.Rules)
+            {
+                if (rule.Hidden) continue;
+                if (string.IsNullOrWhiteSpace(rule.Name)) continue;
+                if (army.ArmyRules.Any(r => r.Name.Equals(rule.Name, StringComparison.OrdinalIgnoreCase))) continue;
+                army.ArmyRules.Add(new RuleEntry
+                {
+                    Name = rule.Name,
+                    Description = SanitizeText(rule.Description)
+                });
+            }
+
             foreach (var selection in force.Selections)
             {
                 if (selection.Categories.Any(c => c.Name == "Configuration"))

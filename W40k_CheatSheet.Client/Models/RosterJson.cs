@@ -46,6 +46,9 @@ public class Force
     [JsonPropertyName("categories")]
     public List<Category> Categories { get; set; } = [];
 
+    [JsonPropertyName("rules")]
+    public List<Rule> Rules { get; set; } = [];
+
     [JsonPropertyName("id")]
     public string Id { get; set; } = "";
 
