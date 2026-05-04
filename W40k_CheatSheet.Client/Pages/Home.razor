@@ -394,13 +394,20 @@
                       TotalPoints="army.TotalPoints"
                       PointLimit="army.PointLimit" />
     }
-    <TopActions WrapperClass="footer-actions"
-                PlayMode="playMode"
-                SaveTick="saveTick"
-                OnTogglePlayMode="TogglePlayMode"
-                OnSaveCurrentArmy="SaveCurrentArmy"
-                OnResetAllFilters="ResetAllFilters"
-                OnClearRoster="ClearRoster" />
+    @if (playMode)
+    {
+        <button class="play-footer-btn @(footerVisible ? "visible" : "")" @onclick="TogglePlayMode">☰ Setup</button>
+    }
+    else
+    {
+        <TopActions WrapperClass="footer-actions"
+                    PlayMode="playMode"
+                    SaveTick="saveTick"
+                    OnTogglePlayMode="TogglePlayMode"
+                    OnSaveCurrentArmy="SaveCurrentArmy"
+                    OnResetAllFilters="ResetAllFilters"
+                    OnClearRoster="ClearRoster" />
+    }
     <div class="version-tag" @onclick="() => showChangelog = true">v2.6</div>
 
     <ChangelogModal @bind-Visible="showChangelog" />

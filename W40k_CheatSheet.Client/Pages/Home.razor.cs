@@ -50,6 +50,7 @@ public partial class Home : ComponentBase
     private bool stratDetailsZoomed;
     private bool showChangelog;
     private bool playMode;
+    private bool footerVisible = true;
     private bool setupConfirmed;
     private bool stratagemSetupConfirmed;
     // ── Setup state is owned by RosterStateService; these aliases keep existing call sites working. ──
@@ -129,10 +130,10 @@ public partial class Home : ComponentBase
                     "var last=0;" +
                     "window.addEventListener('scroll',function(){" +
                     "var cp=document.getElementById('cp-counter');" +
-                    "if(!cp)return;" +
+                    "var fb=document.querySelector('.play-footer-btn');" +
                     "var y=window.scrollY;" +
-                    "if(y>last&&y>60){cp.classList.add('cp-hidden')}" +
-                    "else{cp.classList.remove('cp-hidden')}" +
+                    "if(y>last&&y>60){if(cp)cp.classList.add('cp-hidden');if(fb)fb.classList.remove('visible')}" +
+                    "else{if(cp)cp.classList.remove('cp-hidden');if(fb)fb.classList.add('visible')}" +
                     "last=y;" +
                     "},{passive:true})" +
                     "})()");

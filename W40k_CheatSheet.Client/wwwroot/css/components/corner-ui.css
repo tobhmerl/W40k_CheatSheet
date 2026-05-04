@@ -177,3 +177,38 @@
     color: #ff9800;
     border-color: #ff9800;
 }
+
+/* ── Play-mode floating footer button ────────────────────────── */
+.play-footer-btn {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    z-index: 200;
+    padding: 0.5rem 1.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #ccc;
+    background: rgba(20, 20, 20, 0.92);
+    border: 1px solid #444;
+    border-radius: 8px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.play-footer-btn.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.play-footer-btn:hover {
+    color: #fff;
+    border-color: #888;
+    background: rgba(30, 30, 30, 0.95);
+}
