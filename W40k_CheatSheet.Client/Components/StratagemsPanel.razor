@@ -1,0 +1,154 @@
+@using W40k_CheatSheet.Client.Models
+
+<div id="stratagems-panel" class="stratagems-panel">
+    <div class="stratagems-panel-header" @onclick="ToggleOpen">
+        <span>🎯 @(!PlayMode ? "Configure Stratagems" : "Stratagems Overview")</span>
+        <span class="collapse-icon">@(IsOpen ? "▾" : "▸")</span>
+    </div>
+    @if (IsOpen)
+    {
+        <div class="stratagems-panel-body">
+            @if (!PlayMode)
+            {
+                <div class="setup-wipe-row">
+                    <button class="wipe-btn" @onclick="OnWipeAllStratagemConfigs">🗑 Reset all stratagem checkboxes</button>
+                </div>
+                @* ── Setup mode: all stratagems with config checkboxes ── *@
+                @foreach (var strat in AllSetupStratagems)
+                {
+                    var sCfg = GetStratConfig!(strat);
+                    <div class="strat-item @(sCfg.Disabled ? "strat-hidden" : "") @(FocusedStratagem == strat ? "zoomed" : "")"
+                         @onclick="() => OnToggleFocusStratagem.InvokeAsync(strat)" @onclick:stopPropagation="true">
+                        <div class="strat-header @GetStratTurnClass(strat)">
+                            <span class="strat-name">@strat.Name <span class="strat-category-inline">@strat.Category</span></span>
+                            @if (ParseCpCost(strat.Cost) > 1) { <span class="strat-cost">@strat.Cost</span> }
+                        </div>
+                        @if (FocusedStratagem == strat)
+                        {
+                            <div class="strat-details" @onclick:stopPropagation="true">
+                                <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
+                                <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
+                                <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
+                                @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
+                                {
+                                    <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
+                                }
+                            </div>
+                        }
+                        <div class="setup-checks" @onclick:stopPropagation="true">
+                            <div class="setup-checks-row">
+                                <label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyTurn" @bind:after="saveCfg" /> My</label>
+                                <label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyTurn" @bind:after="saveCfg" /> Enem</label>
+                                <label class="setup-lbl disable"><input type="checkbox" @bind="sCfg.Disabled" @bind:after="saveCfg" /> Disable</label>
+                            </div>
+                            <div class="setup-checks-row">
+                                <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Command" @bind:after="saveCfg" /> Cmd</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Move" @bind:after="saveCfg" /> Mov</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Shoot" @bind:after="saveCfg" /> Sht</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Charge" @bind:after="saveCfg" /> Chg</label>
+                                <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Fight" @bind:after="saveCfg" /> Fgt</label>
+                            </div>
+                            @if (sCfg.Command || sCfg.Move || sCfg.Shoot || sCfg.Charge || sCfg.Fight)
+                            {
+                                <div class="setup-checks-row">
+                                    @if (sCfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyCommand" @bind:after="saveCfg" /> eCmd</label>}
+                                    @if (sCfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyMove" @bind:after="saveCfg" /> eMov</label>}
+                                    @if (sCfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyShoot" @bind:after="saveCfg" /> eSht</label>}
+                                    @if (sCfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyCharge" @bind:after="saveCfg" /> eChg</label>}
+                                    @if (sCfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyFight" @bind:after="saveCfg" /> eFgt</label>}
+                                </div>
+                                <div class="setup-checks-row">
+                                    @if (sCfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyCommand" @bind:after="saveCfg" /> myCmd</label>}
+                                    @if (sCfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyMove" @bind:after="saveCfg" /> myMov</label>}
+                                    @if (sCfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyShooting" @bind:after="saveCfg" /> mySht</label>}
+                                    @if (sCfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyCharge" @bind:after="saveCfg" /> myChg</label>}
+                                    @if (sCfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyFight" @bind:after="saveCfg" /> myFgt</label>}
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                @foreach (var strat in OverviewStratagems)
+                {
+                    var stUsed = UsedStratagems.Contains(strat);
+                    <div class="strat-item @(FocusedStratagem == strat ? "zoomed" : "") @(stUsed ? "once-used" : "")"
+                         @onclick="() => OnToggleFocusStratagem.InvokeAsync(strat)" @onclick:stopPropagation="true"
+                         @onpointerdown="() => OnceStratagemPointerDown.InvokeAsync(strat)"
+                         @onpointerup="() => OncePointerUp.InvokeAsync()" @onpointerleave="() => OncePointerUp.InvokeAsync()"
+                         @oncontextmenu:preventDefault>
+                        <div class="strat-header @GetStratTurnClass(strat)">
+                            <span class="strat-name">@strat.Name <span class="strat-category-inline">@strat.Category</span></span>
+                            @if (ParseCpCost(strat.Cost) > 1) { <span class="strat-cost">@strat.Cost</span> }
+                        </div>
+                        @if (FocusedStratagem == strat)
+                        {
+                            <div class="strat-details @(StratDetailsZoomed ? "zoomed" : "")" @onclick="ToggleZoom" @onclick:stopPropagation="true">
+                                <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
+                                <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
+                                <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
+                                @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
+                                {
+                                    <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
+                                }
+                            </div>
+                        }
+                        @if (strat.RequiredKeywords.Count > 0 && FocusedStratagem != strat)
+                        {
+                            <div class="strat-keywords">
+                                @foreach (var kw in strat.RequiredKeywords)
+                                {
+                                    <span class="strat-kw-badge">@kw.ToUpperInvariant()</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public bool PlayMode { get; set; }
+
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    // Setup mode
+    [Parameter] public IReadOnlyList<Stratagem> AllSetupStratagems { get; set; } = [];
+    [Parameter] public Func<Stratagem, StratagemSetupEntry>? GetStratConfig { get; set; }
+    [Parameter] public EventCallback OnSaveStratagemConfigs { get; set; }
+    [Parameter] public EventCallback OnWipeAllStratagemConfigs { get; set; }
+
+    // Play / overview mode
+    [Parameter] public IReadOnlyList<Stratagem> OverviewStratagems { get; set; } = [];
+    [Parameter] public IReadOnlyCollection<Stratagem> UsedStratagems { get; set; } = Array.Empty<Stratagem>();
+
+    // Focus / zoom state
+    [Parameter] public Stratagem? FocusedStratagem { get; set; }
+    [Parameter] public EventCallback<Stratagem> OnToggleFocusStratagem { get; set; }
+    [Parameter] public bool StratDetailsZoomed { get; set; }
+    [Parameter] public EventCallback<bool> StratDetailsZoomedChanged { get; set; }
+
+    // Once-used pointer handling
+    [Parameter] public EventCallback<Stratagem> OnceStratagemPointerDown { get; set; }
+    [Parameter] public EventCallback OncePointerUp { get; set; }
+
+    // Helpers (passed in to avoid duplicating page-level statics)
+    [Parameter, EditorRequired] public Func<Stratagem, string> GetStratTurnClass { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<string, int> ParseCpCost { get; set; } = default!;
+
+    private Action saveCfg = default!;
+
+    protected override void OnInitialized()
+    {
+        saveCfg = () => OnSaveStratagemConfigs.InvokeAsync();
+    }
+
+    private Task ToggleOpen() => IsOpenChanged.InvokeAsync(!IsOpen);
+
+    private Task ToggleZoom() => StratDetailsZoomedChanged.InvokeAsync(!StratDetailsZoomed);
+}

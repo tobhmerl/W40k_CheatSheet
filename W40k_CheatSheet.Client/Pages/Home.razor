@@ -758,123 +758,21 @@
             }
         </div>
 
-        <div id="stratagems-panel" class="stratagems-panel">
-            <div class="stratagems-panel-header" @onclick="() => stratagemsPanelOpen = !stratagemsPanelOpen">
-                <span>🎯 @(!playMode ? "Configure Stratagems" : "Stratagems Overview")</span>
-                <span class="collapse-icon">@(stratagemsPanelOpen ? "▾" : "▸")</span>
-            </div>
-            @if (stratagemsPanelOpen)
-            {
-                <div class="stratagems-panel-body">
-                    @if (!playMode)
-                    {
-                        <div class="setup-wipe-row">
-                            <button class="wipe-btn" @onclick="WipeAllStratagemConfigs">🗑 Reset all stratagem checkboxes</button>
-                        </div>
-                        @* ── Setup mode: all stratagems with config checkboxes ── *@
-                        var sDetachment = army!.Detachment ?? "";
-                        var allStrats = CoreStratagems.All
-                            .Where(s => string.IsNullOrEmpty(s.Detachment) ||
-                                        s.Detachment.Equals(sDetachment, StringComparison.OrdinalIgnoreCase))
-                            .OrderBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
-                            .ThenBy(s => s.Name)
-                            .ToList();
-                        @foreach (var strat in allStrats)
-                        {
-                            var sCfg = GetOrCreateStratConfig(strat);
-                            <div class="strat-item @(sCfg.Disabled ? "strat-hidden" : "") @(focusedStratagem == strat ? "zoomed" : "")"
-                                 @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true">
-                                <div class="strat-header @GetStratTurnClass(strat)">
-                                    <span class="strat-name">@strat.Name <span class="strat-category-inline">@strat.Category</span></span>
-                                    @if (ParseCpCost(strat.Cost) > 1) { <span class="strat-cost">@strat.Cost</span> }
-                                </div>
-                                @if (focusedStratagem == strat)
-                                {
-                                    <div class="strat-details" @onclick:stopPropagation="true">
-                                        <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
-                                        <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
-                                        <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
-                                        @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
-                                        {
-                                            <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
-                                        }
-                                    </div>
-                                }
-                                <div class="setup-checks" @onclick:stopPropagation="true">
-                                    <div class="setup-checks-row">
-                                        <label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyTurn" @bind:after="SaveStratagemConfigs" /> My</label>
-                                        <label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyTurn" @bind:after="SaveStratagemConfigs" /> Enem</label>
-                                        <label class="setup-lbl disable"><input type="checkbox" @bind="sCfg.Disabled" @bind:after="SaveStratagemConfigs" /> Disable</label>
-                                    </div>
-                                    <div class="setup-checks-row">
-                                        <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Command" @bind:after="SaveStratagemConfigs" /> Cmd</label>
-                                        <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Move" @bind:after="SaveStratagemConfigs" /> Mov</label>
-                                        <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Shoot" @bind:after="SaveStratagemConfigs" /> Sht</label>
-                                        <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Charge" @bind:after="SaveStratagemConfigs" /> Chg</label>
-                                        <label class="setup-lbl"><input type="checkbox" @bind="sCfg.Fight" @bind:after="SaveStratagemConfigs" /> Fgt</label>
-                                    </div>
-                                    @if (sCfg.Command || sCfg.Move || sCfg.Shoot || sCfg.Charge || sCfg.Fight)
-                                    {
-                                        <div class="setup-checks-row">
-                                            @if (sCfg.Command){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyCommand" @bind:after="SaveStratagemConfigs" /> eCmd</label>}
-                                            @if (sCfg.Move){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyMove" @bind:after="SaveStratagemConfigs" /> eMov</label>}
-                                            @if (sCfg.Shoot){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyShoot" @bind:after="SaveStratagemConfigs" /> eSht</label>}
-                                            @if (sCfg.Charge){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyCharge" @bind:after="SaveStratagemConfigs" /> eChg</label>}
-                                            @if (sCfg.Fight){<label class="setup-lbl enemy"><input type="checkbox" @bind="sCfg.EnemyFight" @bind:after="SaveStratagemConfigs" /> eFgt</label>}
-                                        </div>
-                                        <div class="setup-checks-row">
-                                            @if (sCfg.Command){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyCommand" @bind:after="SaveStratagemConfigs" /> myCmd</label>}
-                                            @if (sCfg.Move){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyMove" @bind:after="SaveStratagemConfigs" /> myMov</label>}
-                                            @if (sCfg.Shoot){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyShooting" @bind:after="SaveStratagemConfigs" /> mySht</label>}
-                                            @if (sCfg.Charge){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyCharge" @bind:after="SaveStratagemConfigs" /> myChg</label>}
-                                            @if (sCfg.Fight){<label class="setup-lbl"><input type="checkbox" @bind="sCfg.MyFight" @bind:after="SaveStratagemConfigs" /> myFgt</label>}
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                    @foreach (var strat in AllOverviewStratagems)
-                    {
-                        var stUsed = usedStratagems.Contains(strat);
-                        <div class="strat-item @(focusedStratagem == strat ? "zoomed" : "") @(stUsed ? "once-used" : "")"
-                             @onclick="() => ToggleFocusStratagem(strat)" @onclick:stopPropagation="true"
-                             @onpointerdown="() => OnceStratagemPointerDown(strat)"
-                             @onpointerup="OncePointerUp" @onpointerleave="OncePointerUp"
-                             @oncontextmenu:preventDefault>
-                            <div class="strat-header @GetStratTurnClass(strat)">
-                                    <span class="strat-name">@strat.Name <span class="strat-category-inline">@strat.Category</span></span>
-                                    @if (ParseCpCost(strat.Cost) > 1) { <span class="strat-cost">@strat.Cost</span> }
-                                </div>
-                                @if (focusedStratagem == strat)
-                                {
-                                    <div class="strat-details @(stratDetailsZoomed ? "zoomed" : "")" @onclick="() => stratDetailsZoomed = !stratDetailsZoomed" @onclick:stopPropagation="true">
-                                    <div class="strat-field"><span class="strat-label">When:</span> @(!string.IsNullOrEmpty(strat.FullWhen) ? strat.FullWhen : strat.When)</div>
-                                    <div class="strat-field"><span class="strat-label">Target:</span> @(!string.IsNullOrEmpty(strat.FullTarget) ? strat.FullTarget : strat.Target)</div>
-                                    <div class="strat-field"><span class="strat-label">Effect:</span> @(!string.IsNullOrEmpty(strat.FullEffect) ? strat.FullEffect : strat.Effect)</div>
-                                    @if (!string.IsNullOrEmpty(strat.FullRestriction) || !string.IsNullOrEmpty(strat.Restriction))
-                                    {
-                                        <div class="strat-field"><span class="strat-label restriction">Restriction:</span> @(!string.IsNullOrEmpty(strat.FullRestriction) ? strat.FullRestriction : strat.Restriction)</div>
-                                    }
-                                </div>
-                            }
-                            @if (strat.RequiredKeywords.Count > 0 && focusedStratagem != strat)
-                            {
-                                <div class="strat-keywords">
-                                    @foreach (var kw in strat.RequiredKeywords)
-                                    {
-                                        <span class="strat-kw-badge">@kw.ToUpperInvariant()</span>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    }
-                    }
-                </div>
-            }
-        </div>
+        <StratagemsPanel PlayMode="playMode"
+                         @bind-IsOpen="stratagemsPanelOpen"
+                         AllSetupStratagems="SetupStratagems"
+                         GetStratConfig="GetOrCreateStratConfig"
+                         OnSaveStratagemConfigs="SaveStratagemConfigs"
+                         OnWipeAllStratagemConfigs="WipeAllStratagemConfigs"
+                         OverviewStratagems="AllOverviewStratagems"
+                         UsedStratagems="usedStratagems"
+                         FocusedStratagem="focusedStratagem"
+                         OnToggleFocusStratagem="ToggleFocusStratagem"
+                         @bind-StratDetailsZoomed="stratDetailsZoomed"
+                         OnceStratagemPointerDown="OnceStratagemPointerDown"
+                         OncePointerUp="OncePointerUp"
+                         GetStratTurnClass="GetStratTurnClass"
+                         ParseCpCost="ParseCpCost" />
 
         <div id="abilities-panel" class="abilities-panel">
             <div class="abilities-panel-header" @onclick="() => abilitiesPanelOpen = !abilitiesPanelOpen">
@@ -1769,6 +1667,20 @@
                 .OrderBy(s => LowestPhaseOrder(s))
                 .ThenBy(s => TurnColorOrder(s.TurnColor))
                 .ThenBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
+                .ThenBy(s => s.Name)
+                .ToList();
+        }
+    }
+
+    private List<Stratagem> SetupStratagems
+    {
+        get
+        {
+            var detachment = army?.Detachment ?? "";
+            return CoreStratagems.All
+                .Where(s => string.IsNullOrEmpty(s.Detachment) ||
+                            s.Detachment.Equals(detachment, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(s => string.IsNullOrEmpty(s.Detachment) ? 0 : 1)
                 .ThenBy(s => s.Name)
                 .ToList();
         }
