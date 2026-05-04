@@ -2519,11 +2519,38 @@
         var unitWideFnp = unit.FeelNoPain;
         var unitWideInvuln = unit.InvulnerableSave;
 
+        // Include ability-derived invuln only if the ability has AddToUnit checked
+        if (!string.IsNullOrEmpty(unit.InvulnerableSaveFromAbility))
+        {
+            var invulnAbility = unit.Abilities.FirstOrDefault(a =>
+                !string.IsNullOrEmpty(a.Description) &&
+                a.Description.Contains("invulnerable", StringComparison.OrdinalIgnoreCase) &&
+                !a.Description.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase));
+            if (invulnAbility is not null && IsAddedToUnit(invulnAbility))
+            {
+                unitWideInvuln = BetterFnp(unitWideInvuln, unit.InvulnerableSaveFromAbility);
+            }
+        }
+
         var result = unit.StatLines.Select(s => (s, unitWideInvuln, unitWideFnp, unit)).ToList();
         foreach (var leader in unit.AttachedLeaders)
         {
             var leaderFnp = BetterFnp(unitWideFnp, leader.FeelNoPain);
             var leaderInvuln = BetterFnp(unitWideInvuln, leader.InvulnerableSave);
+
+            // Include leader's own ability-derived invuln only if AddToUnit checked
+            if (!string.IsNullOrEmpty(leader.InvulnerableSaveFromAbility))
+            {
+                var lInvulnAbility = leader.Abilities.FirstOrDefault(a =>
+                    !string.IsNullOrEmpty(a.Description) &&
+                    a.Description.Contains("invulnerable", StringComparison.OrdinalIgnoreCase) &&
+                    !a.Description.Contains("while this model is leading", StringComparison.OrdinalIgnoreCase));
+                if (lInvulnAbility is not null && IsAddedToUnit(lInvulnAbility))
+                {
+                    leaderInvuln = BetterFnp(leaderInvuln, leader.InvulnerableSaveFromAbility);
+                }
+            }
+
             result.AddRange(leader.StatLines.Select(s => (s, leaderInvuln, leaderFnp, leader)));
         }
         return result;

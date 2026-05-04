@@ -200,7 +200,7 @@ public partial class RosterParserService
                         if (isLeaderAura)
                             unit.InvulnerableSaveAura = BetterValue(unit.InvulnerableSaveAura, invulnMatch.Groups[1].Value);
                         else
-                            unit.InvulnerableSave = BetterValue(unit.InvulnerableSave, invulnMatch.Groups[1].Value);
+                            unit.InvulnerableSaveFromAbility = BetterValue(unit.InvulnerableSaveFromAbility, invulnMatch.Groups[1].Value);
                     }
 
                     unit.Abilities.Add(new AbilityEntry { Name = profile.Name, Description = desc, Phases = ClassifyPhase(desc) });
