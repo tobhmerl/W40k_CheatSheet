@@ -1,0 +1,94 @@
+/* Top-of-page corner UI — extracted from Pages/Home.razor.css.
+   These elements (login dropdown + fixed action buttons) are positioned
+   absolutely/fixed at the page edges and don't need component-scoped CSS. */
+
+/* ── Top-left login corner ───────────────────────────────────── */
+.login-corner {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+}
+
+.login-toggle {
+    font-size: 0.7rem;
+    color: #555;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+    user-select: none;
+}
+
+.login-toggle:hover {
+    color: #aaa;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.login-toggle.logged-in {
+    color: #4caf50;
+    font-size: 0.6rem;
+}
+
+.login-dropdown {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 0.5rem;
+    min-width: 220px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Top-right corner action buttons ─────────────────────────── */
+.corner-actions {
+    position: fixed;
+    top: 0.4rem;
+    right: 0.4rem;
+    z-index: 200;
+    display: flex;
+    gap: 0.25rem;
+}
+
+.corner-btn {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background: rgba(0, 0, 0, 0.7);
+    color: #888;
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    padding: 0;
+    line-height: 1;
+    backdrop-filter: blur(4px);
+}
+
+.corner-btn:hover {
+    color: #ccc;
+    border-color: #666;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.corner-btn.play.active {
+    color: #e94560;
+    border-color: #e94560;
+}
+
+.corner-btn.save.tick {
+    color: #4caf50;
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.15);
+}
+
+.corner-btn.home:hover {
+    color: #ff9800;
+    border-color: #ff9800;
+}

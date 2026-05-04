@@ -1,0 +1,289 @@
+@* Changelog modal — extracted from Pages/Home.razor.
+   Two-way bound Visible parameter so the parent can show/hide it.
+   CSS lives in wwwroot/css/components/changelog.css (global). *@
+
+@if (Visible)
+{
+    <div class="changelog-overlay" @onclick="Close">
+        <div class="changelog-modal" @onclick:stopPropagation="true">
+            <div class="changelog-header">
+                <span>📋 Changelog</span>
+                <button class="changelog-close" @onclick="Close">✕</button>
+            </div>
+            <div class="changelog-body">
+
+                <div class="changelog-version">v2.5 🎉</div>
+                <ul class="changelog-list">
+                    <li class="cl-changed">Internal: roster + setup state moved into a shared <code>RosterStateService</code> so the page no longer owns the dictionaries directly</li>
+                    <li class="cl-changed">Internal: ability / detachment-effect / army-rule resolution centralized in a new <code>EffectResolverService</code> — single source of truth, no more auto-apply scattered across the page</li>
+                    <li class="cl-changed">Internal: setup-config models extracted from <code>Home.razor</code> into <code>Models/SetupConfigs.cs</code> so other components can consume them</li>
+                    <li class="cl-changed">Internal: started splitting <code>Home.razor.css</code> — corner UI, score tracker and changelog modal moved to <code>wwwroot/css/components/</code></li>
+                    <li class="cl-changed">Internal: changelog modal extracted into its own <code>Components/ChangelogModal.razor</code></li>
+                </ul>
+
+                <div class="changelog-version">v2.4 🎉</div>
+                <ul class="changelog-list">
+                    <li class="cl-changed">Nothing is auto-applied on import anymore — detachment rules, army rules, abilities and stratagems all stay neutral until you tick them in setup</li>
+                    <li class="cl-new">Detachment rule effects are now configurable individually (one row per effect under the detachment) with a “Stats” toggle to apply them directly to weapon/unit stats</li>
+                    <li class="cl-new">Army Rules section in setup — each faction-wide rule (e.g. Reanimation Protocols, Oath of Moment) gets its own Active / Reminder / Stats checkboxes</li>
+                    <li class="cl-changed">Renamed ability checkbox “Unit” → “Stats” for consistency across abilities, stratagems, detachment effects and army rules (existing checkboxes are reset on first launch)</li>
+                    <li class="cl-removed">Existing per-army setup configs are wiped on upgrade — start fresh and tick what you want active</li>
+                </ul>
+
+                <div class="changelog-version">v2.3 🎉</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Top action buttons — play / save / reset filters / home buttons duplicated at the top of the page for quicker access</li>
+                    <li class="cl-new">Inline reset-filters ✕ button added to both the top and bottom unit jump bars in play mode</li>
+                    <li class="cl-new">Setup mode wipe buttons — 🗑 reset all ability checkboxes and 🗑 reset all stratagem checkboxes (one click clears every config)</li>
+                    <li class="cl-changed">Reset filters ✕ button now only clears unit/weapon selections — phase, turn, pre-game banner and targeted/charged states are preserved</li>
+                    <li class="cl-changed">Stratagems &amp; Abilities Overview panels always show every item — no longer affected by phase, turn, unit focus or CP filters</li>
+                    <li class="cl-changed">Ability-derived invulnerable saves (e.g. Dispersion Shield 4+) only appear in the unit’s stat line when the ability has “Unit” checked</li>
+                    <li class="cl-changed">New imports start with all ability and detachment-stratagem checkboxes empty — only core stratagems persist their configuration across armies</li>
+                    <li class="cl-removed">Cleanup — removed dead methods, unused fields, leftover backup snapshots, empty Api/scripts folders for a leaner codebase</li>
+                </ul>
+
+                <div class="changelog-version">v2.2 🎉</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Welcome page redesign — hero card with background image overlay and dark theme</li>
+                    <li class="cl-new">Custom import button image replaces plain text button</li>
+                    <li class="cl-new">Username registration — choose a unique username during signup</li>
+                    <li class="cl-changed">Login displays username instead of email address</li>
+                    <li class="cl-changed">Login / Register moved to top-left corner dropdown — accessible from all pages</li>
+                    <li class="cl-changed">Session restore extracts username from JWT token for reliability</li>
+                </ul>
+
+                <div class="changelog-version">v2.1</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Cloud sync — save &amp; load armies online via Supabase backend</li>
+                    <li class="cl-new">Cross-device access — set up armies on PC, continue on mobile</li>
+                    <li class="cl-changed">Save button syncs to cloud when logged in, falls back to localStorage when offline</li>
+                    <li class="cl-removed">Server-side ASP.NET Core API removed — app is now fully standalone Blazor WASM with Supabase cloud</li>
+                </ul>
+
+                <div class="changelog-version">v2.0-beta 🎉</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Always-active column — abilities &amp; stratagems active every turn/phase now displayed in a dedicated right-side column on unit cards</li>
+                    <li class="cl-new">Color-coded right column — purple abilities, blue/red stratagems, green stratagems with dividers</li>
+                    <li class="cl-changed">Streamlined unit headers — removed colored number counters, replaced with a simple ▸/▾ expand/collapse toggle for abilities &amp; stratagems</li>
+                    <li class="cl-changed">Aligned always-active column — fixed-width right column ensures consistent alignment across all unit cards</li>
+                    <li class="cl-changed">Left column shows only phase-filtered items (always-active items moved to right column)</li>
+                </ul>
+
+                <div class="changelog-version">v1.20</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Always-active stratagems (both turns + ≥4 phases checked) now appear in the right-side column alongside always-active abilities</li>
+                    <li class="cl-new">Right column shows color-coded sections with dividers — purple abilities, blue/red stratagems, green stratagems</li>
+                    <li class="cl-changed">Left column now shows only phase-filtered items (always-active strats excluded)</li>
+                    <li class="cl-changed">Header badge purple count includes both always-active abilities and stratagems</li>
+                </ul>
+
+                <div class="changelog-version">v1.19</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Always Active section — abilities with "Unit" checked now appear as a separate purple section on unit cards, below phase-specific abilities &amp; stratagems</li>
+                    <li class="cl-new">Always-active abilities are not affected by turn/phase filters — they stay visible in every phase</li>
+                    <li class="cl-new">Purple count badge in unit header shows always-active ability count</li>
+                </ul>
+
+                <div class="changelog-version">v1.18</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Once per battle — long-press (1.5 s) on any ability or stratagem containing "once per battle" to mark it as used</li>
+                    <li class="cl-new">Used abilities &amp; stratagems hidden from unit card headers</li>
+                    <li class="cl-new">Used abilities &amp; stratagems shown strikethrough in overview panels — long-press again to restore</li>
+                </ul>
+
+                <div class="changelog-version">v1.17</div>
+                <ul class="changelog-list">
+                    <li class="cl-changed">Abilities &amp; stratagems unified in compact header — click to expand description inline with color-matched backgrounds (orange abilities, blue/red/green stratagems)</li>
+                    <li class="cl-changed">Removed duplicate abilities &amp; stratagems sections from lower unit card body in play mode</li>
+                    <li class="cl-new">Unit keywords moved directly below weapon tables for quicker reference</li>
+                    <li class="cl-new">Enhancements (🔮) are now clickable — tap to expand full ability description</li>
+                    <li class="cl-new">Attached leader keyword abilities (e.g. STEALTH) shown as compact badges under leader name</li>
+                    <li class="cl-new">Stratagem expand scoped per unit card — clicking a stratagem in one card no longer expands it in all cards</li>
+                    <li class="cl-removed">Removed keyword highlighting regex from ability/stratagem descriptions (plain text only)</li>
+                </ul>
+
+                <div class="changelog-version">v1.16</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Pre-Game Reminders banner — when entering Play mode, a pulsing orange banner lists all pre-game abilities (Scouts, Infiltrators, Deep Strike) with unit names and descriptions</li>
+                    <li class="cl-new">Auto-dismiss — banner disappears when any turn or phase button is tapped (battle has started)</li>
+                    <li class="cl-new">Manual dismiss via ✓ Done button</li>
+                    <li class="cl-new">Core ability rule parsing — Scouts, Infiltrators and Deep Strike are now extracted from BattleScribe rules data (not just profiles)</li>
+                    <li class="cl-changed">Banner resets each time Play mode is toggled</li>
+                </ul>
+
+                <div class="changelog-version">v1.15</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Detachment hit bonus — Awakened Dynasty "+1 to Hit roll" automatically improves BS/WS on weapon rows (e.g. 4+ → 3+, min 2+) in orange when a CHARACTER leads the unit</li>
+                    <li class="cl-new">Hit bonus auto-reverts when the CHARACTER leader is killed or detached</li>
+                    <li class="cl-new">Enemy-only phase checkboxes (eSht, eFgt, etc.) — mark individual phases as enemy-turn-only so they don't appear when filtering by My Turn</li>
+                    <li class="cl-new">Auto-detected from stratagem data — e.g. Protocol of the Undying Legions auto-sets eSht since Shooting is enemy-only</li>
+                    <li class="cl-changed">Enemy-only row only appears when at least one phase is checked</li>
+                </ul>
+
+                <div class="changelog-version">v1.14</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Inline stratagem setup — configure stratagem turn, phase and Disable checkboxes directly on the main page in setup mode (stratagems panel + unit cards)</li>
+                    <li class="cl-new">Stratagems panel shows “Configure Stratagems” header in setup mode with all stratagems listed</li>
+                    <li class="cl-new">Both panels open automatically on import for immediate configuration</li>
+                    <li class="cl-changed">Import now goes directly to the main page (no separate setup pages)</li>
+                    <li class="cl-removed">Separate stratagem setup page removed — configuration is now inline</li>
+                    <li class="cl-removed">🎯 Stratagems footer button removed (no longer needed)</li>
+                </ul>
+
+                <div class="changelog-version">v1.13</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Inline ability setup — configure ability turn, phase and “Add to Unit” checkboxes directly on the main page in setup mode (abilities panel + unit cards)</li>
+                    <li class="cl-new">Abilities panel shows “Configure Abilities” header in setup mode with all abilities listed by unit</li>
+                    <li class="cl-new">Auto-save — every checkbox change persists to localStorage immediately</li>
+                    <li class="cl-changed">Abilities panel opens automatically after stratagem setup for first-time configuration</li>
+                    <li class="cl-removed">Separate ability setup page removed — configuration is now inline</li>
+                    <li class="cl-removed">⚙️ Abilities footer button removed (no longer needed)</li>
+                    <li class="cl-removed">← Back to Abilities button removed from stratagem setup</li>
+                </ul>
+
+                <div class="changelog-version">v1.12</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Leader critical hit modifiers — "Add to Unit" now parses crit abilities (e.g. Critical Wound 5+) and displays the threshold next to weapon skill in orange</li>
+                    <li class="cl-new">Leader unit keywords — abilities granting unit-wide keywords (e.g. Stealth) shown as orange [ KEYWORD ] labels on unit cards</li>
+                    <li class="cl-new">Extra keywords expand on tap — click the keyword row to reveal full ability descriptions with orange left-strip styling</li>
+                    <li class="cl-changed">"Add to Unit" checkbox now also recognises crit modifier and unit keyword abilities</li>
+                    <li class="cl-changed">Ability header count color softened to neutral #ccc</li>
+                </ul>
+
+                <div class="changelog-version">v1.11</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Phase-aware weapon highlighting — ranged weapons zoom only in Shooting, melee only in Fight phase</li>
+                    <li class="cl-new">Active jump button — tapped unit nav button stays highlighted with faction accent</li>
+                    <li class="cl-changed">Zoomed weapon and stat rows use transparent backgrounds with bolder text for cleaner contrast</li>
+                    <li class="cl-changed">Faction-themed highlight colors — zoomed weapons and focused stats use faction green (Necrons, Dark Angels) instead of default cyan</li>
+                    <li class="cl-changed">Invuln/FnP saves in stat row now use orange text for better visibility</li>
+                </ul>
+
+                <div class="changelog-version">v1.10</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Unit cards collapsed by default — tap to expand for a cleaner overview</li>
+                    <li class="cl-new">Header counts per unit — (abilities, <span style="color:#5a9bd5">blue</span>, <span style="color:#c97a85">red</span>, <span style="color:#7baa7d">green</span> strats) reflecting current turn/phase filters</li>
+                </ul>
+
+                <div class="changelog-version">v1.9</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Save &amp; Load armies — 💾 Save button in footer stores current army with all setup (abilities, stratagems, leader attachments) to localStorage</li>
+                    <li class="cl-new">Saved armies list on import page — tap to restore a fully configured army instantly, skip setup pages</li>
+                    <li class="cl-new">Delete saved armies via 🗑 button per row</li>
+                    <li class="cl-changed">Stat row model names shortened for space — strips "Canoptek" prefix, "the &lt;Title&gt;" suffix, abbreviates 3+ word names to initials (e.g. LHD)</li>
+                </ul>
+
+                <div class="changelog-version">v1.8</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Keyword highlighting in ability and stratagem descriptions — cyan text on click for game terms (phases, dice, distances, re-rolls, etc.)</li>
+                    <li class="cl-new">Faction-themed button accents — green hover/active states for Necrons and Dark Angels (kill, detach, clear buttons excluded)</li>
+                    <li class="cl-changed">Invuln save and Feel No Pain moved inline after model name — e.g. "Canoptek Wraiths (4+, 5++)" — freeing table space</li>
+                    <li class="cl-changed">Shield column (🛡️) removed from stats table — 6 columns now have more room</li>
+                </ul>
+
+                <div class="changelog-version">v1.7</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">"Add to Unit" checkbox on ability setup — applies leader weapon keywords (e.g. Lethal Hits, Sustained Hits) directly onto weapon rows in purple</li>
+                    <li class="cl-new">"Add to Unit" for defensive auras — leader invulnerable save shown in green, Feel No Pain shown in gold on stat rows</li>
+                    <li class="cl-new">Unit checkbox only appears for abilities that can be parsed (weapon keywords or defensive auras)</li>
+                    <li class="cl-new">Setup rows greyed out with purple strikethrough when "Unit" is checked</li>
+                    <li class="cl-changed">Leader auras (invuln / FnP) no longer auto-applied when attaching — must explicitly check "Unit" on ability setup</li>
+                    <li class="cl-changed">Setup-only abilities (Leader, Retinue) now hidden from abilities panel regardless of saved config state</li>
+                    <li class="cl-changed">Added spacing between unit jump buttons and panels below</li>
+                </ul>
+
+                <div class="changelog-version">v1.6</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Wrath of the Rock (Dark Angels) detachment stratagems added</li>
+                    <li class="cl-new">Starshatter Arsenal (Necrons) detachment stratagems added</li>
+                    <li class="cl-changed">Stratagem details on main page now show full rules text instead of shorthand</li>
+                    <li class="cl-changed">Stratagem setup page now shows full rules text instead of shorthand</li>
+                </ul>
+
+                <div class="changelog-version">v1.5</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Ability Setup page - manually assign turn and phase per ability before entering the roster view</li>
+                    <li class="cl-new">Per-ability checkboxes: My Turn, Enemy Turn, Cmd, Mov, Sht, Chg, Fgt</li>
+                    <li class="cl-new">Ability configs auto-populated from parsed phase data and saved to localStorage</li>
+                    <li class="cl-new">Abilities button in footer to re-open setup at any time</li>
+                    <li class="cl-new">Always active section for abilities with 4+ phases checked (exempt from phase filter)</li>
+                    <li class="cl-new">Ability descriptions always visible on each item (no click needed)</li>
+                    <li class="cl-changed">Ability panel items are now individual bordered cards - same visual style as stratagems</li>
+                    <li class="cl-changed">Ability click-to-zoom matches stratagem zoom (blue border, left-strip, larger text)</li>
+                    <li class="cl-changed">Show all now bypasses all filters (turn + phase + stat-reflected), was stat-reflected only</li>
+                    <li class="cl-changed">Show all button renamed to Filter while active</li>
+                    <li class="cl-changed">Phase and turn filtering for abilities driven by manual config</li>
+                    <li class="cl-removed">Heuristic-based automatic turn detection for abilities</li>
+                    <li class="cl-removed">Heuristic-based automatic phase detection for abilities</li>
+                </ul>
+
+                <div class="changelog-version">v1.4</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Play mode - live game tracking via footer toggle</li>
+                    <li class="cl-new">Kill units with skull button; killed units move below a Destroyed divider</li>
+                    <li class="cl-new">Killing a bodyguard detaches surviving leaders to standalone cards</li>
+                    <li class="cl-new">Abilities of killed units hidden from the Abilities panel</li>
+                    <li class="cl-new">While leading abilities auto-hidden when the bodyguard is destroyed</li>
+                    <li class="cl-new">Show all / Hide stats toggle in Abilities panel header</li>
+                    <li class="cl-changed">Stratagem details zoom as a single block on click (was per-field)</li>
+                    <li class="cl-changed">Simplified all stratagem text to concise shorthand</li>
+                    <li class="cl-changed">Abilities panel: stat-reflected abilities (FNP, invuln) hidden by default</li>
+                </ul>
+
+                <div class="changelog-version">v1.3</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Stratagem headers show applicable phases (Cmd, Mov, Sht, Chg, Fgt)</li>
+                    <li class="cl-new">Red to blue gradient for enemy-first mixed stratagems</li>
+                    <li class="cl-new">Per-turn phase filtering for stratagems with mixed availability</li>
+                    <li class="cl-new">Two-column unit grid: grouped units left, standalone right</li>
+                    <li class="cl-new">Tap-to-move reorder for mobile (handle per unit card)</li>
+                    <li class="cl-new">Clickable changelog popup on version tag</li>
+                    <li class="cl-changed">Stratagem turn colours hardcoded for accurate display</li>
+                    <li class="cl-changed">Stratagem text fields click-to-zoom (was always expanded)</li>
+                    <li class="cl-changed">Colored stratagems sort before green (any-phase) stratagems</li>
+                    <li class="cl-changed">Fixed Protocol of the Undying Legions turn/phase filtering</li>
+                </ul>
+
+                <div class="changelog-version">v1.2</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">My turn / Enemy turn filter buttons</li>
+                    <li class="cl-new">Stratagem headers color-coded by turn (blue / red / green)</li>
+                    <li class="cl-new">Abilities panel filters by active turn</li>
+                    <li class="cl-new">Pipe separator between invuln save and feel-no-pain in shield column</li>
+                    <li class="cl-removed">Duplicate abilities section from individual unit cards</li>
+                </ul>
+
+                <div class="changelog-version">v1.1</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Stratagems panel - Core and Detachment stratagems with phase filter</li>
+                    <li class="cl-new">Abilities overview panel grouped by phase</li>
+                    <li class="cl-new">Detachment rule display in roster header</li>
+                    <li class="cl-new">Scoped weapon highlight when clicking a stat row</li>
+                    <li class="cl-new">Feel-no-pain parsing and display in stat table</li>
+                    <li class="cl-new">Weapon row click-to-zoom</li>
+                    <li class="cl-new">Score tracker for primary and secondary objectives</li>
+                    <li class="cl-new">Version tag in footer</li>
+                </ul>
+
+                <div class="changelog-version">v1.0</div>
+                <ul class="changelog-list">
+                    <li class="cl-new">Initial release - import BattleScribe roster JSON</li>
+                    <li class="cl-new">Unit cards with stats, weapons, keywords and enhancements</li>
+                    <li class="cl-new">Leader attachment (drag-and-drop / tap)</li>
+                    <li class="cl-new">Collapsible unit cards</li>
+                    <li class="cl-new">Phase filter buttons (Command, Move, Shoot, Charge, Fight)</li>
+                    <li class="cl-new">Local storage persistence across sessions</li>
+                    <li class="cl-new">Deployed as standalone Blazor WASM on GitHub Pages</li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+
+    private Task Close() => VisibleChanged.InvokeAsync(false);
+}
