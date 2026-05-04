@@ -11,50 +11,8 @@
 <PageTitle>Segmentum Ultima</PageTitle>
 
 <div class="roster-app @FactionClass">
-    @* ── Top-left login toggle ── *@
-    <div class="login-corner">
-        @if (!Cloud.IsLoggedIn)
-        {
-            <span class="login-toggle" @onclick="() => loginExpanded = !loginExpanded">@(loginExpanded ? "✕" : "Login")</span>
-            @if (loginExpanded)
-            {
-                <div class="login-dropdown">
-                    @if (showRegister)
-                    {
-                        <input type="text" placeholder="Username" @bind="cloudUsername" class="cloud-input" />
-                    }
-                    <input type="email" placeholder="Email" @bind="cloudEmail" class="cloud-input" />
-                    <input type="password" placeholder="Password" @bind="cloudPassword" class="cloud-input" />
-                    <div class="cloud-auth-buttons">
-                        @if (showRegister)
-                        {
-                            <button class="cloud-btn register" @onclick="CloudRegister" disabled="@cloudBusy">Register</button>
-                            <button class="cloud-btn login" @onclick="() => showRegister = false">← Back</button>
-                        }
-                        else
-                        {
-                            <button class="cloud-btn login" @onclick="CloudLogin" disabled="@cloudBusy">Login</button>
-                            <button class="cloud-btn register" @onclick="() => showRegister = true">Register</button>
-                        }
-                    </div>
-                    @if (!string.IsNullOrEmpty(Cloud.ErrorMessage))
-                    {
-                        <div class="cloud-error">@Cloud.ErrorMessage</div>
-                    }
-                </div>
-            }
-        }
-        else
-        {
-            <span class="login-toggle logged-in" @onclick="() => loginExpanded = !loginExpanded">@Cloud.Username</span>
-            @if (loginExpanded)
-            {
-                <div class="login-dropdown">
-                    <button class="cloud-btn logout" @onclick="CloudLogout">Logout</button>
-                </div>
-            }
-        }
-    </div>
+    @* ── Top-left login corner ── *@
+    <LoginCorner OnAuthChanged="OnAuthChanged" />
 
     @if (!loaded)
     {
@@ -1393,14 +1351,8 @@
     }
 
     // ── Cloud sync fields ──
-    private string cloudEmail = "";
-    private string cloudPassword = "";
-    private string cloudUsername = "";
-    private bool cloudBusy;
     private string? welcomeBg = null;
 
-    private bool loginExpanded;
-    private bool showRegister;
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];
 
     private string FactionClass => army?.Faction switch
@@ -3866,47 +3818,12 @@
         catch { }
     }
 
-    private async Task CloudLogin()
+    private async Task OnAuthChanged()
     {
-        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword)) return;
-        cloudBusy = true;
-        StateHasChanged();
-        var ok = await Cloud.LoginAsync(cloudEmail, cloudPassword);
-        if (ok)
-        {
-            cloudPassword = "";
-            loginExpanded = false;
+        if (Cloud.IsLoggedIn)
             await RefreshCloudRosters();
-        }
-        cloudBusy = false;
-    }
-
-    private async Task CloudRegister()
-    {
-        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword) || string.IsNullOrWhiteSpace(cloudUsername)) return;
-        cloudBusy = true;
-        StateHasChanged();
-        var ok = await Cloud.RegisterAsync(cloudEmail, cloudPassword, cloudUsername.Trim());
-        if (ok)
-        {
-            cloudPassword = "";
-            cloudUsername = "";
-            loginExpanded = false;
-            showRegister = false;
-            await RefreshCloudRosters();
-        }
-        cloudBusy = false;
-    }
-
-    private async Task CloudLogout()
-    {
-        await Cloud.LogoutAsync();
-        cloudRosters.Clear();
-        cloudEmail = "";
-        cloudPassword = "";
-        cloudUsername = "";
-        loginExpanded = false;
-        showRegister = false;
+        else
+            cloudRosters.Clear();
     }
 
     private async Task RefreshCloudRosters()

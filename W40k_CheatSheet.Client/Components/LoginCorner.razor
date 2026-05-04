@@ -1,0 +1,114 @@
+@* Top-left login corner — extracted from Pages/Home.razor.
+   Owns its own auth-form state (email/password/username/busy/expanded) and
+   raises OnAuthChanged after a successful login, register, or logout so the
+   parent page can refresh (or clear) its cloud roster list.
+
+   When the user is logged in, the username is rendered as a label floating
+   over the logged_in_button.png base image so it looks like the name is part
+   of the button artwork. *@
+
+@using W40k_CheatSheet.Client.Services
+@inject CloudRosterService Cloud
+
+<div class="login-corner">
+    @if (!Cloud.IsLoggedIn)
+    {
+        <span class="login-toggle" @onclick="ToggleExpanded">@(loginExpanded ? "✕" : "Login")</span>
+        @if (loginExpanded)
+        {
+            <div class="login-dropdown">
+                @if (showRegister)
+                {
+                    <input type="text" placeholder="Username" @bind="cloudUsername" class="cloud-input" />
+                }
+                <input type="email" placeholder="Email" @bind="cloudEmail" class="cloud-input" />
+                <input type="password" placeholder="Password" @bind="cloudPassword" class="cloud-input" />
+                <div class="cloud-auth-buttons">
+                    @if (showRegister)
+                    {
+                        <button class="cloud-btn register" @onclick="DoRegister" disabled="@cloudBusy">Register</button>
+                        <button class="cloud-btn login" @onclick="() => showRegister = false">← Back</button>
+                    }
+                    else
+                    {
+                        <button class="cloud-btn login" @onclick="DoLogin" disabled="@cloudBusy">Login</button>
+                        <button class="cloud-btn register" @onclick="() => showRegister = true">Register</button>
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(Cloud.ErrorMessage))
+                {
+                    <div class="cloud-error">@Cloud.ErrorMessage</div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <button type="button" class="login-btn-img" @onclick="ToggleExpanded" title="@Cloud.Username">
+            <img src="images/logged_in_button.png" alt="" />
+            <span class="login-btn-name">@Cloud.Username</span>
+        </button>
+        @if (loginExpanded)
+        {
+            <div class="login-dropdown">
+                <button class="cloud-btn logout" @onclick="DoLogout">Logout</button>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback OnAuthChanged { get; set; }
+
+    private string cloudEmail = "";
+    private string cloudPassword = "";
+    private string cloudUsername = "";
+    private bool cloudBusy;
+    private bool loginExpanded;
+    private bool showRegister;
+
+    private void ToggleExpanded() => loginExpanded = !loginExpanded;
+
+    private async Task DoLogin()
+    {
+        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword)) return;
+        cloudBusy = true;
+        StateHasChanged();
+        var ok = await Cloud.LoginAsync(cloudEmail, cloudPassword);
+        if (ok)
+        {
+            cloudPassword = "";
+            loginExpanded = false;
+            await OnAuthChanged.InvokeAsync();
+        }
+        cloudBusy = false;
+    }
+
+    private async Task DoRegister()
+    {
+        if (string.IsNullOrWhiteSpace(cloudEmail) || string.IsNullOrWhiteSpace(cloudPassword) || string.IsNullOrWhiteSpace(cloudUsername)) return;
+        cloudBusy = true;
+        StateHasChanged();
+        var ok = await Cloud.RegisterAsync(cloudEmail, cloudPassword, cloudUsername.Trim());
+        if (ok)
+        {
+            cloudPassword = "";
+            cloudUsername = "";
+            loginExpanded = false;
+            showRegister = false;
+            await OnAuthChanged.InvokeAsync();
+        }
+        cloudBusy = false;
+    }
+
+    private async Task DoLogout()
+    {
+        await Cloud.LogoutAsync();
+        cloudEmail = "";
+        cloudPassword = "";
+        cloudUsername = "";
+        loginExpanded = false;
+        showRegister = false;
+        await OnAuthChanged.InvokeAsync();
+    }
+}
