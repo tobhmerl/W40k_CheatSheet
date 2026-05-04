@@ -1,0 +1,19 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (Leaders.Count > 0)
+{
+    <div class="attached-leader-compact">
+        @foreach (var leader in Leaders)
+        {
+            var captured = leader;
+            <button class="detach-btn" title="Detach @captured.Name"
+                    @onclick="() => OnDetach.InvokeAsync(captured)"
+                    @onclick:stopPropagation="true">✕</button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<UnitEntry> Leaders { get; set; } = [];
+    [Parameter] public EventCallback<UnitEntry> OnDetach { get; set; }
+}

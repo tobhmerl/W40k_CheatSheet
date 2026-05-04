@@ -1,0 +1,14 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (SelectedLeader is not null)
+{
+    <div class="attach-hint">
+        Tap a unit to attach <strong>@SelectedLeader.Name</strong> ·
+        <span class="cancel-link" @onclick="() => OnCancel.InvokeAsync()">Cancel</span>
+    </div>
+}
+
+@code {
+    [Parameter] public UnitEntry? SelectedLeader { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+}

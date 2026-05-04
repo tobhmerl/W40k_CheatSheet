@@ -79,13 +79,7 @@
                        OnToggleAllUnits="ToggleAllUnits"
                        OnResetAllFilters="ResetAllFilters" />
 
-        @if (selectedLeader is not null)
-        {
-            <div class="attach-hint">
-                Tap a unit to attach <strong>@selectedLeader.Name</strong> ·
-                <span class="cancel-link" @onclick="CancelSelection">Cancel</span>
-            </div>
-        }
+        <AttachHint SelectedLeader="selectedLeader" OnCancel="CancelSelection" />
 
         <MoveHint MovingUnit="movingUnit" OnCancel="() => movingUnit = null" />
 
@@ -139,9 +133,7 @@
                 @if (playMode && !killedDividerInserted && IsKilled(unit))
                 {
                     killedDividerInserted = true;
-                    <div class="killed-divider">
-                        <span class="killed-divider-text">☠ Destroyed</span>
-                    </div>
+                    <KilledDivider />
                 }
 
                 <div id="@UnitAnchorId(unit.Name)" class="unit-card @CardClass(unit)"
@@ -208,12 +200,8 @@
 
                     @if (!playMode && unit.AttachedLeaders.Count > 0)
                     {
-                        <div class="attached-leader-compact">
-                            @foreach (var leader in unit.AttachedLeaders)
-                            {
-                                <button class="detach-btn" title="Detach @leader.Name" @onclick="() => DetachLeader(unit, leader)" @onclick:stopPropagation="true">✕</button>
-                            }
-                        </div>
+                        <AttachedLeadersStrip Leaders="unit.AttachedLeaders"
+                                              OnDetach="leader => DetachLeader(unit, leader)" />
                     }
 
                     @if (!collapsed)
