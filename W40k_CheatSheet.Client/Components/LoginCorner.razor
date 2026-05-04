@@ -13,7 +13,9 @@
 <div class="login-corner">
     @if (!Cloud.IsLoggedIn)
     {
-        <span class="login-toggle" @onclick="ToggleExpanded">@(loginExpanded ? "✕" : "Login")</span>
+        <button type="button" class="login-toggle-btn" @onclick="ToggleExpanded">
+            @(loginExpanded ? "✕" : "Login")
+        </button>
         @if (loginExpanded)
         {
             <div class="login-dropdown">
