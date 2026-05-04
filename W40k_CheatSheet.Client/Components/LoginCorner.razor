@@ -51,6 +51,10 @@
         @if (loginExpanded)
         {
             <div class="login-dropdown">
+                @if (!string.IsNullOrEmpty(Cloud.Email))
+                {
+                    <div class="login-email" title="@Cloud.Email">@Cloud.Email</div>
+                }
                 <button class="cloud-btn logout" @onclick="DoLogout">Logout</button>
             </div>
         }

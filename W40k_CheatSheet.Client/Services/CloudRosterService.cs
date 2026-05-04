@@ -17,6 +17,7 @@ public class CloudRosterService
 
     public bool IsLoggedIn { get; private set; }
     public string? Username { get; private set; }
+    public string? Email { get; private set; }
     public string? ErrorMessage { get; private set; }
 
     public CloudRosterService(HttpClient http, IJSRuntime js, string supabaseUrl, string anonKey)
@@ -254,6 +255,7 @@ public class CloudRosterService
 
             IsLoggedIn = true;
             Username = username;
+            Email = email;
             await PersistSession(username);
             return true;
         }
@@ -292,6 +294,7 @@ public class CloudRosterService
     {
         IsLoggedIn = false;
         Username = null;
+        Email = null;
         _accessToken = null;
         _refreshToken = null;
         await ClearPersistedSession();
