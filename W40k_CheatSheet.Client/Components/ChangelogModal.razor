@@ -12,6 +12,15 @@
             </div>
             <div class="changelog-body">
 
+                <div class="changelog-version">v2.6 🎉</div>
+                <ul class="changelog-list">
+                    <li class="cl-changed">Internal: <code>Home.razor</code> further decomposed — every reusable section is now its own component (stats, weapons, header, footer, enhancements, keywords, popups, hints, setup-mode card abilities, draggable card shell)</li>
+                    <li class="cl-changed">Internal: page-level overlays (<code>BuffSourcePopup</code>, <code>WeaponRemovePopup</code>, <code>MoveHint</code>, <code>AttachHint</code>, <code>KilledDivider</code>) now isolated and reusable</li>
+                    <li class="cl-changed">Internal: unit card structure split into <code>UnitCardShell</code>, <code>UnitCardHeader</code>, <code>UnitCardSetupAbilities</code>, <code>UnitCardFooter</code>, <code>AttachLeaderButton</code>, <code>AttachedLeadersStrip</code></li>
+                    <li class="cl-changed">Internal: weapons table consolidated into a single reusable <code>WeaponsTable</code> rendered for both ranged and melee</li>
+                    <li class="cl-changed">Internal: loading screen extracted into <code>LoadingScreen</code> component</li>
+                </ul>
+
                 <div class="changelog-version">v2.5 🎉</div>
                 <ul class="changelog-list">
                     <li class="cl-changed">Internal: roster + setup state moved into a shared <code>RosterStateService</code> so the page no longer owns the dictionaries directly</li>

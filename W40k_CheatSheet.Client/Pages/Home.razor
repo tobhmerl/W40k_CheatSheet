@@ -16,15 +16,7 @@
 
     @if (!loaded)
     {
-        <div class="import-section">
-            <div class="welcome-card">
-                <div class="welcome-overlay"></div>
-                <div class="welcome-content">
-                    <h1>There is only war ...</h1>
-                    <p>Accessing libraries…</p>
-                </div>
-            </div>
-        </div>
+        <LoadingScreen />
     }
     else if (army is null)
     {
@@ -409,7 +401,7 @@
                 OnSaveCurrentArmy="SaveCurrentArmy"
                 OnResetAllFilters="ResetAllFilters"
                 OnClearRoster="ClearRoster" />
-    <div class="version-tag" @onclick="() => showChangelog = true">v2.5</div>
+    <div class="version-tag" @onclick="() => showChangelog = true">v2.6</div>
 
     <ChangelogModal @bind-Visible="showChangelog" />
 </div>
