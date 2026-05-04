@@ -3,7 +3,14 @@ html {
 }
 
 /* Unified icon symbol color — muted amber/gold, low-key but distinct */
-.icon-symbol {
+.icon-symbol,
+.move-handle,
+.collapse-icon,
+.strat-toggle,
+.weapon-collapse-icon,
+.targeted-btn:not(.active),
+.charged-btn:not(.active),
+.weapon-section-header th:first-child .weapon-collapse-icon {
     color: #b08d57;
 }
 
