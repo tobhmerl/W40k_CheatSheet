@@ -2135,8 +2135,6 @@
 
     private void ResetAllFilters()
     {
-        activeTurn = null;
-        activePhase = null;
         focusedUnit = null;
         focusedWeapon = null;
         focusedStatOwner = null;
@@ -2145,9 +2143,6 @@
         focusedStratagem = null;
         focusedStratagemUnit = null;
         focusedExtraAbility = null;
-        preGameDismissed = false;
-        targetedUnits.Clear();
-        chargedUnits.Clear();
     }
 
     private void ToggleTargeted(UnitEntry unit)
