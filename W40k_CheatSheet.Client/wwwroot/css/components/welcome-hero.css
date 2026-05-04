@@ -199,3 +199,11 @@
     border-color: #e94560;
     background: rgba(233, 69, 96, 0.1);
 }
+
+/* Faction-themed import button colors — kept here because the .import-btn
+   markup lives inside Components/WelcomeHero.razor and Blazor CSS isolation
+   in Pages/Home.razor.css cannot reach across the component boundary. */
+.roster-app.faction-necrons .import-btn { background: #185724; }
+.roster-app.faction-necrons .import-btn:hover { background: #1e6e2e; }
+.roster-app.faction-dark-angels .import-btn { background: #2DA145; }
+.roster-app.faction-dark-angels .import-btn:hover { background: #237B35; }
