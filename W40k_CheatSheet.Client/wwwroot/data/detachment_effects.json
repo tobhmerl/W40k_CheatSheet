@@ -7,7 +7,7 @@
         "modifier": -1,
         "weaponType": "all",
         "condition": "has_leader_character",
-        "reflectedInStats": false,
+        "reflectedInStats": true,
         "sourceLabel": "Awakened Dynasty"
       }
     ]
