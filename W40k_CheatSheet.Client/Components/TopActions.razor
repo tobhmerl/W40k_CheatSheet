@@ -1,0 +1,27 @@
+@* ──────────────────────────────────────────────────────────────
+   Top-right corner action buttons (used at the top of the page
+   and again in the footer). Pure presentation: the parent owns
+   playMode/saveTick state and the click handlers.
+   ────────────────────────────────────────────────────────────── *@
+<div class="@WrapperClass">
+    <button class="corner-btn play @(PlayMode ? "active" : "")" @onclick="OnTogglePlayMode">@(PlayMode ? "☰" : "⚔")</button>
+    @if (!PlayMode)
+    {
+        <button class="corner-btn save @(SaveTick ? "tick" : "")" @onclick="OnSaveCurrentArmy">@(SaveTick ? "✓" : "💾")</button>
+    }
+    @if (PlayMode)
+    {
+        <button class="corner-btn reset-filters" @onclick="OnResetAllFilters" title="Remove all filters">✕</button>
+    }
+    <button class="corner-btn home" @onclick="OnClearRoster">⌂</button>
+</div>
+
+@code {
+    [Parameter] public string WrapperClass { get; set; } = "top-actions";
+    [Parameter] public bool PlayMode { get; set; }
+    [Parameter] public bool SaveTick { get; set; }
+    [Parameter] public EventCallback OnTogglePlayMode { get; set; }
+    [Parameter] public EventCallback OnSaveCurrentArmy { get; set; }
+    [Parameter] public EventCallback OnResetAllFilters { get; set; }
+    [Parameter] public EventCallback OnClearRoster { get; set; }
+}

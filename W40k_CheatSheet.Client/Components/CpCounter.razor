@@ -1,0 +1,20 @@
+@* ──────────────────────────────────────────────────────────────
+   Command-Point counter shown in the top-right corner during
+   play mode. Two-way binds the integer value via @bind-Value.
+   ────────────────────────────────────────────────────────────── *@
+<div class="corner-actions">
+    <div class="cp-counter" id="cp-counter">
+        <button class="cp-btn" @onclick="Decrement">−</button>
+        <span class="cp-value">@Value</span>
+        <span class="cp-label">CP</span>
+        <button class="cp-btn" @onclick="Increment">+</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Value { get; set; }
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+
+    private Task Decrement() => ValueChanged.InvokeAsync(Math.Max(0, Value - 1));
+    private Task Increment() => ValueChanged.InvokeAsync(Value + 1);
+}
