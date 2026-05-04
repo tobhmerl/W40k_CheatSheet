@@ -136,13 +136,13 @@
                     <KilledDivider />
                 }
 
-                <div id="@UnitAnchorId(unit.Name)" class="unit-card @CardClass(unit)"
-                     draggable="true"
-                     @ondragstart="() => DragStart(unit)"
-                     @ondragend="DragEnd"
-                     @ondragenter="() => DragEnter(unit)"
-                     @ondragover:preventDefault
-                     @ondrop="() => Drop(unit)">
+                <UnitCardShell Unit="unit"
+                               AnchorId="@UnitAnchorId(unit.Name)"
+                               CardClass="@CardClass(unit)"
+                               OnDragStart="DragStart"
+                               OnDragEnd="DragEnd"
+                               OnDragEnter="DragEnter"
+                               OnDrop="Drop">
 
                     <UnitCardHeader Unit="unit"
                                     Collapsed="collapsed"
@@ -334,7 +334,7 @@
                             <UnitCardFooter ShowKeywords="!playMode" Keywords="keywords" OnScrollTo="ScrollToAsync" />
                         </div>
                     }
-                </div>
+                </UnitCardShell>
             }
         </div>
 

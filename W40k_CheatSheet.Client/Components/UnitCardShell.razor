@@ -1,0 +1,22 @@
+@using W40k_CheatSheet.Client.Models
+
+<div id="@AnchorId" class="unit-card @CardClass"
+     draggable="true"
+     @ondragstart="() => OnDragStart.InvokeAsync(Unit!)"
+     @ondragend="() => OnDragEnd.InvokeAsync()"
+     @ondragenter="() => OnDragEnter.InvokeAsync(Unit!)"
+     @ondragover:preventDefault
+     @ondrop="() => OnDrop.InvokeAsync(Unit!)">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired] public UnitEntry? Unit { get; set; }
+    [Parameter] public string AnchorId { get; set; } = string.Empty;
+    [Parameter] public string CardClass { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnDragStart { get; set; }
+    [Parameter] public EventCallback OnDragEnd { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnDragEnter { get; set; }
+    [Parameter] public EventCallback<UnitEntry> OnDrop { get; set; }
+}
