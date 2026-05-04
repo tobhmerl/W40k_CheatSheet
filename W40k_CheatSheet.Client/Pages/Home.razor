@@ -70,82 +70,15 @@
     }
     else if (army is null)
     {
-        <div class="import-section">
-            @if (welcomeBg is null)
-            {
-                <div class="welcome-card" style="background: #111;">
-                    <div class="welcome-overlay"></div>
-                    <div class="welcome-content">
-                        <h1>Segmentum Ultima</h1>
-                        <p>Select your faction to begin.</p>
-                        <div class="welcome-faction-toggle">
-                            <img src="images/select_necrons.png" alt="Necrons" class="faction-select-img" @onclick="@(() => welcomeBg = "necrons")" />
-                            <img src="images/select_blood_angels.png" alt="Blood Angels" class="faction-select-img" @onclick="@(() => welcomeBg = "blood_angels")" />
-                            <img src="images/select_dark_angels.png" alt="Dark Angels" class="faction-select-img" @onclick="@(() => welcomeBg = "dark_angels")" />
-                        </div>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="welcome-faction-toggle mini">
-                    <img src="images/select_necrons.png" alt="Necrons" class="faction-select-img @(welcomeBg == "necrons" ? "active" : "")" @onclick="@(() => welcomeBg = "necrons")" />
-                    <img src="images/select_blood_angels.png" alt="Blood Angels" class="faction-select-img @(welcomeBg == "blood_angels" ? "active" : "")" @onclick="@(() => welcomeBg = "blood_angels")" />
-                    <img src="images/select_dark_angels.png" alt="Dark Angels" class="faction-select-img @(welcomeBg == "dark_angels" ? "active" : "")" @onclick="@(() => welcomeBg = "dark_angels")" />
-                </div>
-                <div class="welcome-card" style="background: url('images/bg_@(welcomeBg).jpg') no-repeat center/cover;">
-                    <div class="welcome-overlay"></div>
-                    <div class="welcome-content">
-                        <h1>Segmentum Ultima</h1>
-                        <p>Import your army roster JSON to view unit stats.</p>
-                        <label class="import-btn">
-                            <img src="images/import_button_@(welcomeBg).png" alt="Import Roster (JSON)" />
-                            <InputFile OnChange="HandleFileSelected" accept=".json" style="display:none" />
-                        </label>
-                        @if (!string.IsNullOrEmpty(errorMessage))
-                        {
-                            <div class="error-msg">@errorMessage</div>
-                        }
-                    </div>
-                </div>
-            }
-
-            @* ── Cloud Armies (shown when logged in, filtered by selected faction) ── *@
-            @if (Cloud.IsLoggedIn && cloudRosters.Any(cr => FactionMatchesWelcome(cr.Faction)))
-            {
-                <div class="saved-armies">
-                    <h3>☁️ Saved Armies</h3>
-                    @foreach (var cr in cloudRosters.Where(cr => FactionMatchesWelcome(cr.Faction)))
-                    {
-                        <div class="saved-army-row">
-                            <div class="saved-army-info" @onclick="() => LoadCloudArmy(cr.Id)">
-                                <span class="saved-army-name">@cr.Name</span>
-                                <span class="saved-army-meta">@cr.Faction · @cr.Detachment · @cr.Points pts</span>
-                            </div>
-                            <button class="saved-army-delete" @onclick="() => DeleteCloudArmy(cr.Id)" @onclick:stopPropagation="true">🗑</button>
-                        </div>
-                    }
-                </div>
-            }
-
-            @* ── Local armies (only shown when NOT logged in, filtered by selected faction) ── *@
-            @if (!Cloud.IsLoggedIn && savedArmies.Any(sa => FactionMatchesWelcome(sa.Faction)))
-            {
-                <div class="saved-armies">
-                    <h3>📦 Saved Armies (Local)</h3>
-                    @foreach (var sa in savedArmies.Where(sa => FactionMatchesWelcome(sa.Faction)))
-                    {
-                        <div class="saved-army-row">
-                            <div class="saved-army-info" @onclick="() => LoadSavedArmy(sa.Name)">
-                                <span class="saved-army-name">@sa.Name</span>
-                                <span class="saved-army-meta">@sa.Faction · @sa.Detachment · @sa.Points pts</span>
-                            </div>
-                            <button class="saved-army-delete" @onclick="() => DeleteSavedArmy(sa.Name)" @onclick:stopPropagation="true">🗑</button>
-                        </div>
-                    }
-                </div>
-            }
-        </div>
+        <WelcomeHero @bind-WelcomeBg="welcomeBg"
+                     ErrorMessage="@errorMessage"
+                     SavedArmies="savedArmies"
+                     CloudRosters="cloudRosters"
+                     OnFileSelected="HandleFileSelected"
+                     OnLoadSavedArmy="LoadSavedArmy"
+                     OnDeleteSavedArmy="DeleteSavedArmy"
+                     OnLoadCloudArmy="LoadCloudArmy"
+                     OnDeleteCloudArmy="DeleteCloudArmy" />
     }
     else
     {
@@ -1466,13 +1399,6 @@
     private bool cloudBusy;
     private string? welcomeBg = null;
 
-    private bool FactionMatchesWelcome(string faction) => welcomeBg switch
-    {
-        "necrons" => faction.Contains("Necron", StringComparison.OrdinalIgnoreCase),
-        "blood_angels" => faction.Contains("Blood Angel", StringComparison.OrdinalIgnoreCase),
-        "dark_angels" => faction.Contains("Dark Angel", StringComparison.OrdinalIgnoreCase),
-        _ => false
-    };
     private bool loginExpanded;
     private bool showRegister;
     private List<CloudRosterService.CloudRosterMeta> cloudRosters = [];

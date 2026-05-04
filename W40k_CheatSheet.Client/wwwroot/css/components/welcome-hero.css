@@ -1,0 +1,201 @@
+/* Welcome hero / import card + saved-armies list — extracted from
+   Pages/Home.razor.css. Used by Components/WelcomeHero.razor. */
+
+.import-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0.5rem 2.5rem;
+}
+
+/* Welcome hero card — mirrors unit-card look with bg image */
+.welcome-card {
+    position: relative;
+    border-radius: 10px;
+    border: 1.5px solid #232323;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 16 / 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-faction-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.faction-select-img {
+    max-width: 42px;
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s, filter 0.15s;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+
+.faction-select-img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7)) brightness(1.1);
+}
+
+.faction-select-img.active {
+    border-color: #888;
+}
+
+.welcome-faction-toggle.mini {
+    justify-content: flex-start;
+    margin-bottom: 0.4rem;
+    gap: 0.3rem;
+}
+
+.welcome-faction-toggle.mini .faction-select-img {
+    max-width: 32px;
+    border-radius: 4px;
+    border-width: 1px;
+}
+
+.welcome-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.welcome-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.welcome-content h1 {
+    font-size: 1.8rem;
+    margin: 0 0 0.5rem;
+}
+
+.welcome-content p {
+    color: #aaa;
+    margin-bottom: 1.5rem;
+}
+
+.import-btn {
+    display: inline-block;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: transform 0.15s, filter 0.15s;
+}
+
+.import-btn img {
+    display: block;
+    width: 280px;
+    height: 56px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.import-btn:hover {
+    transform: scale(1.05);
+}
+
+.import-btn:hover img {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7)) brightness(1.1);
+}
+
+.import-btn.small {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+}
+
+.error-msg {
+    color: #e94560;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background: rgba(233, 69, 96, 0.1);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* ── Saved armies list (cloud + local) ────────────────────────── */
+.saved-armies {
+    margin-top: 1.5rem;
+    max-width: 500px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.saved-armies h3 {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+}
+
+.saved-army-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 0.5rem 0.6rem;
+    margin-bottom: 0.4rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.saved-army-row:hover {
+    border-color: #444;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.saved-army-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.saved-army-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ccc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.saved-army-meta {
+    font-size: 0.6rem;
+    color: #666;
+}
+
+.saved-army-delete {
+    background: none;
+    border: 1px solid transparent;
+    color: #555;
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 0.2rem 0.3rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.saved-army-delete:hover {
+    color: #e94560;
+    border-color: #e94560;
+    background: rgba(233, 69, 96, 0.1);
+}
