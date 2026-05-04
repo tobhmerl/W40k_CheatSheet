@@ -241,29 +241,10 @@
                     @if (!collapsed)
                     {
                         <div class="unit-body">
-                            @if (enhancements.Count > 0)
-                            {
-                                <div class="unit-enhancements" @onclick:stopPropagation="true">
-                                    @foreach (var enh in enhancements)
-                                    {
-                                        var enhAbility = allAbilities.FirstOrDefault(a => a.Name.Equals(enh, StringComparison.OrdinalIgnoreCase));
-                                        @if (enhAbility is not null)
-                                        {
-                                            <div class="enhancement-entry">
-                                                <span class="enhancement clickable @(focusedAbility == enhAbility ? "expanded" : "")" @onclick="() => ToggleFocusAbility(enhAbility)">🔮 @enh</span>
-                                                @if (focusedAbility == enhAbility)
-                                                {
-                                                    <div class="enhancement-desc">@enhAbility.Description</div>
-                                                }
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <span class="enhancement">🔮 @enh</span>
-                                        }
-                                    }
-                                </div>
-                            }
+                            <UnitEnhancements Enhancements="enhancements"
+                                              AllAbilities="allAbilities"
+                                              FocusedAbility="focusedAbility"
+                                              OnToggleFocusAbility="ToggleFocusAbility" />
 
                             @if (stats.Count > 0)
                             {
@@ -354,12 +335,7 @@
 
                             @if (keywords.Count > 0)
                             {
-                                <div class="unit-keywords unit-keywords-inline">
-                                    @foreach (var kw in keywords)
-                                    {
-                                        <span class="keyword">@kw</span>
-                                    }
-                                </div>
+                                <UnitKeywords Keywords="keywords" />
                             }
 
                             @if (focusedWeapon is not null && (ranged.Contains(focusedWeapon) || melee.Contains(focusedWeapon)))

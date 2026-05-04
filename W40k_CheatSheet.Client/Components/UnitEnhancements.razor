@@ -1,0 +1,33 @@
+@using W40k_CheatSheet.Client.Models
+
+@if (Enhancements.Count > 0)
+{
+    <div class="unit-enhancements" @onclick:stopPropagation="true">
+        @foreach (var enh in Enhancements)
+        {
+            var enhAbility = AllAbilities.FirstOrDefault(a => a.Name.Equals(enh, StringComparison.OrdinalIgnoreCase));
+            @if (enhAbility is not null)
+            {
+                <div class="enhancement-entry">
+                    <span class="enhancement clickable @(FocusedAbility == enhAbility ? "expanded" : "")"
+                          @onclick="() => OnToggleFocusAbility.InvokeAsync(enhAbility)">🔮 @enh</span>
+                    @if (FocusedAbility == enhAbility)
+                    {
+                        <div class="enhancement-desc">@enhAbility.Description</div>
+                    }
+                </div>
+            }
+            else
+            {
+                <span class="enhancement">🔮 @enh</span>
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<string> Enhancements { get; set; } = [];
+    [Parameter] public IReadOnlyList<AbilityEntry> AllAbilities { get; set; } = [];
+    [Parameter] public AbilityEntry? FocusedAbility { get; set; }
+    [Parameter] public EventCallback<AbilityEntry> OnToggleFocusAbility { get; set; }
+}

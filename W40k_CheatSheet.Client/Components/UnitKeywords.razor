@@ -1,0 +1,13 @@
+@if (Keywords.Count > 0)
+{
+    <div class="unit-keywords unit-keywords-inline">
+        @foreach (var kw in Keywords)
+        {
+            <span class="keyword">@kw</span>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<string> Keywords { get; set; } = [];
+}
