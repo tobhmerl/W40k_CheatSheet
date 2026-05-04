@@ -1,4 +1,4 @@
-@* Changelog modal — extracted from Pages/Home.razor.
+﻿@* Changelog modal — extracted from Pages/Home.razor.
    Two-way bound Visible parameter so the parent can show/hide it.
    CSS lives in wwwroot/css/components/changelog.css (global). *@
 
@@ -7,12 +7,12 @@
     <div class="changelog-overlay" @onclick="Close">
         <div class="changelog-modal" @onclick:stopPropagation="true">
             <div class="changelog-header">
-                <span>📋 Changelog</span>
+                <span>☰ Changelog</span>
                 <button class="changelog-close" @onclick="Close">✕</button>
             </div>
             <div class="changelog-body">
 
-                <div class="changelog-version">v2.6 🎉</div>
+                <div class="changelog-version">v2.6 ★</div>
                 <ul class="changelog-list">
                     <li class="cl-changed">Internal: <code>Home.razor</code> further decomposed — every reusable section is now its own component (stats, weapons, header, footer, enhancements, keywords, popups, hints, setup-mode card abilities, draggable card shell)</li>
                     <li class="cl-changed">Internal: page-level overlays (<code>BuffSourcePopup</code>, <code>WeaponRemovePopup</code>, <code>MoveHint</code>, <code>AttachHint</code>, <code>KilledDivider</code>) now isolated and reusable</li>
@@ -21,7 +21,7 @@
                     <li class="cl-changed">Internal: loading screen extracted into <code>LoadingScreen</code> component</li>
                 </ul>
 
-                <div class="changelog-version">v2.5 🎉</div>
+                <div class="changelog-version">v2.5 ★</div>
                 <ul class="changelog-list">
                     <li class="cl-changed">Internal: roster + setup state moved into a shared <code>RosterStateService</code> so the page no longer owns the dictionaries directly</li>
                     <li class="cl-changed">Internal: ability / detachment-effect / army-rule resolution centralized in a new <code>EffectResolverService</code> — single source of truth, no more auto-apply scattered across the page</li>
@@ -30,7 +30,7 @@
                     <li class="cl-changed">Internal: changelog modal extracted into its own <code>Components/ChangelogModal.razor</code></li>
                 </ul>
 
-                <div class="changelog-version">v2.4 🎉</div>
+                <div class="changelog-version">v2.4 ★</div>
                 <ul class="changelog-list">
                     <li class="cl-changed">Nothing is auto-applied on import anymore — detachment rules, army rules, abilities and stratagems all stay neutral until you tick them in setup</li>
                     <li class="cl-new">Detachment rule effects are now configurable individually (one row per effect under the detachment) with a “Stats” toggle to apply them directly to weapon/unit stats</li>
@@ -39,11 +39,11 @@
                     <li class="cl-removed">Existing per-army setup configs are wiped on upgrade — start fresh and tick what you want active</li>
                 </ul>
 
-                <div class="changelog-version">v2.3 🎉</div>
+                <div class="changelog-version">v2.3 ★</div>
                 <ul class="changelog-list">
                     <li class="cl-new">Top action buttons — play / save / reset filters / home buttons duplicated at the top of the page for quicker access</li>
                     <li class="cl-new">Inline reset-filters ✕ button added to both the top and bottom unit jump bars in play mode</li>
-                    <li class="cl-new">Setup mode wipe buttons — 🗑 reset all ability checkboxes and 🗑 reset all stratagem checkboxes (one click clears every config)</li>
+                    <li class="cl-new">Setup mode wipe buttons — ✖ reset all ability checkboxes and ✖ reset all stratagem checkboxes (one click clears every config)</li>
                     <li class="cl-changed">Reset filters ✕ button now only clears unit/weapon selections — phase, turn, pre-game banner and targeted/charged states are preserved</li>
                     <li class="cl-changed">Stratagems &amp; Abilities Overview panels always show every item — no longer affected by phase, turn, unit focus or CP filters</li>
                     <li class="cl-changed">Ability-derived invulnerable saves (e.g. Dispersion Shield 4+) only appear in the unit’s stat line when the ability has “Unit” checked</li>
@@ -51,7 +51,7 @@
                     <li class="cl-removed">Cleanup — removed dead methods, unused fields, leftover backup snapshots, empty Api/scripts folders for a leaner codebase</li>
                 </ul>
 
-                <div class="changelog-version">v2.2 🎉</div>
+                <div class="changelog-version">v2.2 ★</div>
                 <ul class="changelog-list">
                     <li class="cl-new">Welcome page redesign — hero card with background image overlay and dark theme</li>
                     <li class="cl-new">Custom import button image replaces plain text button</li>
@@ -69,7 +69,7 @@
                     <li class="cl-removed">Server-side ASP.NET Core API removed — app is now fully standalone Blazor WASM with Supabase cloud</li>
                 </ul>
 
-                <div class="changelog-version">v2.0-beta 🎉</div>
+                <div class="changelog-version">v2.0-beta ★</div>
                 <ul class="changelog-list">
                     <li class="cl-new">Always-active column — abilities &amp; stratagems active every turn/phase now displayed in a dedicated right-side column on unit cards</li>
                     <li class="cl-new">Color-coded right column — purple abilities, blue/red stratagems, green stratagems with dividers</li>
@@ -105,7 +105,7 @@
                     <li class="cl-changed">Abilities &amp; stratagems unified in compact header — click to expand description inline with color-matched backgrounds (orange abilities, blue/red/green stratagems)</li>
                     <li class="cl-changed">Removed duplicate abilities &amp; stratagems sections from lower unit card body in play mode</li>
                     <li class="cl-new">Unit keywords moved directly below weapon tables for quicker reference</li>
-                    <li class="cl-new">Enhancements (🔮) are now clickable — tap to expand full ability description</li>
+                    <li class="cl-new">Enhancements (◆) are now clickable — tap to expand full ability description</li>
                     <li class="cl-new">Attached leader keyword abilities (e.g. STEALTH) shown as compact badges under leader name</li>
                     <li class="cl-new">Stratagem expand scoped per unit card — clicking a stratagem in one card no longer expands it in all cards</li>
                     <li class="cl-removed">Removed keyword highlighting regex from ability/stratagem descriptions (plain text only)</li>
@@ -136,7 +136,7 @@
                     <li class="cl-new">Both panels open automatically on import for immediate configuration</li>
                     <li class="cl-changed">Import now goes directly to the main page (no separate setup pages)</li>
                     <li class="cl-removed">Separate stratagem setup page removed — configuration is now inline</li>
-                    <li class="cl-removed">🎯 Stratagems footer button removed (no longer needed)</li>
+                    <li class="cl-removed">⊕ Stratagems footer button removed (no longer needed)</li>
                 </ul>
 
                 <div class="changelog-version">v1.13</div>
@@ -176,9 +176,9 @@
 
                 <div class="changelog-version">v1.9</div>
                 <ul class="changelog-list">
-                    <li class="cl-new">Save &amp; Load armies — 💾 Save button in footer stores current army with all setup (abilities, stratagems, leader attachments) to localStorage</li>
+                    <li class="cl-new">Save &amp; Load armies — ▪ Save button in footer stores current army with all setup (abilities, stratagems, leader attachments) to localStorage</li>
                     <li class="cl-new">Saved armies list on import page — tap to restore a fully configured army instantly, skip setup pages</li>
-                    <li class="cl-new">Delete saved armies via 🗑 button per row</li>
+                    <li class="cl-new">Delete saved armies via ✖ button per row</li>
                     <li class="cl-changed">Stat row model names shortened for space — strips "Canoptek" prefix, "the &lt;Title&gt;" suffix, abbreviates 3+ word names to initials (e.g. LHD)</li>
                 </ul>
 
@@ -187,7 +187,7 @@
                     <li class="cl-new">Keyword highlighting in ability and stratagem descriptions — cyan text on click for game terms (phases, dice, distances, re-rolls, etc.)</li>
                     <li class="cl-new">Faction-themed button accents — green hover/active states for Necrons and Dark Angels (kill, detach, clear buttons excluded)</li>
                     <li class="cl-changed">Invuln save and Feel No Pain moved inline after model name — e.g. "Canoptek Wraiths (4+, 5++)" — freeing table space</li>
-                    <li class="cl-changed">Shield column (🛡️) removed from stats table — 6 columns now have more room</li>
+                    <li class="cl-changed">Shield column (✠️) removed from stats table — 6 columns now have more room</li>
                 </ul>
 
                 <div class="changelog-version">v1.7</div>

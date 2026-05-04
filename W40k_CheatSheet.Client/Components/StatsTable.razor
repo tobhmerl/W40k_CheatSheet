@@ -1,4 +1,4 @@
-@using W40k_CheatSheet.Client.Models
+﻿@using W40k_CheatSheet.Client.Models
 
 @if (Stats.Count > 0)
 {
@@ -67,7 +67,7 @@
                             <td colspan="7">
                                 @foreach (var mod in DefensiveModifiers)
                                 {
-                                    var prefix = mod.AttackType == "melee" ? "⚔ " : mod.AttackType == "ranged" ? "🎯 " : "";
+                                    var prefix = mod.AttackType == "melee" ? "⚔ " : mod.AttackType == "ranged" ? "⊕ " : "";
                                     var label = $"{prefix}{char.ToUpper(mod.Roll[0])}{mod.Roll[1..]} {mod.Value:+#;-#}";
                                     var tipText = string.IsNullOrEmpty(mod.Condition) ? mod.Source : $"{mod.Source} ({mod.Condition})";
                                     var descText = string.IsNullOrEmpty(mod.Condition) ? "" : $"Condition: {mod.Condition}";

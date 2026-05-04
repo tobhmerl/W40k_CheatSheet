@@ -231,7 +231,7 @@
                             {
                                 var rangedExpanded = IsRangedExpanded(unit);
                                 var hideRangedSection = focusedCard == unit && focusedStatOwner is not null && !ranged.Any(w => IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(true));
-                                <WeaponsTable Title="ðŸŽ¯ Ranged"
+                                <WeaponsTable Title="⊕ RANGED"
                                               SkillLabel="BS"
                                               Weapons="ranged"
                                               Expanded="rangedExpanded"
@@ -263,7 +263,7 @@
                             {
                                 var meleeExpanded = IsMeleeExpanded(unit);
                                 var hideMeleeSection = focusedCard == unit && focusedStatOwner is not null && !melee.Any(w => IsWeaponOwnedByFocused(w) && IsWeaponPhaseRelevant(false));
-                                <WeaponsTable Title="âš”ï¸ Melee"
+                                <WeaponsTable Title="⚔ MELEE"
                                               SkillLabel="WS"
                                               Weapons="melee"
                                               Expanded="meleeExpanded"

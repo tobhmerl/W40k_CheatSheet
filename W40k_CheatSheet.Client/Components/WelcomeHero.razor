@@ -1,4 +1,4 @@
-@* Welcome / import hero card — extracted from Pages/Home.razor.
+﻿@* Welcome / import hero card — extracted from Pages/Home.razor.
    Shown when no army is loaded. Renders the faction picker, the import button,
    and the cloud + local saved-armies lists filtered by the selected faction.
 
@@ -61,7 +61,7 @@
                         <span class="saved-army-name">@cr.Name</span>
                         <span class="saved-army-meta">@cr.Faction · @cr.Detachment · @cr.Points pts</span>
                     </div>
-                    <button class="saved-army-delete" @onclick="() => OnDeleteCloudArmy.InvokeAsync(cr.Id)" @onclick:stopPropagation="true">🗑</button>
+                    <button class="saved-army-delete" @onclick="() => OnDeleteCloudArmy.InvokeAsync(cr.Id)" @onclick:stopPropagation="true">✖</button>
                 </div>
             }
         </div>
@@ -71,7 +71,7 @@
     @if (!Cloud.IsLoggedIn && SavedArmies.Any(sa => FactionMatches(sa.Faction)))
     {
         <div class="saved-armies">
-            <h3>📦 Saved Armies (Local)</h3>
+            <h3>▣ Saved Armies (Local)</h3>
             @foreach (var sa in SavedArmies.Where(sa => FactionMatches(sa.Faction)))
             {
                 <div class="saved-army-row">
@@ -79,7 +79,7 @@
                         <span class="saved-army-name">@sa.Name</span>
                         <span class="saved-army-meta">@sa.Faction · @sa.Detachment · @sa.Points pts</span>
                     </div>
-                    <button class="saved-army-delete" @onclick="() => OnDeleteSavedArmy.InvokeAsync(sa.Name)" @onclick:stopPropagation="true">🗑</button>
+                    <button class="saved-army-delete" @onclick="() => OnDeleteSavedArmy.InvokeAsync(sa.Name)" @onclick:stopPropagation="true">✖</button>
                 </div>
             }
         </div>

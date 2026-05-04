@@ -1,4 +1,4 @@
-@using W40k_CheatSheet.Client.Models
+﻿@using W40k_CheatSheet.Client.Models
 
 @if (Enhancements.Count > 0)
 {
@@ -10,7 +10,7 @@
             {
                 <div class="enhancement-entry">
                     <span class="enhancement clickable @(FocusedAbility == enhAbility ? "expanded" : "")"
-                          @onclick="() => OnToggleFocusAbility.InvokeAsync(enhAbility)">🔮 @enh</span>
+                          @onclick="() => OnToggleFocusAbility.InvokeAsync(enhAbility)">◆ @enh</span>
                     @if (FocusedAbility == enhAbility)
                     {
                         <div class="enhancement-desc">@enhAbility.Description</div>
@@ -19,7 +19,7 @@
             }
             else
             {
-                <span class="enhancement">🔮 @enh</span>
+                <span class="enhancement">◆ @enh</span>
             }
         }
     </div>

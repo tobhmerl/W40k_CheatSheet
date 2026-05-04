@@ -1,4 +1,4 @@
-@using W40k_CheatSheet.Client.Models
+﻿@using W40k_CheatSheet.Client.Models
 
 <div class="unit-header @(Collapsed ? "" : "expanded")"
      @onclick="e => OnHeaderClick.InvokeAsync((Unit!, e))"
@@ -36,7 +36,7 @@
         @if (PlayMode && HasDefensiveModifiers)
         {
             <button class="targeted-btn @(Targeted ? "active" : "")"
-                    @onclick="() => OnToggleTargeted.InvokeAsync(Unit!)" @onclick:stopPropagation="true">🎯</button>
+                    @onclick="() => OnToggleTargeted.InvokeAsync(Unit!)" @onclick:stopPropagation="true">⊕</button>
         }
         @if (PlayMode && HasChargeEffects)
         {

@@ -1,4 +1,4 @@
-@* ──────────────────────────────────────────────────────────────
+﻿@* ──────────────────────────────────────────────────────────────
    Play-mode score tracker: primary + secondary scores for both
    players, plus the running totals row. Pure presentation; the
    parent owns the four counters via @bind-* parameters.
@@ -16,7 +16,7 @@
         <div class="score-section-label">Primary</div>
         <div class="score-row">
             <div class="score-player">
-                <div class="score-label">🛡️ Defender</div>
+                <div class="score-label">✠️ Defender</div>
                 <div class="score-controls">
                     <button class="score-btn" @onclick="() => Update(nameof(DefenderPrimary), DefenderPrimary - 1)">−</button>
                     <span class="score-value">@DefenderPrimary</span>

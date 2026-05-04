@@ -1,4 +1,4 @@
-@* ──────────────────────────────────────────────────────────────
+﻿@* ──────────────────────────────────────────────────────────────
    Top-right corner action buttons (used at the top of the page
    and again in the footer). Pure presentation: the parent owns
    playMode/saveTick state and the click handlers.
@@ -7,7 +7,7 @@
     <button class="corner-btn play @(PlayMode ? "active" : "")" @onclick="OnTogglePlayMode">@(PlayMode ? "☰" : "⚔")</button>
     @if (!PlayMode)
     {
-        <button class="corner-btn save @(SaveTick ? "tick" : "")" @onclick="OnSaveCurrentArmy">@(SaveTick ? "✓" : "💾")</button>
+        <button class="corner-btn save @(SaveTick ? "tick" : "")" @onclick="OnSaveCurrentArmy">@(SaveTick ? "✓" : "▪")</button>
     }
     @if (PlayMode)
     {
