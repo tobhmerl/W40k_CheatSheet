@@ -1115,37 +1115,37 @@
                                             </div>
                                         }
                                     </div>
-                                    @if (activeDetachmentEffects.Count > 0)
-                                    {
-                                        <div class="detachment-effects-list">
-                                            @for (int idx = 0; idx < activeDetachmentEffects.Count; idx++)
-                                            {
-                                                var effIdx = idx;
-                                                var eff = activeDetachmentEffects[effIdx];
-                                                var effKey = DetachmentEffectKey(army.Detachment, effIdx);
-                                                var effCfg = GetOrCreateDetachmentEffectConfig(army.Detachment, effIdx);
-                                                var canApply = eff.ReflectedInStats;
-                                                <div class="detachment-effect-item @(effCfg.ApplyToStats ? "added-to-unit" : "")"
-                                                     @onclick:stopPropagation="true">
-                                                    <span class="ability-name">↳ @DescribeDetachmentEffect(eff)</span>
-                                                    <div class="setup-checks">
-                                                        <div class="setup-checks-row">
-                                                            <label class="setup-lbl"><input type="checkbox" @bind="effCfg.Enabled" @bind:after="SaveDetachmentEffectConfigs" /> Active</label>
-                                                            @if (canApply)
-                                                            {
-                                                                <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="effCfg.ApplyToStats" @bind:after="SaveDetachmentEffectConfigs" /> Stats</label>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span class="setup-lbl disabled-lbl" title="This effect is not eligible for direct stat application">Reminder only</span>
-                                                            }
-                                                        </div>
+                                </div>
+                                @if (activeDetachmentEffects.Count > 0)
+                                {
+                                    <div class="detachment-effects-list">
+                                        @for (int idx = 0; idx < activeDetachmentEffects.Count; idx++)
+                                        {
+                                            var effIdx = idx;
+                                            var eff = activeDetachmentEffects[effIdx];
+                                            var effKey = DetachmentEffectKey(army.Detachment, effIdx);
+                                            var effCfg = GetOrCreateDetachmentEffectConfig(army.Detachment, effIdx);
+                                            var canApply = eff.ReflectedInStats;
+                                            <div class="detachment-effect-item @(effCfg.ApplyToStats ? "added-to-unit" : "")"
+                                                 @onclick:stopPropagation="true">
+                                                <span class="ability-name">↳ @DescribeDetachmentEffect(eff)</span>
+                                                <div class="setup-checks">
+                                                    <div class="setup-checks-row">
+                                                        <label class="setup-lbl"><input type="checkbox" @bind="effCfg.Enabled" @bind:after="SaveDetachmentEffectConfigs" /> Active</label>
+                                                        @if (canApply)
+                                                        {
+                                                            <label class="setup-lbl unit-lbl" title="Apply to stats directly"><input type="checkbox" @bind="effCfg.ApplyToStats" @bind:after="SaveDetachmentEffectConfigs" /> Stats</label>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="setup-lbl disabled-lbl" title="This effect is not eligible for direct stat application">Reminder only</span>
+                                                        }
                                                     </div>
                                                 </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
                             </div>
                         }
 
