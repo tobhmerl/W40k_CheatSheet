@@ -1,4 +1,4 @@
-.roster-app {
+﻿.roster-app {
     max-width: 1100px;
     margin: 0 auto;
     padding: 1.5rem 0.5rem 2.5rem 0.5rem;
@@ -6,320 +6,27 @@
     position: relative;
 }
 
-/* Top-left login corner + top-right corner action buttons —
+/* Top-left login corner + top-right corner action buttons â€”
    moved to wwwroot/css/components/corner-ui.css */
 
 /* Login dropdown / cloud auth form (.cloud-input / .cloud-btn / .cloud-error)
    also moved to corner-ui.css since the markup now lives in
    Components/LoginCorner.razor. */
 
-/* Welcome / import card + saved-armies — moved to
+/* Welcome / import card + saved-armies â€” moved to
    wwwroot/css/components/welcome-hero.css */
 
-/* ============================================================
-   Ability Setup page
-   ============================================================ */
-.setup-page {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 1rem 0.5rem 3rem;
-}
-
-.setup-header {
-    text-align: center;
-    margin-bottom: 1.2rem;
-}
-
-.setup-header h2 {
-    font-size: 1.2rem;
-    margin: 0 0 0.4rem;
-    color: #ccc;
-}
-
-.setup-header p {
-    font-size: 0.72rem;
-    color: #666;
-    margin: 0.1rem 0;
-}
-
-.setup-hint {
-    color: #444 !important;
-    font-size: 0.65rem !important;
-}
-
-.setup-unit {
-    margin-bottom: 0.6rem;
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    overflow: hidden;
-    position: relative;
-}
-
-.setup-unit-name {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #00b4d8;
-    padding: 0.3rem 0.6rem;
-    border-bottom: 1px solid #1a4d66;
-    background: #0c3347;
-}
-
-.setup-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    padding: 0.35rem 0.6rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-@media (max-width: 700px) {
-    .setup-row {
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .setup-checks {
-        width: 100%;
-    }
-}
-
-.setup-row:last-child {
-    border-bottom: none;
-}
-
-.setup-row.added-to-unit {
-    opacity: 0.35;
-}
-
-.setup-row.added-to-unit .setup-ability-name {
-    text-decoration: line-through;
-    text-decoration-color: #bb86fc;
-}
-
-.setup-ability-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.setup-ability-name {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: #bbb;
-    white-space: nowrap;
-}
-
-.setup-ability-desc {
-    font-size: 0.6rem;
-    color: #555;
-    line-height: 1.4;
-}
-
-.setup-checks {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    flex-shrink: 0;
-}
-
-.setup-checks-row {
-    display: flex;
-    align-items: center;
-    gap: 0.1rem;
-}
-
-.setup-lbl {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    font-size: 0.6rem;
-    color: #888;
-    padding: 0.15rem 0.35rem;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.1s;
-}
-
-.setup-lbl:hover {
-    background: rgba(0, 180, 216, 0.1);
-    color: #ccc;
-}
-
-.setup-lbl.enemy:hover {
-    background: rgba(233, 69, 96, 0.1);
-}
-
-.setup-lbl input[type="checkbox"] {
-    accent-color: #00b4d8;
-    cursor: pointer;
-}
-
-.setup-lbl.enemy input[type="checkbox"] {
-    accent-color: #e94560;
-}
-
-.setup-lbl.unit-lbl:hover {
-    background: rgba(187, 134, 252, 0.1);
-}
-
-.setup-lbl.unit-lbl input[type="checkbox"] {
-    accent-color: #bb86fc;
-}
-
-.setup-sep {
-    font-size: 0.6rem;
-    color: #333;
-    padding: 0 0.2rem;
-}
-
-.setup-actions {
-    display: flex;
-    gap: 0.6rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 1.5rem;
-}
-
-.setup-btn {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid #333;
-    color: #888;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.setup-btn:hover {
-    border-color: #00b4d8;
-    color: #00b4d8;
-    background: rgba(0, 180, 216, 0.1);
-}
-
-/* Save button — saved state (green) */
-.setup-btn.saved {
-    border-color: #4caf50;
-    color: #4caf50;
-    background: rgba(76, 175, 80, 0.1);
-}
-
-.setup-btn.saved:hover {
-    background: rgba(76, 175, 80, 0.2);
-    border-color: #4caf50;
-    color: #4caf50;
-}
-
-/* Save toast */
-.save-toast {
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: #4caf50;
-    animation: toast-fade 2s ease-out forwards;
-}
-
-@keyframes toast-fade {
-    0%, 70% { opacity: 1; }
-    100%    { opacity: 0; }
-}
-
-/* Light mode */
-.roster-app.light .setup-unit {
-    background: #fff;
-    border-color: #e5e7eb;
-}
-
-.roster-app.light .setup-unit-name {
-    background: #0c3347;
-    border-bottom-color: #1a4d66;
-    color: #fff;
-}
-
-.roster-app.light .setup-row {
-    border-bottom-color: #f3f4f6;
-}
-
-.roster-app.light .setup-ability-name {
-    color: #111827;
-}
-
-.roster-app.light .setup-ability-desc {
-    color: #9ca3af;
-}
-
-.roster-app.light .setup-lbl {
-    color: #4b5563;
-}
-
-.roster-app.light .setup-sep {
-    color: #d1d5db;
-}
-
-.roster-app.light .setup-header h2 {
-    color: #111827;
-}
-
-.roster-app.light .setup-header p {
-    color: #9ca3af;
-}
-
-/* ============================================================
-   Stratagem Setup page
-   ============================================================ */
-.strat-setup-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 0.35rem;
-    vertical-align: middle;
-}
-
-.strat-setup-dot.dot-blue  { background: #2979ff; }
-.strat-setup-dot.dot-red   { background: #e94560; }
-.strat-setup-dot.dot-green { background: #2e7d32; }
-
-.strat-setup-cost {
-    font-size: 0.6rem;
-    font-weight: 700;
-    color: #e94560;
-    margin-left: 0.4rem;
-}
-
-.setup-row.strat-hidden {
-    opacity: 0.35;
-}
-
-.setup-row.strat-hidden .setup-ability-name {
-    text-decoration: line-through;
-    text-decoration-color: #555;
-}
-
-.setup-lbl.disable:hover {
-    background: rgba(255, 152, 0, 0.1);
-}
-
-.setup-lbl.disable input[type="checkbox"] {
-    accent-color: #ff9800;
-}
-
-.strat-restriction-label {
-    color: #e94560;
-}
+/* Ability Setup + Stratagem Setup pages — moved to
+   wwwroot/css/components/setup-page.css */
 
 
 /* ============================================================
-   Pre-Game Reminders banner — moved to
+   Pre-Game Reminders banner â€” moved to
    wwwroot/css/components/pregame-banner.css
    ============================================================ */
 
 
-/* Import / welcome screen — moved to
+/* Import / welcome screen â€” moved to
    wwwroot/css/components/welcome-hero.css */
 
 /* Turn filter buttons */
@@ -398,7 +105,7 @@
     color: #00b4d8;
 }
 
-/* .error-msg — moved to wwwroot/css/components/welcome-hero.css */
+/* .error-msg â€” moved to wwwroot/css/components/welcome-hero.css */
 
 /* Roster header */
 .roster-header {
@@ -511,7 +218,7 @@
     letter-spacing: 0.2px;
 }
 
-/* ── each ability is a card — identical base to .strat-item ── */
+/* â”€â”€ each ability is a card â€” identical base to .strat-item â”€â”€ */
 .abilities-panel-item {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid #2a2a2a;
@@ -525,7 +232,7 @@
     border-color: #444;
 }
 
-/* ── name: always visible — mirrors .strat-name ── */
+/* â”€â”€ name: always visible â€” mirrors .strat-name â”€â”€ */
 .ability-name {
     display: block;
     font-size: 0.75rem;
@@ -533,7 +240,7 @@
     color: #ccc;
 }
 
-/* ── description: always visible — mirrors .strat-field ── */
+/* â”€â”€ description: always visible â€” mirrors .strat-field â”€â”€ */
 .ability-desc {
     font-size: 0.65rem;
     line-height: 1.5;
@@ -542,19 +249,19 @@
     transition: all 0.2s ease;
 }
 
-/* ── expanded (zoomed): mirrors .strat-item.zoomed ── */
+/* â”€â”€ expanded (zoomed): mirrors .strat-item.zoomed â”€â”€ */
 .abilities-panel-item.expanded {
     background: rgba(0, 180, 216, 0.06);
     border-color: #00b4d8;
 }
 
-/* ── expanded name: mirrors .strat-item.zoomed .strat-name ── */
+/* â”€â”€ expanded name: mirrors .strat-item.zoomed .strat-name â”€â”€ */
 .abilities-panel-item.expanded .ability-name {
     color: #00b4d8;
     font-size: 0.85rem;
 }
 
-/* ── expanded desc: mirrors .strat-details.zoomed .strat-field ── */
+/* â”€â”€ expanded desc: mirrors .strat-details.zoomed .strat-field â”€â”€ */
 .abilities-panel-item.expanded .ability-desc {
     font-size: 0.9rem;
     line-height: 1.6;
@@ -818,7 +525,7 @@
     letter-spacing: 0.3px;
 }
 
-/* Score tracker (CP counter + scores) — moved to
+/* Score tracker (CP counter + scores) â€” moved to
    wwwroot/css/components/score-tracker.css */
 
 /* Play mode */
@@ -1132,7 +839,7 @@
     border-style: dashed;
 }
 
-/* Grid — responsive auto-fill columns */
+/* Grid â€” responsive auto-fill columns */
 .unit-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -1189,7 +896,7 @@
     box-shadow: 0 0 10px rgba(0, 180, 216, 0.35);
 }
 
-/* Unit header — clickable for collapse/expand */
+/* Unit header â€” clickable for collapse/expand */
 .unit-header {
     display: flex;
     justify-content: space-between;
@@ -1509,7 +1216,7 @@
     background: rgba(233, 69, 96, 0.22);
 }
 
-/* Unit body — collapsible content */
+/* Unit body â€” collapsible content */
 .unit-body {
     margin-top: 0.3rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1611,88 +1318,9 @@
     color: #ccc;
 }
 
-/* Inline ability setup checkboxes (setup mode) */
-.abilities-panel-item .setup-checks,
-.card-ability-item .setup-checks {
-    margin-top: 0.25rem;
-    padding-top: 0.2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.abilities-panel-item.added-to-unit {
-    opacity: 0.35;
-}
-
-.abilities-panel-item.added-to-unit .ability-name {
-    text-decoration: line-through;
-    text-decoration-color: #bb86fc;
-}
-
-.card-ability-item.added-to-unit {
-    opacity: 0.35;
-}
-
-.card-ability-item.added-to-unit .card-ability-name {
-    text-decoration: line-through;
-    text-decoration-color: #bb86fc;
-}
-
-/* Detachment effect sub-rows (setup mode) */
-.detachment-effects-list {
-    margin-top: 0.4rem;
-    padding-left: 0.8rem;
-    border-left: 2px solid rgba(187, 134, 252, 0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.detachment-effect-item {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 0.25rem;
-    padding: 0.3rem 0.45rem;
-    font-size: 0.85rem;
-}
-
-.detachment-effect-item.added-to-unit {
-    opacity: 0.55;
-}
-
-.detachment-effect-item .ability-name {
-    color: #cdb4f8;
-}
-
-.setup-lbl.disabled-lbl {
-    opacity: 0.55;
-    font-style: italic;
-    cursor: default;
-}
-
-/* Inline stratagem setup checkboxes (setup mode) */
-.strat-item .setup-checks,
-.card-strat-item .setup-checks {
-    margin-top: 0.25rem;
-    padding-top: 0.2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.strat-item.strat-hidden {
-    opacity: 0.35;
-}
-
-.strat-item.strat-hidden .strat-name {
-    text-decoration: line-through;
-    text-decoration-color: #555;
-}
-
-.card-strat-item.strat-hidden {
-    opacity: 0.35;
-}
-
-.card-strat-item.strat-hidden .card-strat-name {
-    text-decoration: line-through;
-    text-decoration-color: #555;
-}
+/* Inline ability + stratagem setup checkboxes (rendered inside unit cards
+   in setup mode) and detachment-effect sub-rows â€” moved to
+   wwwroot/css/components/setup-page.css */
 
 /* In-card stratagems */
 .card-stratagems {
@@ -2270,7 +1898,7 @@
     color: #ff6b6b;
 }
 
-/* Stat row — clickable to highlight owned weapons */
+/* Stat row â€” clickable to highlight owned weapons */
 .stat-row {
     cursor: pointer;
     transition: all 0.15s ease;
@@ -2371,27 +1999,8 @@
     margin-bottom: 0.5rem;
 }
 
-/* Setup wipe buttons */
-.setup-wipe-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 0.5rem;
-}
-
-.wipe-btn {
-    background: rgba(233, 69, 96, 0.1);
-    border: 1px solid #e94560;
-    color: #e94560;
-    font-size: 0.65rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.wipe-btn:hover {
-    background: rgba(233, 69, 96, 0.25);
-}
+/* Setup wipe buttons (.setup-wipe-row / .wipe-btn) â€” moved to
+   wwwroot/css/components/setup-page.css */
 
 /* Inline reset-filters in unit-jump-buttons */
 .corner-btn.reset-filters.inline {
@@ -2432,11 +2041,11 @@
     color: #666;
 }
 
-/* Changelog modal — moved to wwwroot/css/components/changelog.css
+/* Changelog modal â€” moved to wwwroot/css/components/changelog.css
    so it can be reused outside the Home page without dragging the rest
    of this stylesheet along. */
 
-/* ── Light mode: abilities panel — mirrors light strat-item ── */
+/* â”€â”€ Light mode: abilities panel â€” mirrors light strat-item â”€â”€ */
 .roster-app.light .abilities-panel-item {
     background: #f9fafb;
     border-color: #e5e7eb;
