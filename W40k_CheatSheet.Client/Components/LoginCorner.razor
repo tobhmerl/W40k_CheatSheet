@@ -46,10 +46,7 @@
     }
     else
     {
-        <button type="button" class="login-btn-img" @onclick="ToggleExpanded" title="@Cloud.Username">
-            <img src="images/logged_in_button.png" alt="" />
-            <span class="login-btn-name">@Cloud.Username</span>
-        </button>
+        <span class="login-username" @onclick="ToggleExpanded">@Cloud.Username</span>
         @if (loginExpanded)
         {
             <div class="login-dropdown">
